@@ -9,11 +9,11 @@ This project is a wrapper around OSS-CAD-Suite which does the heavy lifting of p
 
 ## Requirements
 
-To use this plugin you have to have OSS-CAD-Suite on your computer. For linux and mac you just need to extract the zip for your OS to anywhere on your computer
+To use this plugin you have to have OSS-CAD-Suite on your computer. For linux and mac you just need to extract the compressed folder for your OS to anywhere on your computer
 For windows you download an executable which will extract the data for you.
 OSS-CAD-Suite can be downloaded from [here](https://github.com/YosysHQ/oss-cad-suite-build/releases)
 
-There is also a link from within the extension which will appear once running the extension.
+There is also a link from within the extension which will appear once running the extension to download OSS-CAD-Suite.
 
 ## Getting Started
 To get started you need to open a new folder and have at least 1 verilog file (`.v`) and 1 constraints file (`.cst`). With these two files created you can press the "FPGA Toolchain" button on the right side of the bottom bar.
@@ -67,8 +67,6 @@ This extension contributes the following settings:
 
 ## Release Notes
 
-### 1.0.0
-
-Initial release of Lushay Code Plugin
+Check CHANGELOG for updates
 
 **Enjoy!**
