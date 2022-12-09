@@ -149,7 +149,7 @@ export class YosysGowinStage extends ToolchainStage {
 	}
 
 	protected onCommandPrintLine(line: string): void {
-		if (['|', '/', '\\'].includes(line[0])) {
+		if (['|', '/', '\\'].includes(line.trim()[0])) {
 			// copyright area
 			ToolchainStage.logger.logToSummary('    ' + line);
 			return;
