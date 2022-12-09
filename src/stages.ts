@@ -109,7 +109,7 @@ export class YosysGowinStage extends ToolchainStage {
 		const synthesisCommand = [
 			yosysPath,
 			'-p',
-			`read_verilog ${this.projectFile.includedFilePaths.join(' ')}; synth_gowin -top ${this.projectFile.top || 'top'} -json ${outPath}`
+			`read_verilog ${this.projectFile.includedFilePaths.join(' ')}; synth_gowin -top ${this.projectFile.top || 'top'} -json ${outPath} ${this.projectFile.synthGowinOptions.join(' ')}`
 		];
         this.filesCreated.push(outPath);
 		return this.runCommand(synthesisCommand);
@@ -211,7 +211,8 @@ export class NextPnrGowinStage extends ToolchainStage {
             '--family',
             family,
             '--cst',
-            this.projectFile.constraintsFile
+            this.projectFile.constraintsFile,
+            ...this.projectFile.nextPnrGowinOptions
         ];
 
         this.filesCreated.push(outputPath);

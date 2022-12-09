@@ -23,6 +23,7 @@ enum CommandOption {
 	PROGRAM_ONLY = 'Program Only',
 	EXTERNAL_FLASH = 'External Flash',
 	RUN_TESTBENCH = 'Run Testbench',
+	OPEN_TERMINAL = 'Open Terminal',
 	CANCEL = 'Cancel'
 }
 
@@ -153,7 +154,7 @@ async function clickedPanelButton(): Promise<void> {
 	if (projectFile.testBenches.length > 0) {
 		commandOptions.push(CommandOption.RUN_TESTBENCH);
 	}
-
+	commandOptions.push(CommandOption.OPEN_TERMINAL);
 	commandOptions.push(CommandOption.CANCEL);
 
 	const option = await vscode.window.showQuickPick(commandOptions, {
@@ -163,6 +164,11 @@ async function clickedPanelButton(): Promise<void> {
 	});
 
 	if (!option || option === CommandOption.CANCEL) {
+		return;
+	}
+
+	if (option === CommandOption.OPEN_TERMINAL) {
+		await openTerminal(ossCadPath, projectFile);
 		return;
 	}
 
@@ -259,6 +265,24 @@ async function validateProjectFileAndOption(projectFile: ProjectFile, option: Co
 		projectFile.testBenchPath = testbench;
 	}
 	return true;
+}
+
+async function openTerminal(ossCadSuiteBinPath: string, projectFile: ProjectFile) {
+	const ossRootPath = path.resolve(ossCadSuiteBinPath, '..');
+	const terminal = vscode.window.createTerminal({
+		name: 'OSS-Cad-Suite',
+		cwd: projectFile.basePath,
+		env: {
+			PATH: [
+				path.join(ossRootPath, 'bin'),
+				path.join(ossRootPath, 'lib'),
+				path.join(ossRootPath, 'py3bin'),
+				process.env.PATH
+			].join(';'),
+			something: 'demo'
+		},
+	});
+	terminal.show();
 }
 
 export function deactivate() {}

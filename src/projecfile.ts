@@ -10,7 +10,8 @@ export interface ProjectFile {
     constraintsFile: string;
 	programMode: 'flash' | 'ram';
 	testBenches: string[] | 'all';
-
+	nextPnrGowinOptions: string[];
+	synthGowinOptions: string[];
 	basePath: string;
 	fileName: string;
 	includedFilePaths: string[];
@@ -57,7 +58,9 @@ export async function parseProjectFile(logger: Logger): Promise<ProjectFile | un
 			board: 'tangnano9k',
 			externalFlashFilePath: '',
 			testBenches: 'all',
-			testBenchPath: ''
+			testBenchPath: '',
+			synthGowinOptions: [],
+			nextPnrGowinOptions: []
 		})
 	}
 	
@@ -84,7 +87,7 @@ export async function parseProjectFile(logger: Logger): Promise<ProjectFile | un
 			projectFile.constraintsFile = (projectFile as any as {constraintsFilePath: string}).constraintsFilePath;
 		}
 		if (!projectFile.name) {
-			projectFile.name = projectFolderName;
+			projectFile.name = projectFileName.replace('.lushay.json', '');
 		}
 		if (!projectFile.includedFiles) {
 			projectFile.includedFiles = 'all';
@@ -92,6 +95,14 @@ export async function parseProjectFile(logger: Logger): Promise<ProjectFile | un
 
 		if (!projectFile.testBenches) {
 			projectFile.testBenches = [];
+		}
+
+		if (!projectFile.synthGowinOptions) {
+			projectFile.synthGowinOptions = [];
+		}
+
+		if (!projectFile.nextPnrGowinOptions) {
+			projectFile.nextPnrGowinOptions = [];
 		}
 	
 		if (!projectFile.constraintsFile) {

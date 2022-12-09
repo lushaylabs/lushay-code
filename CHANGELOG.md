@@ -5,6 +5,8 @@
 ### Added
 - Iverilog Support
 - Support for no projectfile
+- Way to supply nextpnr / synth_gowin parameters from project file
+- New Open terminal command to open a terminal with oss-cad-suite loaded
 
 ### Changed
 - Removed mandatory fields in projectfile providing defaults for all
