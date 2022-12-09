@@ -1,0 +1,61 @@
+{
+  "name": "lushay-code",
+  "displayName": "Lushay Code",
+  "description": "Open Source FPGA Toolchain using OSS-Cad-Suite",
+  "version": "0.0.3",
+  "engines": {
+    "vscode": "^1.72.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "icon": "lushay-icon.png",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "publisher": "Lushay Labs",
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "lushay-code.runFPGAToolchain",
+        "title": "Run FPGA Toolchain"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "Lushay Code",
+        "properties": {
+          "lushay.OssCadSuite.path": {
+            "type": "string",
+            "default": "",
+            "description": "The path to OSS Cad Suite"
+          }
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "bundle": "vsce package"
+  },
+  "devDependencies": {
+    "@types/cli-spinner": "^0.2.1",
+    "@types/glob": "^8.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.72.0",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "@vscode/test-electron": "^2.1.5",
+    "eslint": "^8.24.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.0.0",
+    "typescript": "^4.8.4"
+  }
+}
