@@ -1,0 +1,96 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Project Name",
+        "description": "Used as name for output files"
+      },
+      "includedFiles": {
+        "oneOf": [
+          {
+            "type": "string",
+            "pattern": "all"
+          },
+          {
+            "type": "array",
+            "items": [
+              {
+                "type": "string"
+              }
+            ]
+          }
+        ],
+        "title": "List of files to synthesize",
+        "description": "List of files to synthesize, if set to \"all\" then all non tb verilog files will be used"
+      },
+      "externalFlashFiles": {
+        "type": "array",
+        "items": [
+          {
+            "type": "string"
+          }
+        ],
+        "title": "List of files that can be flashed to external memory",
+        "description": "List of files that can be flashed to external memory"
+      },
+      "top": {
+        "type": "string",
+        "description": "The name of the top module",
+        "title": "Top Module's Name"
+      },
+      "constraintsFile": {
+        "type": "string",
+        "description": "The constraints file to use for pnr",
+        "title": "Constraints File Path"
+      },
+      "testBenches": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": [
+              {
+                "type": "string"
+              }
+            ]
+          }
+        ],
+        "title": "A list if testbench files",
+        "description": "A list if testbench files Defaults to all _tb.v files"
+      },
+      "programMode": {
+        "enum": [
+          "ram",
+          "flash"
+        ],
+        "description": "Whether programming should be to flash or ram",
+        "title": "Programming Mode"
+      },
+      "baudRate": {
+        "type": "number",
+        "title": "Serial Baud Rate",
+        "description": "The baud rate to use in the serial terminal"
+      },
+      "nextPnrGowinOptions": {
+        "type": "array",
+        "items": [],
+        "title": "Additional nextpnr-gowin flags",
+        "description": "Extra flags which will be passed to nextpnr-gowin"
+      },
+      "synthGowinOptions": {
+        "type": "array",
+        "items": [
+          {
+            "type": "string"
+          }
+        ],
+        "title": "Additional synth_gowin flags",
+        "description": "Extra flags which will be passed to synth_gowin as part of yosys"
+      }
+    },
+    "title": "Lushay Project File"
+  }

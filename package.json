@@ -38,7 +38,11 @@
           }
         }
       }
-    ]
+    ],
+    "jsonValidation": [{
+        "fileMatch": "*.lushay.json",
+        "url": "./lushay.schema.json"
+    }]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
