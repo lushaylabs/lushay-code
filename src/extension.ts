@@ -7,6 +7,8 @@ import * as path from 'path';
 import { GowinPackStage, IVerilogTestbenchStage, NextPnrGowinStage, OpenFPGALoaderExternalFlashStage, OpenFPGALoaderFsStage, ToolchainStage, YosysGowinStage } from './stages';
 import { parseProjectFile, ProjectFile } from './projecfile';
 import { existsSync, fstat, statSync } from 'fs';
+import { SerialPort } from 'serialport';
+import { PortInfo } from '@serialport/bindings-cpp';
 
 type StageClass = new (projectFile: ProjectFile) => ToolchainStage;
 
@@ -14,8 +16,8 @@ const RUN_TOOLCHAIN_CMD_ID = 'lushay-code.runFPGAToolchain';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 
-const outputPanel = vscode.window.createOutputChannel('Toolchain Summary');
-const rawOutputPanel = vscode.window.createOutputChannel('Toolchain Raw Output');
+let outputPanel: vscode.OutputChannel | undefined;
+let rawOutputPanel: vscode.OutputChannel | undefined;
 
 enum CommandOption {
 	BUILD_AND_PROGRAM = 'Build and Program',
@@ -24,13 +26,11 @@ enum CommandOption {
 	EXTERNAL_FLASH = 'External Flash',
 	RUN_TESTBENCH = 'Run Testbench',
 	OPEN_TERMINAL = 'Open Terminal',
+	SERIAL_CONSOLE = 'Open Serial Console',
 	CANCEL = 'Cancel'
 }
 
 export async function activate(context: vscode.ExtensionContext) {
-	outputPanel.hide();
-	rawOutputPanel.hide();
-
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 	myStatusBarItem.text = '$(megaphone) FPGA Toolchain';
 	myStatusBarItem.command = RUN_TOOLCHAIN_CMD_ID;
@@ -46,25 +46,16 @@ function updateStatusBarItem(): void {
 	myStatusBarItem.show();
 }
 
-function clearLogs() {
-	rawOutputPanel.clear();
-	outputPanel.clear();
-}
-
-function showLogs() {
-	rawOutputPanel.show(true);
-	outputPanel.show(false);
-}
 
 function logToBoth(str: string) {
-	outputPanel.appendLine(str);
-	rawOutputPanel.appendLine(str);
+	outputPanel?.appendLine(str);
+	rawOutputPanel?.appendLine(str);
 }
 function logToRaw(str: string) {
-	rawOutputPanel.appendLine(str);
+	rawOutputPanel?.appendLine(str);
 }
 function logToSummary(str: string) {
-	outputPanel.appendLine(str);
+	outputPanel?.appendLine(str);
 }
 
 async function setupOssCadSuitePath(): Promise<void> {
@@ -97,9 +88,21 @@ async function getOssCadSuite(): Promise<void> {
 	vscode.env.openExternal(vscode.Uri.parse('https://github.com/YosysHQ/oss-cad-suite-build/releases'));
 }
 
+async function setupLogs(): Promise<void> {
+	if (rawOutputPanel) {
+		rawOutputPanel.dispose();
+	}
+	if (outputPanel) {
+		outputPanel.dispose();
+	}
+	rawOutputPanel = vscode.window.createOutputChannel('Toolchain Raw Output');
+	outputPanel = vscode.window.createOutputChannel('Toolchain Summary');
+	rawOutputPanel.show(true);
+	outputPanel.show(false);
+}
+
 async function clickedPanelButton(): Promise<void> {
-	clearLogs();
-	showLogs();
+	await setupLogs();
 	const config = vscode.workspace.getConfiguration('lushay');
 	if (!config.has('OssCadSuite') || !config.OssCadSuite.path) {
 		logToBoth('Error OSS Cad Suite Path not setup in settings');
@@ -154,6 +157,8 @@ async function clickedPanelButton(): Promise<void> {
 	if (projectFile.testBenches.length > 0) {
 		commandOptions.push(CommandOption.RUN_TESTBENCH);
 	}
+
+	commandOptions.push(CommandOption.SERIAL_CONSOLE);
 	commandOptions.push(CommandOption.OPEN_TERMINAL);
 	commandOptions.push(CommandOption.CANCEL);
 
@@ -170,6 +175,11 @@ async function clickedPanelButton(): Promise<void> {
 	if (option === CommandOption.OPEN_TERMINAL) {
 		await openTerminal(ossCadPath, projectFile);
 		return;
+	}
+
+	if (option === CommandOption.SERIAL_CONSOLE) {
+		await openSerialTerminal(projectFile);
+		return
 	}
 
 	logToBoth('Starting FPGA Toolchain');
@@ -266,23 +276,137 @@ async function validateProjectFileAndOption(projectFile: ProjectFile, option: Co
 	}
 	return true;
 }
-
-async function openTerminal(ossCadSuiteBinPath: string, projectFile: ProjectFile) {
+let terminal: vscode.Terminal | undefined;
+async function openTerminal(ossCadSuiteBinPath: string, projectFile: ProjectFile): Promise<void> {
 	const ossRootPath = path.resolve(ossCadSuiteBinPath, '..');
-	const terminal = vscode.window.createTerminal({
-		name: 'OSS-Cad-Suite',
-		cwd: projectFile.basePath,
-		env: {
-			PATH: [
-				path.join(ossRootPath, 'bin'),
-				path.join(ossRootPath, 'lib'),
-				path.join(ossRootPath, 'py3bin'),
-				process.env.PATH
-			].join(';'),
-			something: 'demo'
-		},
-	});
+	if (!terminal || terminal.exitStatus) {
+		terminal = vscode.window.createTerminal({
+			name: 'OSS-Cad-Suite',
+			cwd: projectFile.basePath,
+			env: {
+				PATH: [
+					path.join(ossRootPath, 'bin'),
+					path.join(ossRootPath, 'lib'),
+					path.join(ossRootPath, 'py3bin'),
+					process.env.PATH
+				].join(';'),
+				something: 'demo'
+			},
+		});
+	}
+	if (process.platform === 'win32') {
+		terminal.sendText('cls', true);
+	} else {
+		terminal.sendText('clear', true);
+	}
 	terminal.show();
+}
+
+let serialConsole: vscode.Terminal | undefined;
+let serialPort: SerialPort | undefined;
+
+async function openSerialTerminal(projectFile: ProjectFile): Promise<void> {
+	if (!serialConsole || serialConsole.exitStatus) {
+		const ports = await SerialPort.list();
+		if (ports.length === 0) {
+			logToBoth('No Serial Devices found');
+			if (process.platform === 'win32') {
+				logToBoth('    This may be because the device is not plugged in or the driver is not correct');
+				logToBoth('    In Windows you can use Zadig to change the driver of JTAG Interface 1 to USB Serial (CDC)');
+			} else {
+				logToBoth('    This may be because the device is not plugged in');
+			}
+		}
+
+		let devicePort = ports.find((port) => {
+			return port.vendorId === '0403' && port.productId === '6010';
+		});
+
+		if (!devicePort) {
+			const devicePortMap: Record<string, PortInfo>  = {}
+			
+			ports.forEach((port) => {
+				devicePortMap[(port as any).friendlyName || port.path] = port;
+			});
+
+			const chosenPort = await vscode.window.showQuickPick(Object.keys(devicePortMap), {
+				title: 'Choose Serial Port',
+				canPickMany: false,
+				ignoreFocusOut: true,
+			});
+			if (!chosenPort) {
+				logToBoth('No port chosen')
+				return;
+			}
+			devicePort = devicePortMap[chosenPort];
+		}
+
+		if (serialPort) {
+			await closeCurrentConnection();
+		}
+
+		serialPort = new SerialPort({
+			path: devicePort.path,
+			baudRate: projectFile.baudRate,
+		});
+		const serialWriteEmitter = new vscode.EventEmitter<string>();
+		const serialStopEmitter = new vscode.EventEmitter<number | void>();
+		serialPort.on('pause', () => {
+			serialWriteEmitter.fire('Connection Paused');
+		});
+		serialPort.on('resume', () => {
+			serialWriteEmitter.fire('Connection Resumed');
+		});
+		serialPort.on('close', () => {
+			serialWriteEmitter.fire('Connection Opened');
+		});
+		serialPort.on('end', () => {
+			serialWriteEmitter.fire('Connection Ended');
+		});
+		serialPort.on('readable', () => {
+			serialWriteEmitter.fire('Connection Readable');
+		});
+		serialPort.on('error', () => {
+			serialWriteEmitter.fire('Error with Connection');
+		});
+
+		
+		serialConsole = vscode.window.createTerminal({
+			name: 'Serial Console',
+			pty: {
+				open() {
+					
+				},
+				close() {
+					serialPort?.close();
+				},
+				onDidWrite: serialWriteEmitter.event,
+				onDidClose: serialStopEmitter.event,
+				handleInput(data: string) {
+					serialWriteEmitter.fire(data === '\r' ? '\r\n' : data)
+					serialPort?.write(Buffer.from(data));
+				},
+			}
+		});
+		serialPort.on('data', (data: Buffer) => {
+			serialWriteEmitter.fire(data.toString());
+		});
+		serialWriteEmitter.fire('Serial Port Opened');
+	}
+	serialConsole.show(false);
+	
+}
+
+function closeCurrentConnection(): Promise<void> {
+	return new Promise((resolve, reject) => {
+		if (!serialPort) {
+			resolve();
+			return;
+		}
+		serialPort.close((err) => {
+			resolve();
+		})
+	});
 }
 
 export function deactivate() {}

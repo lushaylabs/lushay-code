@@ -3,7 +3,7 @@
   "displayName": "Lushay Code",
   "description": "Open Source FPGA Toolchain using OSS-Cad-Suite",
   "version": "0.0.3",
-	"license": "MIT",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.72.0"
   },
@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-		"url": "https://github.com/lushaylabs/lushay-code.git"
+    "url": "https://github.com/lushaylabs/lushay-code.git"
   },
   "icon": "lushay-icon.png",
   "activationEvents": [
@@ -62,5 +62,8 @@
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
     "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "serialport": "^10.5.0"
   }
 }

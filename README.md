@@ -41,6 +41,7 @@ export interface ProjectFile {
 	testBenches: string[] | 'all';
 	nextPnrGowinOptions: string[];
 	synthGowinOptions: string[];
+	baudRate: number;
 }
 ```
 
@@ -57,6 +58,7 @@ All fields are option and have default values as detailed below
 | testBenches | Paths to test benches relative to project file | all which means all `_tb.v` files |
 | nextPnrGowinOptions | Extra flags for the nextpnr-gowin stage | [] |
 | synthGowinOptions | Extra flags for the synth-gowin stage in yosys | [] |
+| baudRate | Baud Rate for serial console | 115200 |
 
 
 ## Extension Settings

@@ -10,6 +10,7 @@ export interface ProjectFile {
     constraintsFile: string;
 	programMode: 'flash' | 'ram';
 	testBenches: string[] | 'all';
+	baudRate: number;
 	nextPnrGowinOptions: string[];
 	synthGowinOptions: string[];
 	basePath: string;
@@ -60,7 +61,8 @@ export async function parseProjectFile(logger: Logger): Promise<ProjectFile | un
 			testBenches: 'all',
 			testBenchPath: '',
 			synthGowinOptions: [],
-			nextPnrGowinOptions: []
+			nextPnrGowinOptions: [],
+			baudRate: 115200
 		})
 	}
 	
@@ -95,6 +97,10 @@ export async function parseProjectFile(logger: Logger): Promise<ProjectFile | un
 
 		if (!projectFile.testBenches) {
 			projectFile.testBenches = [];
+		}
+
+		if (!projectFile.baudRate) {
+			projectFile.baudRate = 115200;
 		}
 
 		if (!projectFile.synthGowinOptions) {
