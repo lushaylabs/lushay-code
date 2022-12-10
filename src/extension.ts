@@ -312,7 +312,7 @@ async function openSerialTerminal(projectFile: ProjectFile): Promise<void> {
 			logToBoth('No Serial Devices found');
 			if (process.platform === 'win32') {
 				logToBoth('    This may be because the device is not plugged in or the driver is not correct');
-				logToBoth('    In Windows you can use Zadig to change the driver of JTAG Interface 1 to USB Serial (CDC)');
+				logToBoth('    It should show up as "USB Serial Converter B" in device manager');
 			} else {
 				logToBoth('    This may be because the device is not plugged in');
 			}
