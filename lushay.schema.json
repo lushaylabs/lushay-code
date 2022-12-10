@@ -10,8 +10,7 @@
       "includedFiles": {
         "oneOf": [
           {
-            "type": "string",
-            "pattern": "all"
+            "enum": [ "all" ]
           },
           {
             "type": "array",
@@ -48,7 +47,7 @@
       "testBenches": {
         "oneOf": [
           {
-            "type": "string"
+            "enum": [ "all" ]
           },
           {
             "type": "array",
