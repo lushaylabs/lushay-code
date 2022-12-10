@@ -75,8 +75,6 @@ async function setupOssCadSuitePath(): Promise<void> {
 			return;
 		}
 		const config = vscode.workspace.getConfiguration('lushay');
-		console.log(config);
-		console.log(config.inspect('OssCadSuite'));
 		await config.update('OssCadSuite.path', ossCadPath, vscode.ConfigurationTarget.Global);
 		vscode.window.showInformationMessage('Path Set Successfuly');
 	} else {
@@ -318,9 +316,26 @@ async function openSerialTerminal(projectFile: ProjectFile): Promise<void> {
 			}
 		}
 
-		let devicePort = ports.find((port) => {
+		let devicePorts = ports.filter((port) => {
 			return port.vendorId === '0403' && port.productId === '6010';
 		});
+
+		let devicePort: PortInfo | undefined;
+		if (devicePorts.length === 1) {
+			devicePort = devicePorts[0];
+		}
+		if (devicePorts.length > 1) {
+			const devicePaths = devicePorts.map((port) => port.path);
+			const selectedPath = await vscode.window.showQuickPick(devicePaths,{
+				title: 'Select Device',
+				canPickMany: false,
+				ignoreFocusOut: true
+			});
+			if (!selectedPath) {
+				return;
+			}
+			devicePort = devicePorts.find((port) => port.path === selectedPath);
+		}
 
 		if (!devicePort) {
 			const devicePortMap: Record<string, PortInfo>  = {}
@@ -345,37 +360,27 @@ async function openSerialTerminal(projectFile: ProjectFile): Promise<void> {
 			await closeCurrentConnection();
 		}
 
-		serialPort = new SerialPort({
-			path: devicePort.path,
-			baudRate: projectFile.baudRate,
-		});
+		
 		const serialWriteEmitter = new vscode.EventEmitter<string>();
 		const serialStopEmitter = new vscode.EventEmitter<number | void>();
-		serialPort.on('pause', () => {
-			serialWriteEmitter.fire('Connection Paused');
-		});
-		serialPort.on('resume', () => {
-			serialWriteEmitter.fire('Connection Resumed');
-		});
-		serialPort.on('close', () => {
-			serialWriteEmitter.fire('Connection Opened');
-		});
-		serialPort.on('end', () => {
-			serialWriteEmitter.fire('Connection Ended');
-		});
-		serialPort.on('readable', () => {
-			serialWriteEmitter.fire('Connection Readable');
-		});
-		serialPort.on('error', () => {
-			serialWriteEmitter.fire('Error with Connection');
-		});
-
 		
 		serialConsole = vscode.window.createTerminal({
 			name: 'Serial Console',
 			pty: {
 				open() {
-					
+					if (!devicePort) { return; }
+					serialWriteEmitter.fire('Serial Console'+ '\r\n');
+					serialPort = new SerialPort({
+						path: devicePort.path,
+						baudRate: projectFile.baudRate,
+					});
+
+					serialPort.on('data', (data: Buffer) => {
+						serialWriteEmitter.fire(data.toString());
+					});
+					serialPort.on('error', (err) => {
+						serialWriteEmitter.fire(err.message+ '\r\n');
+					})
 				},
 				close() {
 					serialPort?.close();
@@ -388,10 +393,6 @@ async function openSerialTerminal(projectFile: ProjectFile): Promise<void> {
 				},
 			}
 		});
-		serialPort.on('data', (data: Buffer) => {
-			serialWriteEmitter.fire(data.toString());
-		});
-		serialWriteEmitter.fire('Serial Port Opened');
 	}
 	serialConsole.show(false);
 	

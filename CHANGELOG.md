@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.0.5]
+
+### Changed
+- Fixes to Serial Console
+
+## [0.0.4]
+
+### Changed
+- Updates to README
+
 ## [0.0.3]
 
 ### Added
