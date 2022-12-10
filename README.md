@@ -40,16 +40,16 @@ You can override the default behaviour of the extension by creating a file calle
 The type of the configuration file is as follows:
 ```
 export interface ProjectFile {
-	name: string;
-	includedFiles: string[] | 'all';
-	externalFlashFiles: string[];
-	top: string;
+    name: string;
+    includedFiles: string[] | 'all';
+    externalFlashFiles: string[];
+    top: string;
     constraintsFile: string;
-	programMode: 'flash' | 'ram';
-	testBenches: string[] | 'all';
-	nextPnrGowinOptions: string[];
-	synthGowinOptions: string[];
-	baudRate: number;
+    programMode: 'flash' | 'ram';
+    testBenches: string[] | 'all';
+    nextPnrGowinOptions: string[];
+    synthGowinOptions: string[];
+    baudRate: number;
 }
 ```
 

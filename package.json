@@ -2,7 +2,7 @@
   "name": "lushay-code",
   "displayName": "Lushay Code",
   "description": "Open Source FPGA Toolchain using OSS-Cad-Suite",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "MIT",
   "engines": {
     "vscode": "^1.72.0"
@@ -18,7 +18,7 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-  "publisher": "Lushay Labs",
+  "publisher": "lushay-labs",
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
