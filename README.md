@@ -7,6 +7,14 @@ This is the README for the Lushay Code extensions for VSCode.
 This extension automates the execution of the open source FPGA toolchain. 
 This project is a wrapper around OSS-CAD-Suite which does the heavy lifting of providing all the prebuilt binaries for the OS toolchain.
 
+Currently this extension only supports the Tang Nano 9K, support for other FPGAs is planned and welcomed.
+
+Features Include:
+- Building Project (yosys + nextpnr + apicula)
+- Programming (openFPGALoader)
+- Serial Console for UART communication
+- Terminal pre-configured with OSS-CAD-Suite
+
 ## Requirements
 
 To use this plugin you have to have OSS-CAD-Suite on your computer. For linux and mac you just need to extract the compressed folder for your OS to anywhere on your computer
@@ -60,6 +68,22 @@ All fields are option and have default values as detailed below
 | synthGowinOptions | Extra flags for the synth-gowin stage in yosys | [] |
 | baudRate | Baud Rate for serial console | 115200 |
 
+### Windows Driver Setup
+
+On windows the default driver for the JTAG interface does not work with openFPGALoader. To fix this you need to change the driver of this interface, this can be done with a tool called [Zadig](https://zadig.akeo.ie/)
+
+Download the tool and then open it, once open you need to select "Options" > "List All Devices" from the top menu to show all connected usb devices. Next in the dropdown you should see two devices:
+
+1. JTAG Debugger (Interface 0)
+2. JTAG Debugger (Interface 1)
+
+Interface 0 is the JTAG interface openFPGALoader needs to program the Tang Nano while Interface 1 is the serial interface used for the UART communication. It is important to leave interface 1 as-is and only replace interface 0 here.
+
+So select "JTAG Debugger (Interface 0)" and underneath you should see it show that it will change the driver to "WinUSB" if WinUSB is not selected you can use the up/down arrows to select it.
+
+Once selected just the replace driver button and wait a minute or two, once done it should work in openFPGALoader.
+
+If you ever want to uninstall this driver and go back to the default driver (for example to use the official gowin IDE) all you have to do is go to "Device Manager" select the device called "JTAG Debugger" under "Universal Serial Bus devices" right-click on it and press "uninstall device" from the popup also select the checkbox to attempt to remove the driver. Once removed right click on any item in the device manager window and press "Scan for hardware changes" this should reconnect the device back with the original driver.
 
 ## Extension Settings
 
