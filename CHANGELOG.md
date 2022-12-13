@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.0.6]
+
+### Added
+- Added support for more tangnano boards
+
+### Changed
+- Updates to Serial console, added auto-reconnect and better messages
+
 ## [0.0.5]
 
 ### Changed

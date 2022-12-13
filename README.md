@@ -7,7 +7,13 @@ This is the README for the Lushay Code extensions for VSCode.
 This extension automates the execution of the open source FPGA toolchain. 
 This project is a wrapper around OSS-CAD-Suite which does the heavy lifting of providing all the prebuilt binaries for the OS toolchain.
 
-Currently this extension only supports the Tang Nano 9K, support for other FPGAs is planned and welcomed.
+Currently only the following boards are supported:
+- Tang Nano 9K
+- Tang Nano 4K
+- Tang Nano 1K
+- Tang Nano
+
+Support for other FPGAs is planned and welcomed.
 
 Features Include:
 - Building Project (yosys + nextpnr + apicula)
@@ -50,6 +56,7 @@ export interface ProjectFile {
     nextPnrGowinOptions: string[];
     synthGowinOptions: string[];
     baudRate: number;
+    board: string;
 }
 ```
 
@@ -67,6 +74,13 @@ All fields are option and have default values as detailed below
 | nextPnrGowinOptions | Extra flags for the nextpnr-gowin stage | [] |
 | synthGowinOptions | Extra flags for the synth-gowin stage in yosys | [] |
 | baudRate | Baud Rate for serial console | 115200 |
+| board | The FPGA board being used | tangnano9k |
+
+values for board are:
+- tangnano9k
+- tangnano4k
+- tangnano1k
+- tangnano
 
 ### Windows Driver Setup
 
