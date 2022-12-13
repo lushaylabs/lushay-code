@@ -8,6 +8,21 @@ export const deviceInfo = (board: string):  {device: string, family: string} => 
                 device: 'GW1NR-LV9QN88PC6/I5',
                 family: 'GW1N-9C'
             }
+        } else if (board === 'tangnano4k') {
+            return {
+                device: 'GW1NSR-LV4CQN48PC7/I6',
+                family: 'GW1NS-4'
+            }
+        } else if (board === 'tangnano1k') {
+            return {
+                device: 'GW1NZ-LV1QN48C6/I5',
+                family: 'GW1NZ-1'
+            }
+        } else if (board === 'tangnano') {
+            return {
+                device: 'GW1N-LV1QN48C6/I5',
+                family: 'GW1N-1'
+            }
         }
         throw new Error('Board not supported');
 }
