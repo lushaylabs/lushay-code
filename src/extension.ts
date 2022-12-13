@@ -302,6 +302,7 @@ async function openTerminal(ossCadSuiteBinPath: string, projectFile: ProjectFile
 
 let serialConsole: vscode.Terminal | undefined;
 let serialPort: SerialPort | undefined;
+let reconnectTimeout: NodeJS.Timeout | undefined;
 
 async function openSerialTerminal(projectFile: ProjectFile): Promise<void> {
 	if (!serialConsole || serialConsole.exitStatus) {
@@ -363,6 +364,46 @@ async function openSerialTerminal(projectFile: ProjectFile): Promise<void> {
 		
 		const serialWriteEmitter = new vscode.EventEmitter<string>();
 		const serialStopEmitter = new vscode.EventEmitter<number | void>();
+
+		const setupDevicePort = (devicePort: PortInfo) => {
+			serialPort = new SerialPort({
+				path: devicePort.path,
+				baudRate: projectFile.baudRate,
+				endOnClose: true,
+			}, (err) => {
+				if (err) {
+					serialWriteEmitter.fire(err.message + '\r\n');
+				} else {
+					serialWriteEmitter.fire('Connected\r\n');
+				}
+			});
+			serialPort.on('end', () => {
+				serialWriteEmitter.fire('Connection Closed\r\n');
+				if (reconnectTimeout) {
+					clearTimeout(reconnectTimeout);
+				}
+				const checkForPort = async () => {
+					if (serialConsole?.exitStatus) { return; }
+					const connectedPorts = await SerialPort.list();
+					const ourPort = connectedPorts.find((port) => {
+						return port.path === devicePort.path
+					});
+					if (ourPort) {
+						setupDevicePort(ourPort);
+					} else {
+						setTimeout(checkForPort, 1000);
+					}
+				}
+				reconnectTimeout = setTimeout(checkForPort, 1000);
+			});
+
+			serialPort.on('data', (data: Buffer) => {
+				serialWriteEmitter.fire(data.toString());
+			});
+			serialPort.on('error', (err) => {
+				serialWriteEmitter.fire(err.message+ '\r\n');
+			})
+		}
 		
 		serialConsole = vscode.window.createTerminal({
 			name: 'Serial Console',
@@ -370,20 +411,13 @@ async function openSerialTerminal(projectFile: ProjectFile): Promise<void> {
 				open() {
 					if (!devicePort) { return; }
 					serialWriteEmitter.fire('Serial Console'+ '\r\n');
-					serialPort = new SerialPort({
-						path: devicePort.path,
-						baudRate: projectFile.baudRate,
-					});
-
-					serialPort.on('data', (data: Buffer) => {
-						serialWriteEmitter.fire(data.toString());
-					});
-					serialPort.on('error', (err) => {
-						serialWriteEmitter.fire(err.message+ '\r\n');
-					})
+					setupDevicePort(devicePort);
 				},
 				close() {
 					serialPort?.close();
+					if (reconnectTimeout) {
+						clearTimeout(reconnectTimeout);
+					}
 				},
 				onDidWrite: serialWriteEmitter.event,
 				onDidClose: serialStopEmitter.event,
