@@ -89,6 +89,16 @@
         ],
         "title": "Additional synth_gowin flags",
         "description": "Extra flags which will be passed to synth_gowin as part of yosys"
+      },
+      "board": {
+        "enum": [
+          "tangnano9k",
+          "tangnano4k",
+          "tangnano1k",
+          "tangnano"
+        ],
+        "description": "The FPGA development board",
+        "title": "Dev Board"
       }
     },
     "title": "Lushay Project File"

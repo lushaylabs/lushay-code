@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.7]
+
+### Changed
+- Fix to add board to project file schema
+
 ## [0.0.6]
 
 ### Added
