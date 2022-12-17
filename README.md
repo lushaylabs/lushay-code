@@ -20,6 +20,7 @@ Features Include:
 - Programming (openFPGALoader)
 - Serial Console for UART communication
 - Terminal pre-configured with OSS-CAD-Suite
+- Visual constraints editor
 
 ## Requirements
 
@@ -39,6 +40,16 @@ Once setup clicking this button will open a dropdown with multiple options like 
 By default all verilog files in the current project except those ending with `_tb.v` (which are considered test benches) will be built and you should have a top module called `top`.
 
 If you have a testbench file you will also get an option to run the testbench. The testbench top module needs to be called `test`.
+
+### CST Editor
+
+When opening a .cst file it will open by default with the visual constraints editor. Here you have a table with the current constraints and two main buttons "Add Constraint" and "Add From Template". The "Add From Template" button is to easily add constraints for built in hardware on the development board, things like LEDs, buttons, Flash IC, etc. The "Add Constraint" is to add a new custom constraint. When you add a new constraint (via either method) you will see it show up in the table as a row. You can click on any row to edit it in the side panel.
+
+You can edit the name, location and other options on the constraint. For location you can either enter the pin number if you know it, or press the "Select IO Pin" to visually select the pin from the board.
+
+Both the "Select IO Pin" and "Add From Template" are board specific so you have to chose the correct board from the dropdown at the top.
+
+If you prefer to edit your .cst files manually using a text editor you can right click on the file and press "Open With". This will open a dropdown with options and there is even an option to set the default editor so it will always use your preference in the future.
 
 ## Configuration
 You can override the default behaviour of the extension by creating a file called `<name>.lushay.json` for example `demo.lushay.json` with overrides for all the settings. The name can be whatever you want and it will be used as the default output name so in this example if I would compile the code I would get a file called `demo.fs`.

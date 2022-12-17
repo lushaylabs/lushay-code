@@ -9,6 +9,7 @@ import { parseProjectFile, ProjectFile } from './projecfile';
 import { existsSync, fstat, statSync } from 'fs';
 import { SerialPort } from 'serialport';
 import { PortInfo } from '@serialport/bindings-cpp';
+import { ConstraintsEditor } from './panels/constraints-editor';
 
 type StageClass = new (projectFile: ProjectFile) => ToolchainStage;
 
@@ -40,6 +41,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
 	updateStatusBarItem();
+	ConstraintsEditor.register(context);
 }
 
 function updateStatusBarItem(): void {

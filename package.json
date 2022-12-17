@@ -2,7 +2,7 @@
   "name": "lushay-code",
   "displayName": "Lushay Code",
   "description": "Open Source FPGA Toolchain using OSS-Cad-Suite",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "license": "MIT",
   "engines": {
     "vscode": "^1.72.0"
@@ -21,6 +21,18 @@
   "publisher": "lushay-labs",
   "main": "./out/extension.js",
   "contributes": {
+    "customEditors": [
+      {
+        "viewType": "lushay-code.constraintsEditor",
+        "displayName": "Constraints Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.cst"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
     "commands": [
       {
         "command": "lushay-code.runFPGAToolchain",
@@ -39,10 +51,12 @@
         }
       }
     ],
-    "jsonValidation": [{
+    "jsonValidation": [
+      {
         "fileMatch": "*.lushay.json",
         "url": "./lushay.schema.json"
-    }]
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -68,6 +82,8 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "@vscode/codicons": "^0.0.32",
+    "@vscode/webview-ui-toolkit": "^1.2.0",
     "serialport": "^10.5.0"
   }
 }

@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.8]
+
+### Added
+- Added constraints editor for .cst files
+
 ## [0.0.7]
 
 ### Changed
