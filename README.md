@@ -97,6 +97,15 @@ values for board are:
 - tangnano1k
 - tangnano
 
+### Ubuntu USB Setup
+On Ubuntu by default users don't have the required permissions that openFPGALoader needs in-order to function. To fix this you can open up a terminal and run the following to give your user the required permission.
+
+```sh
+curl -sSL https://raw.githubusercontent.com/lushaylabs/openfpgaloader-ubuntufix/main/setup.sh | sh
+```
+
+After running this you need to unplug and replug in your FPGA board and also logout and log back in to you user for the changes to take effect then openFPGALoader should work
+
 ### Windows Driver Setup
 
 On windows the default driver for the JTAG interface does not work with openFPGALoader. To fix this you need to change the driver of this interface, this can be done with a tool called [Zadig](https://zadig.akeo.ie/)

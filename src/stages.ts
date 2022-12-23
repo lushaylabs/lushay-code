@@ -67,7 +67,7 @@ export abstract class ToolchainStage {
                         path.join(ossRootPath, 'lib'),
                         path.join(ossRootPath, 'py3bin'),
                         process.env.PATH
-                    ].join(';')
+                    ].join(process.platform === 'win32' ? ';' : ':')
                 },
                 cwd: this.projectFile.basePath
             });
@@ -344,6 +344,7 @@ export class OpenFPGALoaderFsStage extends ToolchainStage {
         	'-b',
         	this.projectFile.board,
         	inputPath,
+            '-v',
             ...(this.projectFile.programMode === 'flash' ? ['-f'] : [])
         ];
 
@@ -356,6 +357,9 @@ export class OpenFPGALoaderFsStage extends ToolchainStage {
     protected onCommandPrintLine(line: string): void {
         if (line.includes('write Flash')) {
             ToolchainStage.logger.logToSummary('    Flash Written');
+            return;
+        }
+        if (line.includes('pollFlag')) {
             return;
         }
         ToolchainStage.logger.logToSummary('    ' + line);

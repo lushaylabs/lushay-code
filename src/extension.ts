@@ -352,7 +352,7 @@ async function openTerminal(ossCadSuiteBinPath: string, projectFile: ProjectFile
 					path.join(ossRootPath, 'lib'),
 					path.join(ossRootPath, 'py3bin'),
 					process.env.PATH
-				].join(';'),
+				].join(process.platform === "win32" ? ';' : ':'),
 				something: 'demo'
 			},
 		});

@@ -5,11 +5,13 @@
 ### Added
 - Colored output for toolchain output
 - Ability to select project file in the bottom bar
+- Added instruction for usb setup on ubuntu
 
 ### Changed
 - Fix for openFPGALoader bin not cased correctly
 - updated project file schema to include completions for `nextPnrGowinOptions` and `synthGowinOptions` 
 - Fix to comment type in constraints file generation
+- Fix to path variable on Mac and linux
 
 ## [0.0.8]
 
