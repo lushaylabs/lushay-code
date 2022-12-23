@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.0.9]
+
+### Added
+- Colored output for toolchain output
+- Ability to select project file in the bottom bar
+
+### Changed
+- Fix for openFPGALoader bin not cased correctly
+- updated project file schema to include completions for `nextPnrGowinOptions` and `synthGowinOptions` 
+- Fix to comment type in constraints file generation
+
 ## [0.0.8]
 
 ### Added

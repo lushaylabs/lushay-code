@@ -10,13 +10,25 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "fpga",
+    "verilog",
+    "oss-cad-suite",
+    "yosys",
+    "nextpnr",
+    "apicula"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/lushaylabs/lushay-code.git"
   },
   "icon": "lushay-icon.png",
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "workspaceContains:**/*.v",
+    "workspaceContains:**/*.cst",
+    "onCommand:lushay-code.runFPGAToolchain",
+    "onCommand:lushay-code.selectProject"
   ],
   "publisher": "lushay-labs",
   "main": "./out/extension.js",
@@ -37,6 +49,10 @@
       {
         "command": "lushay-code.runFPGAToolchain",
         "title": "Run FPGA Toolchain"
+      },
+      {
+        "command": "lushay-code.selectProject",
+        "title": "Select FPGA Project"
       }
     ],
     "configuration": [
@@ -55,6 +71,18 @@
       {
         "fileMatch": "*.lushay.json",
         "url": "./lushay.schema.json"
+      }
+    ],
+    "languages": [
+      {
+        "id": "fpga-toolchain-output"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "fpga-toolchain-output",
+        "scopeName": "source.fpga-toolchain-output",
+        "path": "./syntaxes/fpga-toolchain-output.tmLanguage.json"
       }
     ]
   },

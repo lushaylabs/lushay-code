@@ -51,7 +51,7 @@ You can edit the name, location and other options on the constraint. For locatio
 
 ![Pin Selection](./docs/pin-selection-view.jpg)
 
-Both the "Select IO Pin" and "Add From Template" are board specific so you have to chose the correct board from the dropdown at the top.
+Both the "Select IO Pin" and "Add From Template" are board specific so you have to choose the correct board from the dropdown at the top.
 
 If you prefer to edit your .cst files manually using a text editor you can right click on the file and press "Open With". This will open a dropdown with options and there is even an option to set the default editor so it will always use your preference in the future.
 

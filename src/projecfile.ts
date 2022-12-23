@@ -27,7 +27,7 @@ export interface Logger {
     logToRaw(msg: string): void;
 }
 
-export async function parseProjectFile(logger: Logger): Promise<ProjectFile | undefined> {
+export async function parseProjectFile(logger: Logger, selectedProject?: string): Promise<ProjectFile | undefined> {
 	const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	if (!workspaceFolder) {
 		logger.logToBoth('    Error: No workspace open');
@@ -35,7 +35,6 @@ export async function parseProjectFile(logger: Logger): Promise<ProjectFile | un
 	}
 
     const projectFiles = await vscode.workspace.findFiles('**/*.lushay.json');
-	// const projectFilePath = vscode.window.activeTextEditor?.document.fileName.endsWith('.lushay.json') ? vscode.window.activeTextEditor?.document.uri.fsPath : projectFiles[0]?.fsPath;
 	if (!vscode.workspace.workspaceFolders?.length) {
 		logger.logToBoth('Error no <project>.lushay.json file or workspace found');
 		return;
@@ -66,7 +65,7 @@ export async function parseProjectFile(logger: Logger): Promise<ProjectFile | un
 		})
 	}
 	
-	const projectFilePath = await selectProjectFile(projectFiles);
+	const projectFilePath = selectedProject ? selectedProject : await selectProjectFile(projectFiles);
 	if (!projectFilePath) {
 		return;
 	}

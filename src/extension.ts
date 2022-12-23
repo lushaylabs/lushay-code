@@ -2,7 +2,6 @@
 // Import the module and reference it with the alias vscode in your code below
 
 import * as vscode from 'vscode';
-let myStatusBarItem: vscode.StatusBarItem;
 import * as path from 'path';
 import { GowinPackStage, IVerilogTestbenchStage, NextPnrGowinStage, OpenFPGALoaderExternalFlashStage, OpenFPGALoaderFsStage, ToolchainStage, YosysGowinStage } from './stages';
 import { parseProjectFile, ProjectFile } from './projecfile';
@@ -10,10 +9,15 @@ import { existsSync, fstat, statSync } from 'fs';
 import { SerialPort } from 'serialport';
 import { PortInfo } from '@serialport/bindings-cpp';
 import { ConstraintsEditor } from './panels/constraints-editor';
+import { writeFileSync } from 'fs';
 
+let myStatusBarItem: vscode.StatusBarItem;
+let projectStatusBarItem: vscode.StatusBarItem;
+let selectedProject: {name: string, path: string} | undefined;
 type StageClass = new (projectFile: ProjectFile) => ToolchainStage;
 
 const RUN_TOOLCHAIN_CMD_ID = 'lushay-code.runFPGAToolchain';
+const SELECT_PROJECT_CMD_ID = 'lushay-code.selectProject';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 
@@ -36,12 +40,71 @@ export async function activate(context: vscode.ExtensionContext) {
 	myStatusBarItem.text = '$(megaphone) FPGA Toolchain';
 	myStatusBarItem.command = RUN_TOOLCHAIN_CMD_ID;
 
+	projectStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+	projectStatusBarItem.text = selectedProject?.name || '<Auto-Detect Project>';
+	projectStatusBarItem.command = SELECT_PROJECT_CMD_ID;
+
 	context.subscriptions.push(myStatusBarItem);
-	context.subscriptions.push(vscode.commands.registerCommand(RUN_TOOLCHAIN_CMD_ID, clickedPanelButton))
+	context.subscriptions.push(vscode.commands.registerCommand(RUN_TOOLCHAIN_CMD_ID, clickedPanelButton));
+
+	context.subscriptions.push(projectStatusBarItem);
+	context.subscriptions.push(vscode.commands.registerCommand(SELECT_PROJECT_CMD_ID, selectProjectFile));
+	projectStatusBarItem.show();
 
 	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
 	updateStatusBarItem();
 	ConstraintsEditor.register(context);
+}
+
+async function selectProjectFile(): Promise<void> {
+	if (!vscode.workspace.workspaceFolders?.length) {
+		vscode.window.showErrorMessage('No workspace open');
+		return;
+	}
+	const projectFiles = await vscode.workspace.findFiles('**/*.lushay.json');
+	const projectMap: Record<string, string> = {};
+	const projectFullMap: Record<string, string> = {};
+	let useFullMap = false;
+	projectFiles.forEach((projectFile) => {
+		projectFullMap[path.relative(vscode.workspace.workspaceFolders![0].uri.fsPath, projectFile.fsPath)] = projectFile.fsPath;
+		if (projectFullMap[path.basename(projectFile.fsPath)]) {
+			useFullMap = true;
+		}
+		projectFullMap[path.basename(projectFile.fsPath)] = projectFile.fsPath;
+	});
+	const mapToUse = useFullMap ? projectFullMap : projectMap;
+	const projectFileNames = Object.keys(mapToUse);
+	if (selectedProject) {
+		projectFileNames.push('Unset Selected Project');
+	}
+	projectFileNames.push('+ Create new Project File');
+	
+	const selected = await vscode.window.showQuickPick(projectFileNames, {ignoreFocusOut: true, canPickMany: false, title: 'Choose Project File'});
+	if (!selected) {
+		return;
+	}
+	if (selected === 'Unset selected project') {
+		selectedProject = undefined;
+		projectStatusBarItem.text = '<Auto-Detect Project>';
+		return;
+	}
+	if (selected === '+ Create new Project File') {
+		let name = await vscode.window.showInputBox({title: 'Project file Name', ignoreFocusOut: true});
+		if (!name) {return;}
+
+		if (!name.endsWith('.lushay.json')) {
+			name = name + '.lushay.json';
+		}
+		const fullPath = path.isAbsolute(name) ? name : path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, name);
+		writeFileSync(fullPath, JSON.stringify({name: name.replace(/\.lushay\.json$/, ''), includedFiles: 'all'}, undefined, 4));
+		projectStatusBarItem.text = name;
+		selectedProject = {name, path: fullPath};
+		const pFile = await vscode.workspace.openTextDocument(fullPath);
+		await vscode.window.showTextDocument(pFile);
+		return
+	}
+	projectStatusBarItem.text = selected;
+	selectedProject = {name: selected, path: useFullMap ? projectFullMap[selected] : projectMap[selected]};
 }
 
 function updateStatusBarItem(): void {
@@ -96,7 +159,7 @@ async function setupLogs(): Promise<void> {
 		outputPanel.dispose();
 	}
 	rawOutputPanel = vscode.window.createOutputChannel('Toolchain Raw Output');
-	outputPanel = vscode.window.createOutputChannel('Toolchain Summary');
+	outputPanel = vscode.window.createOutputChannel('Toolchain Summary', 'fpga-toolchain-output');
 	rawOutputPanel.show(true);
 	outputPanel.show(false);
 }
@@ -138,7 +201,7 @@ async function clickedPanelButton(): Promise<void> {
 	)
 
 
-	const projectFile = await parseProjectFile(logger);
+	const projectFile = await parseProjectFile(logger, selectedProject?.path);
 
 	if (!projectFile) {
 		return;
@@ -164,7 +227,7 @@ async function clickedPanelButton(): Promise<void> {
 
 	const option = await vscode.window.showQuickPick(commandOptions, {
 		canPickMany: false,
-		title: 'FPGA Toolchain Options',
+		title: projectFile.fileName,
 		ignoreFocusOut: true
 	});
 

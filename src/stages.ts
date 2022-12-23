@@ -192,7 +192,14 @@ export class YosysGowinStage extends ToolchainStage {
         if (line.includes('ERROR: syntax error, unexpected')) {
             const errorLocation = line.match(/([^/\\]+\.v):([0-9]+):/);
             if (errorLocation && +errorLocation[2] > 1) {
-                ToolchainStage.logger.logToSummary(`    Check lines ${+errorLocation[2]-1}-${errorLocation[2]} of file ${errorLocation[1]} you may be missing a semicolon`)
+                ToolchainStage.logger.logToSummary(`    Check lines ${+errorLocation[2]-1}-${errorLocation[2]} of file ${errorLocation[1]} you may be missing a semicolon or left a block open`)
+            }
+        }
+        if (line.includes('ERROR: Module') && line.includes("is not part of the design")) {
+            //Error: ERROR: Module `\mds' referenced in module `\led_blink' in cell `\m' is not part of the design.
+            const moduleMatches = line.match(/ERROR: Module `\\([^']+)' referenced in module `\\([^']+)' in cell `\\([^']+)'/);
+            if (moduleMatches) {
+                ToolchainStage.logger.logToSummary(`    Check if module instantiation \`${moduleMatches[1]} ${moduleMatches[3]}(...)\` in module ${moduleMatches[2]} is a typo or maybe the module is not included in your projectfile`)
             }
         }
 	}
@@ -329,7 +336,7 @@ export class OpenFPGALoaderFsStage extends ToolchainStage {
 	private detectedError: boolean = false;
 
     public async runProg(previousStage: ToolchainStage | undefined): Promise<number | null> {
-        const openFpgaLoaderPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'openFpgaLoader');
+        const openFpgaLoaderPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'openFPGALoader');
 		const inputPath = path.join(this.projectFile.basePath, this.projectFile.name + '.fs');
 
         const programCommand = [
@@ -379,7 +386,7 @@ export class OpenFPGALoaderExternalFlashStage extends ToolchainStage {
 	private detectedError: boolean = false;
 
     public async runProg(previousStage: ToolchainStage | undefined): Promise<number | null> {
-        const openFpgaLoaderPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'openFpgaLoader');
+        const openFpgaLoaderPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'openFPGALoader');
 
         const programCommand = [
         	openFpgaLoaderPath,

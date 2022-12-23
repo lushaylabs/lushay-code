@@ -76,17 +76,86 @@
       },
       "nextPnrGowinOptions": {
         "type": "array",
-        "items": [],
+        "items": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "-v",
+                "--verbose",
+                "-q",
+                "--quiet",
+                "--log",
+                "-l",
+                "--debug",
+                "--debug-placer",
+                "--debug-router",
+                "--threads",
+                "--force",
+                "-f",
+                "--pre-pack",
+                "--pre-place",
+                "--pre-route",
+                "--post-route",
+                "--on-failure",
+                "--seed",
+                "--randomize-seed",
+                "-r",
+                "--placer",
+                "--router",
+                "--slack_redist_iter",
+                "--cstrweight",
+                "--starttemp",
+                "--placer-budgets",
+                "--ignore-loops",
+                "--test",
+                "--timing-allow-fail",
+                "--no-tmdriv",
+                "--sdf",
+                "--sdf-cvc",
+                "--no-print-critical-path-source",
+                "--placer-heap-alpha",
+                "--placer-heap-beta",
+                "--placer-heap-critexp",
+                "--placer-heap-timingweight",
+                "--parallel-refine",
+                "--router2-heatmap",
+                "--tmg-ripup",
+                "--router2-tmg-ripup",
+                "--report",
+                "--detailed-timing-report",
+                "--placed-svg",
+                "--routed-svg",
+                "--enable-globals",
+                "--enable-auto-longwires"
+              ]
+            }, 
+            {
+                "type": "string"
+            }
+          ]
+        },
         "title": "Additional nextpnr-gowin flags",
         "description": "Extra flags which will be passed to nextpnr-gowin"
       },
       "synthGowinOptions": {
         "type": "array",
-        "items": [
-          {
-            "type": "string"
-          }
-        ],
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "enum": [
+            "-nodffe",
+            "-nobram",
+            "-nolutram",
+            "-noflatten",
+            "-retime",
+            "-nowidelut",
+            "-noiopads",
+            "-noalu",
+            "-abc9",
+            "-no-rw-check"
+          ]
+        },
         "title": "Additional synth_gowin flags",
         "description": "Extra flags which will be passed to synth_gowin as part of yosys"
       },

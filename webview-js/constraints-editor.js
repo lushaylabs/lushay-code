@@ -290,10 +290,47 @@ const pinLocations = {
         { x: 556, y: 200, pinNumber: 27 },
     ]
 }
+
+const getBoardImages = () => {
+    const tangnano9kBoard = document.getElementById('tangnano9k-board');
+    const tangnano4kBoard = document.getElementById('tangnano4k-board');
+    const tangnano1kBoard = document.getElementById('tangnano1k-board');
+    const tangnanoBoard = document.getElementById('tangnano-board');
+
+    return {
+        'Tang Nano 9K': tangnano9kBoard,
+        'Tang Nano 4K': tangnano4kBoard,
+        'Tang Nano 1K': tangnano1kBoard,
+        'Tang Nano': tangnanoBoard
+    }
+}
+
+const showBoardImage = (boardImages, chosenBoard) => {
+    for (const board in boardImages) {
+        if (board === chosenBoard) {
+            boardImages[board].classList.remove('hide');
+        } else if (!boardImages[board].classList.contains('hide')) {
+            boardImages[board].classList.add('hide');
+        }
+    }
+}
+
+const recalculateOptions = (row) => {
+    const options = [];
+
+    if (row.drive) {
+        options.push(`${row.drive} Drive`);
+    }
+    if (row.pullMode) {
+        options.push(`${row.pullMode}`);
+    }
+    if (row.standard) {
+        options.push(`${row.standard}`);
+    }
+
+    row.options = options.join(', ');
+} 
                     
-{/* <vscode-button class="pin-btn" appearance="icon">
-                                    <span class="codicon codicon-pass-filled"></span>
-                                </vscode-button> */}
 function main() {
     const constraintsTable = document.getElementById("constraints-table");
     const boardSelect = document.getElementById("board-select");
@@ -316,11 +353,11 @@ function main() {
     const pinContainer = document.getElementById('pin-container');
     const cancelBoardPopupBtn = document.getElementById('cancel-board');
     const boardPopup = document.getElementById('board-popup-container');
-    const tangnano9kBoard = document.getElementById('tangnano9k-board');
-    const tangnano4kBoard = document.getElementById('tangnano4k-board');
-    const tangnano1kBoard = document.getElementById('tangnano1k-board');
-    const tangnanoBoard = document.getElementById('tangnano-board');
+    const boardImages = getBoardImages();
     let isEditable = false;
+    let templates = {}
+    let pins = {};
+    let board = 'Tang Nano 9K';
 
     constraintsTable.rowsData = [];
     constraintsTable.columnDefinitions = [
@@ -341,10 +378,6 @@ function main() {
         }
         constraintsTable.rowsData = constraintsTable.rowsData.slice(0);
     }
-
-    let templates = {}
-    let pins = {};
-    let board = 'Tang Nano 9K';
 
     const selectPin = (pin) => {
         if (editRowIndex !== null && constraintsTable.rowsData[editRowIndex]) {
@@ -371,51 +404,7 @@ function main() {
         templateContainer.innerHTML = Object.keys(templates).map((templateName) => {
             return `<p><vscode-checkbox>${templateName}</vscode-checkbox></p>`
         }).join('');
-        if (board === 'Tang Nano 9K') {
-            if (!tangnano4kBoard.classList.contains('hide')) {
-                tangnano4kBoard.classList.add('hide');
-            }
-            if (!tangnano1kBoard.classList.contains('hide')) {
-                tangnano1kBoard.classList.add('hide');
-            }
-            if (!tangnanoBoard.classList.contains('hide')) {
-                tangnanoBoard.classList.add('hide');
-            }
-            tangnano9kBoard.classList.remove('hide');
-        } else if (board === 'Tang Nano 4K') {
-            if (!tangnano9kBoard.classList.contains('hide')) {
-                tangnano9kBoard.classList.add('hide');
-            }
-            if (!tangnano1kBoard.classList.contains('hide')) {
-                tangnano1kBoard.classList.add('hide');
-            }
-            if (!tangnanoBoard.classList.contains('hide')) {
-                tangnanoBoard.classList.add('hide');
-            }
-            tangnano4kBoard.classList.remove('hide');
-        } else if (board === 'Tang Nano 1K') {
-            if (!tangnano9kBoard.classList.contains('hide')) {
-                tangnano9kBoard.classList.add('hide');
-            }
-            if (!tangnano4kBoard.classList.contains('hide')) {
-                tangnano4kBoard.classList.add('hide');
-            }
-            if (!tangnanoBoard.classList.contains('hide')) {
-                tangnanoBoard.classList.add('hide');
-            }
-            tangnano1kBoard.classList.remove('hide');
-        } else if (board === 'Tang Nano') {
-            if (!tangnano9kBoard.classList.contains('hide')) {
-                tangnano9kBoard.classList.add('hide');
-            }
-            if (!tangnano4kBoard.classList.contains('hide')) {
-                tangnano4kBoard.classList.add('hide');
-            }
-            if (!tangnano1kBoard.classList.contains('hide')) {
-                tangnano1kBoard.classList.add('hide');
-            }
-            tangnanoBoard.classList.remove('hide');
-        }
+        showBoardImage(boardImages, board);
         pinContainer.innerHTML = '';
         pins.forEach((pin) => {
             const button = document.createElement('vscode-button');
@@ -433,6 +422,7 @@ function main() {
         });
         updateEditWindow();
     }
+
     boardSelect.addEventListener('change', () => {
         board = boardSelect.value;
         setupBoard();
@@ -564,39 +554,6 @@ function main() {
         }
     }
 
-    editPortName.addEventListener('input', (e) => {
-        if (constraintsTable.rowsData[editRowIndex]) {
-            constraintsTable.rowsData[editRowIndex] = {
-                ...constraintsTable.rowsData[editRowIndex],
-                name: e.target.value
-            }
-            vscode.postMessage({ 
-                type: 'edit', 
-                editType: 'change',
-                rowIndex: editRowIndex,
-                field: 'name',
-                newValue: constraintsTable.rowsData[editRowIndex].name
-            });
-            updateConstraintsTable();
-        }
-    });
-    editPortLocation.addEventListener('input', (e) => {
-        if (constraintsTable.rowsData[editRowIndex]) {
-            constraintsTable.rowsData[editRowIndex] = {
-                ...constraintsTable.rowsData[editRowIndex],
-                location: e.target.value ? e.target.value : '<Not Selected>'
-            }
-            vscode.postMessage({ 
-                type: 'edit', 
-                editType: 'change',
-                rowIndex: editRowIndex,
-                field: 'location',
-                newValue: constraintsTable.rowsData[editRowIndex].location
-            });
-            updateConstraintsTable();
-        }
-    });
-
     const updateTableHighlight = () => {
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
@@ -662,75 +619,32 @@ function main() {
         updateTableHighlight();
     });
 
-    const recalculateOptions = (row) => {
-        const options = [];
-
-        if (row.drive) {
-            options.push(`${row.drive} Drive`);
-        }
-        if (row.pullMode) {
-            options.push(`${row.pullMode}`);
-        }
-        if (row.standard) {
-            options.push(`${row.standard}`);
-        }
-
-        row.options = options.join(', ');
-    } 
-
-    driveSelect.addEventListener('change', () => {
-        if (constraintsTable.rowsData[editRowIndex]) {
-            constraintsTable.rowsData[editRowIndex] = {
-                ...constraintsTable.rowsData[editRowIndex],
-                drive: driveSelect.value === 'Unset' ? '' : driveSelect.value
+    const changeCallbackForField = (fieldName, defaultVal) => {
+        return (e) => {
+            if (constraintsTable.rowsData[editRowIndex]) {
+                const val = this.value || e.target.value;
+                constraintsTable.rowsData[editRowIndex] = {
+                    ...constraintsTable.rowsData[editRowIndex],
+                    [fieldName]: (!val || ['None', 'Unset'].includes(val)) ? defaultVal : val
+                }
+                vscode.postMessage({ 
+                    type: 'edit', 
+                    editType: 'change',
+                    rowIndex: editRowIndex,
+                    field: fieldName,
+                    newValue: constraintsTable.rowsData[editRowIndex][fieldName]
+                });
+                recalculateOptions(constraintsTable.rowsData[editRowIndex]);
+                updateConstraintsTable();
             }
-            vscode.postMessage({ 
-                type: 'edit', 
-                editType: 'change',
-                rowIndex: editRowIndex,
-                field: 'drive',
-                newValue: constraintsTable.rowsData[editRowIndex].drive
-            });
-            recalculateOptions(constraintsTable.rowsData[editRowIndex]);
-            updateConstraintsTable();
         }
-    });
+    }
 
-    pullModeSelect.addEventListener('change', () => {
-        if (constraintsTable.rowsData[editRowIndex]) {
-            constraintsTable.rowsData[editRowIndex] = {
-                ...constraintsTable.rowsData[editRowIndex],
-                pullMode: pullModeSelect.value === 'None' ? '' : pullModeSelect.value
-            }
-            vscode.postMessage({ 
-                type: 'edit', 
-                editType: 'change',
-                rowIndex: editRowIndex,
-                field: 'pullMode',
-                newValue: constraintsTable.rowsData[editRowIndex].pullMode
-            });
-            recalculateOptions(constraintsTable.rowsData[editRowIndex]);
-            updateConstraintsTable();
-        }
-    });
-
-    standardSelect.addEventListener('change', () => {
-        if (constraintsTable.rowsData[editRowIndex]) {
-            constraintsTable.rowsData[editRowIndex] = {
-                ...constraintsTable.rowsData[editRowIndex],
-                standard: standardSelect.value === 'Unset' ? '' : standardSelect.value
-            }
-            vscode.postMessage({ 
-                type: 'edit', 
-                editType: 'change',
-                rowIndex: editRowIndex,
-                field: 'standard',
-                newValue: constraintsTable.rowsData[editRowIndex].standard
-            });
-            recalculateOptions(constraintsTable.rowsData[editRowIndex]);
-            updateConstraintsTable();
-        }
-    });
+    editPortName.addEventListener('input', changeCallbackForField('name'));
+    editPortLocation.addEventListener('input', changeCallbackForField('location', '<Not Selected>'));
+    driveSelect.addEventListener('change', changeCallbackForField('drive', '').bind(driveSelect));
+    pullModeSelect.addEventListener('change', changeCallbackForField('pullMode', '').bind(pullModeSelect));
+    standardSelect.addEventListener('change', changeCallbackForField('standard', '').bind(standardSelect));
 
     const setDefaults = async () => {
         constraintsTable.rowsData = [];
@@ -804,7 +718,7 @@ function main() {
     const convertToConstraintsText = async () => {
         const constraints = constraintsTable.rowsData;
         let fileRows = [
-            '/* Generated with Lushay Code */',
+            '// Generated with Lushay Code',
             ''
         ];
         constraints.forEach((constraint) => {
