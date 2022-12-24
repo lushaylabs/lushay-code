@@ -19,6 +19,7 @@ export interface ProjectFile {
     board: string;
 	externalFlashFilePath: string;
 	testBenchPath: string;
+	skipCstChecking: boolean;
 }
 
 export interface Logger {
@@ -61,7 +62,8 @@ export async function parseProjectFile(logger: Logger, selectedProject?: string)
 			testBenchPath: '',
 			synthGowinOptions: [],
 			nextPnrGowinOptions: [],
-			baudRate: 115200
+			baudRate: 115200,
+			skipCstChecking: false
 		})
 	}
 	
@@ -92,6 +94,10 @@ export async function parseProjectFile(logger: Logger, selectedProject?: string)
 		}
 		if (!projectFile.includedFiles) {
 			projectFile.includedFiles = 'all';
+		}
+		
+		if (!projectFile.skipCstChecking) {
+			projectFile.skipCstChecking = false;
 		}
 
 		if (!projectFile.testBenches) {

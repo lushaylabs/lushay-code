@@ -3,7 +3,7 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { GowinPackStage, IVerilogTestbenchStage, NextPnrGowinStage, OpenFPGALoaderExternalFlashStage, OpenFPGALoaderFsStage, ToolchainStage, YosysGowinStage } from './stages';
+import { GowinPackStage, IVerilogTestbenchStage, NextPnrGowinStage, YosysCSTCheckStage, OpenFPGALoaderExternalFlashStage, OpenFPGALoaderFsStage, ToolchainStage, YosysGowinStage } from './stages';
 import { parseProjectFile, ProjectFile } from './projecfile';
 import { existsSync, fstat, statSync } from 'fs';
 import { SerialPort } from 'serialport';
@@ -251,7 +251,7 @@ async function clickedPanelButton(): Promise<void> {
 	if (!validSettings) {
 		return;
 	}
-	const stages = await getStagesForOption(option as CommandOption);
+	const stages = await getStagesForOption(projectFile, option as CommandOption);
 	const stageInstances: ToolchainStage[] = [];
 	for (const stageClass of stages) {
 		const nextStage = new stageClass(projectFile);
@@ -265,9 +265,10 @@ async function clickedPanelButton(): Promise<void> {
 	logToBoth('Toolchain Completed');
 }
 
-function getStagesForOption(option: CommandOption): StageClass[] {
+function getStagesForOption(projectFile: ProjectFile, option: CommandOption): StageClass[] {
 	if (option === CommandOption.BUILD_ONLY) {
 		return [
+			...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
 			YosysGowinStage,
 			NextPnrGowinStage,
 			GowinPackStage
@@ -275,6 +276,7 @@ function getStagesForOption(option: CommandOption): StageClass[] {
  	}
 	if (option === CommandOption.BUILD_AND_PROGRAM) {
 		return [
+			...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
 			YosysGowinStage,
 			NextPnrGowinStage,
 			GowinPackStage,

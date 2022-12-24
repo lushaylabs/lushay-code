@@ -168,6 +168,11 @@
         ],
         "description": "The FPGA development board",
         "title": "Dev Board"
+      },
+      "skipCstChecking": {
+        "type": "boolean",
+        "title": "Skip CST Checking",
+        "description": "Skip the prestage of making sure all ports are defined in CST"
       }
     },
     "title": "Lushay Project File"

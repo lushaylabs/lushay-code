@@ -72,6 +72,7 @@ export interface ProjectFile {
     synthGowinOptions: string[];
     baudRate: number;
     board: string;
+    skipCstChecking: boolean;
 }
 ```
 
@@ -90,6 +91,7 @@ All fields are option and have default values as detailed below
 | synthGowinOptions | Extra flags for the synth-gowin stage in yosys | [] |
 | baudRate | Baud Rate for serial console | 115200 |
 | board | The FPGA board being used | tangnano9k |
+| skipCstChecking | Skip the prestage of making sure all ports are defined | false |
 
 values for board are:
 - tangnano9k

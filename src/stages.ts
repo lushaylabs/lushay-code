@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import * as path from 'path';
 import { Logger, ProjectFile } from './projecfile';
+import * as fs from 'fs';
 
 export const deviceInfo = (board: string):  {device: string, family: string} => {
         if (board === 'tangnano9k') {
@@ -57,7 +58,7 @@ export abstract class ToolchainStage {
 	protected abstract onCommandPrintErrorLine(line: string): void;
 	protected abstract onCommandEnd(): void;
 
-	protected runCommand(commandArr: string[]): Promise<number | null> {
+protected runCommand(commandArr: string[]): Promise<number | null> {
         const ossRootPath = path.resolve(ToolchainStage.ossCadSuiteBinPath, '..');
 		return new Promise<number | null>(async (resolve, reject) => {
 			const prog = spawn(commandArr[0], commandArr.slice(1), {
@@ -165,8 +166,7 @@ export class YosysGowinStage extends ToolchainStage {
 
 	protected onCommandPrintLine(line: string): void {
 		if (['|', '/', '\\'].includes(line.trim()[0])) {
-			// copyright area
-			ToolchainStage.logger.logToSummary('    ' + line);
+			// skipping copyright area here as printed in CST check stage
 			return;
 		}
 		const titleRegexp = /^([0-9.]+)\. (.+)$/;
@@ -483,4 +483,102 @@ export class IVerilogTestbenchStage extends ToolchainStage {
     protected onCommandEnd(): void {
         ToolchainStage.logger.logToBoth('Finished Testbench');
     }
+}
+
+export class YosysCSTCheckStage extends ToolchainStage {
+    private ports: string[] = [];
+
+    public async runProg(previousStage: ToolchainStage | undefined): Promise<number | null> {
+        ToolchainStage.logger.logToBoth('Starting Yosys CST Checking');
+
+        const yosysPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'yosys');
+
+        const checkCommand = [
+			yosysPath,
+			'-p',
+			`read_verilog ${this.projectFile.includedFilePaths.join(' ')}; portlist ${this.projectFile.top || 'top'}`
+		];
+
+        let code = await this.runCommand(checkCommand);
+        if (code === 0) {
+            ToolchainStage.logger.logToBoth('    Checking if all ports are defined in constraints file');
+            const constraintNamesMap: Record<string, boolean> = {}
+            const constraintsFile = fs.readFileSync(this.projectFile.constraintsFile).toString();
+            const rows = constraintsFile.split('\n');
+            const ioLocRegex = /IO_LOC\s+"([^"]+)"\s+(\d+\s*,?\s*(\d+)?)\s*;/;
+            const ioPortRegex = /IO_PORT\s+"([^"]+)"\s+([^;]+)\s*;/;
+            rows.forEach((row) => {
+                let match = row.match(ioLocRegex);
+                if (match) {
+                    constraintNamesMap[match[1]] = true;
+                    return;
+                }
+                match = row.match(ioPortRegex);
+                if (match) {
+                    constraintNamesMap[match[1]] = true;
+                }
+            });
+            const constraintNames = Object.keys(constraintNamesMap);
+            const portsMissingDefinition = this.ports.filter((topPort) => !constraintNames.includes(topPort));
+            if (portsMissingDefinition.length === 0) {
+                ToolchainStage.logger.logToBoth('    All Ports are defined');
+            } else {
+                ToolchainStage.logger.logToBoth(`    Error: Port${portsMissingDefinition.length > 1 ? 's' : ''} are missing from CST file: ${portsMissingDefinition.join(', ')}`)
+                return 1;
+            }
+        }
+
+        ToolchainStage.logger.logToBoth('Finished CST Checking');
+        return code;
+
+    }
+
+    protected onCommandStart(): void {
+    }
+    protected onCommandPrintLine(line: string): void {
+        if (['|', '/', '\\'].includes(line.trim()[0])) {
+			// copyright area
+            ToolchainStage.logger.logToSummary('    ' + line);
+			return;
+		}
+        const parseMatch = line.match(/Parsing Verilog input from `([^']+)' to AST/);
+        if (parseMatch) {
+            ToolchainStage.logger.logToSummary(`    Parsing ${path.basename(parseMatch[1])}`);
+            return;
+        }
+        const moduleMatch = line.match(/RTLIL representation for module `\\([^']+)'/);
+        if (moduleMatch) {
+            ToolchainStage.logger.logToSummary(`        - Module ${moduleMatch[1]} parsed`);
+            return;
+        }
+        const portMatch = line.match(/(input|output) \[([0-9]+):([0-9]+)\] ([^\n]+)/);
+        if (portMatch) {
+            const portSize = Math.abs((+portMatch[2]) - (+portMatch[3])) + 1;
+            if (portSize === 1) {
+                this.ports.push(portMatch[4]);
+            } else {
+                for (let i = 0; i < portSize; i += 1) {
+                    this.ports.push(`${portMatch[4]}[${i}]`);
+                }
+            }
+        }
+    }
+    protected onCommandPrintErrorLine(line: string): void {
+        ToolchainStage.logger.logToSummary('    Error: ' + line.trimEnd());
+        if (line.includes('ERROR: syntax error, unexpected')) {
+            const errorLocation = line.match(/([^/\\]+\.v):([0-9]+):/);
+            if (errorLocation && +errorLocation[2] > 1) {
+                ToolchainStage.logger.logToSummary(`    Check lines ${+errorLocation[2]-1}-${errorLocation[2]} of file ${errorLocation[1]} you may be missing a semicolon or left a block open`)
+            }
+        }
+        if (line.includes('ERROR: Module') && line.includes("is not part of the design")) {
+            //Error: ERROR: Module `\mds' referenced in module `\led_blink' in cell `\m' is not part of the design.
+            const moduleMatches = line.match(/ERROR: Module `\\([^']+)' referenced in module `\\([^']+)' in cell `\\([^']+)'/);
+            if (moduleMatches) {
+                ToolchainStage.logger.logToSummary(`    Check if module instantiation \`${moduleMatches[1]} ${moduleMatches[3]}(...)\` in module ${moduleMatches[2]} is a typo or maybe the module is not included in your projectfile`)
+            }
+        }
+    }
+    protected onCommandEnd(): void {
+    }   
 }

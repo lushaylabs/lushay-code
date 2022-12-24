@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.10]
+
+### Added
+- Added pre-build stage to make sure all ports are defined in CST file
+- Added project file option to skip this pre-build stage (`skipCstChecking`)
+
 ## [0.0.9]
 
 ### Added
