@@ -1,4 +1,7 @@
+import { exec } from "child_process";
+import path = require("path");
 import { workspace, Disposable as VSCodeDisposable, window as vsCodeWindow, commands, ExtensionContext, EventEmitter, CancellationToken, CustomDocumentBackup, Uri, ViewColumn, WebviewPanel, window, CustomDocument, CustomEditorProvider, CustomDocumentBackupContext, CustomDocumentContentChangeEvent, CustomDocumentEditEvent, CustomDocumentOpenContext, Event, Webview } from "vscode";
+import { parseProjectFile } from "../projecfile";
 
 export function disposeAll(disposables: VSCodeDisposable[]): void {
 	while (disposables.length) {
@@ -225,9 +228,13 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
     public static currentPanel: ConstraintsEditor | undefined;
     private _disposables: Disposable[] = [];
 
-    private static newConstraintsFileId = 1;
+    private static newConstraintsFileId: number = 1;
+    private static getOssCadSuitePath: undefined | (() => Promise<string | undefined>);
+    private static getSelectedProject: undefined | (() => {name: string, path: string} | undefined);
 
-	public static register(context: ExtensionContext): VSCodeDisposable {
+	public static register(context: ExtensionContext, getOssCadSuitePath: (() => Promise<string | undefined>), getSelectedProject: () => {name: string, path: string} | undefined): VSCodeDisposable {
+        ConstraintsEditor.getSelectedProject = getSelectedProject;
+        ConstraintsEditor.getOssCadSuitePath = getOssCadSuitePath;
 		commands.registerCommand('lushay-code.constraintsEditor.new', () => {
 			const workspaceFolders = workspace.workspaceFolders;
 			if (!workspaceFolders) {
@@ -357,7 +364,9 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
 						editable,
 					});
 				}
-			}
+			} else if (e.type === 'getPorts') {
+                this.getPorts(webviewPanel);
+            }
 		});
 	}
 
@@ -380,7 +389,6 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
 			case 'edit':
 				document.makeEdit(message as ConstraintsFileEdit);
 				return;
-
 			case 'response':
 				{
 					const callback = this._callbacks.get(message.requestId);
@@ -389,6 +397,38 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
 				}
 		}
 	}
+
+    private async getPorts(webview: WebviewPanel) {
+        const ossCadPath = await ConstraintsEditor.getOssCadSuitePath?.();
+        if (!ossCadPath) {
+            return;
+        }
+        const selectedProject = ConstraintsEditor.getSelectedProject?.();
+        const projectFile = await parseProjectFile(undefined, selectedProject?.path);
+        if (!projectFile) {
+            return;
+        }
+
+        const yosysPath = path.join(ossCadPath, 'yosys');
+        exec(`${yosysPath} -p '${`read_verilog ${projectFile.includedFilePaths.join(' ')}; portlist ${projectFile.top || 'top'}`}'`, (err, stdout) => {
+            const ports: string[] = [];
+            const lines = stdout.split('\n');
+            lines.forEach((line) => {
+                const portMatch = line.match(/(input|output) \[([0-9]+):([0-9]+)\] ([^\n]+)/);
+                if (portMatch) {
+                    const portSize = Math.abs((+portMatch[2]) - (+portMatch[3])) + 1;
+                    if (portSize === 1) {
+                        ports.push(portMatch[4]);
+                    } else {
+                        for (let i = 0; i < portSize; i += 1) {
+                            ports.push(`${portMatch[4]}[${i}]`);
+                        }
+                    }
+                }
+            })
+            this.postMessage(webview, 'portResponse', {ports})
+        });
+    }
 
     // public static render(extensionUri: Uri) {
     //     if (ConstraintsEditor.currentPanel) {
@@ -534,6 +574,24 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                             padding: 25px 25px;
                             border: 1px solid rgba(255, 255, 255, 0.1);
                         }
+                        #port-popup-container {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: rgba(0,0,0,0.2);
+                        }
+                        #port-popup {
+                            position: absolute;
+                            left: 50%;
+                            width: 400px;
+                            background: #2d2d2d;
+                            top: 50%;
+                            transform: translate(-50%, -50%);
+                            padding: 25px 25px;
+                            border: 1px solid rgba(255, 255, 255, 0.1);
+                        }
                         #board-popup-container {
                             position: absolute;
                             top: 0;
@@ -591,6 +649,9 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                             border: unset;
                             color: unset;
                         }
+                        #port-outer-container {
+                            margin-bottom: 10px;
+                        }
                     </style>
                 </head>
                 <body>
@@ -632,6 +693,7 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                                         <section>
                                             <label>Port Name</label>
                                             <vscode-text-field id="edit-port-name"></vscode-text-field>
+                                            <vscode-link id="select-port" href="#">Select From Top Module</vscode-link>
                                         </section>
                                         <section>
                                             <label>Location</label>
@@ -705,6 +767,18 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                                 <div id="pin-container"></div>
                             </div>
                             <vscode-button appearance="secondary" id="cancel-board">Cancel</vscode-button>
+                        </div>
+                    </div>
+                    <div class="hide" id="port-popup-container">
+                        <div id="port-popup">
+                            <h3>Select Port</h3>
+                            <div id="port-outer-container">
+                                <vscode-progress-ring id="port-loading" class="hide"></vscode-progress-ring>
+                                <div class="hide" id="port-container"></div>
+                                <div class="hide" id="no-ports">No Ports found, check your top module is defined and has no errors</div>
+                            </div>
+                            <vscode-button appearance="primary" id="save-port-selection">Select Port</vscode-button>
+                            <vscode-button appearance="secondary" id="cancel-port">Cancel</vscode-button>
                         </div>
                     </div>
                 </body>

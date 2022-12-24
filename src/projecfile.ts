@@ -28,16 +28,16 @@ export interface Logger {
     logToRaw(msg: string): void;
 }
 
-export async function parseProjectFile(logger: Logger, selectedProject?: string): Promise<ProjectFile | undefined> {
+export async function parseProjectFile(logger?: Logger, selectedProject?: string): Promise<ProjectFile | undefined> {
 	const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	if (!workspaceFolder) {
-		logger.logToBoth('    Error: No workspace open');
+		logger?.logToBoth('    Error: No workspace open');
 		return;
 	}
 
     const projectFiles = await vscode.workspace.findFiles('**/*.lushay.json');
 	if (!vscode.workspace.workspaceFolders?.length) {
-		logger.logToBoth('Error no <project>.lushay.json file or workspace found');
+		logger?.logToBoth('Error no <project>.lushay.json file or workspace found');
 		return;
 	}
 	const projectFolderName = vscode.workspace.workspaceFolders[0].name;
@@ -45,7 +45,7 @@ export async function parseProjectFile(logger: Logger, selectedProject?: string)
 
 		const constraintsFiles = await vscode.workspace.findFiles(path.join('**','*.cst'));
 		if (constraintsFiles.length === 0) {
-			logger.logToBoth('Error no constraints (.cst) file found');	
+			logger?.logToBoth('Error no constraints (.cst) file found');	
 			return
 		}
 		return expandProjectFile({
@@ -73,12 +73,12 @@ export async function parseProjectFile(logger: Logger, selectedProject?: string)
 	}
 	const projectFileName = path.basename(projectFilePath);
 	
-	logger.logToBoth(`Processing ${projectFileName}`);
+	logger?.logToBoth(`Processing ${projectFileName}`);
 	let projectFile: ProjectFile | null = null;
 	try {
 		projectFile = JSON.parse(fs.readFileSync(projectFilePath).toString());
 		if (!projectFile) {
-			logger.logToBoth('    Error: Not able to parse project file');
+			logger?.logToBoth('    Error: Not able to parse project file');
 			return;
 		}
 		
@@ -95,7 +95,7 @@ export async function parseProjectFile(logger: Logger, selectedProject?: string)
 		if (!projectFile.includedFiles) {
 			projectFile.includedFiles = 'all';
 		}
-		
+
 		if (!projectFile.skipCstChecking) {
 			projectFile.skipCstChecking = false;
 		}
@@ -122,12 +122,12 @@ export async function parseProjectFile(logger: Logger, selectedProject?: string)
 			if (constraintsFile.length > 0) {
 				projectFile.constraintsFile = constraintsFile[0].fsPath;
 			} else {
-				logger.logToBoth('    No constraints file found, set (key: `constraintsFile`) inside ' + projectFile.fileName);
+				logger?.logToBoth('    No constraints file found, set (key: `constraintsFile`) inside ' + projectFile.fileName);
 				return;
 			}
 		} 
 	} catch(e) {
-		logger.logToBoth('    Error: ' + e)
+		logger?.logToBoth('    Error: ' + e)
 		return;
 	}
 

@@ -53,7 +53,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
 	updateStatusBarItem();
-	ConstraintsEditor.register(context);
+	ConstraintsEditor.register(context, getOssCadSuitePath, () => selectedProject);
 }
 
 async function selectProjectFile(): Promise<void> {
@@ -67,10 +67,10 @@ async function selectProjectFile(): Promise<void> {
 	let useFullMap = false;
 	projectFiles.forEach((projectFile) => {
 		projectFullMap[path.relative(vscode.workspace.workspaceFolders![0].uri.fsPath, projectFile.fsPath)] = projectFile.fsPath;
-		if (projectFullMap[path.basename(projectFile.fsPath)]) {
+		if (projectMap[path.basename(projectFile.fsPath)]) {
 			useFullMap = true;
 		}
-		projectFullMap[path.basename(projectFile.fsPath)] = projectFile.fsPath;
+		projectMap[path.basename(projectFile.fsPath)] = projectFile.fsPath;
 	});
 	const mapToUse = useFullMap ? projectFullMap : projectMap;
 	const projectFileNames = Object.keys(mapToUse);
@@ -162,6 +162,29 @@ async function setupLogs(): Promise<void> {
 	outputPanel = vscode.window.createOutputChannel('Toolchain Summary', 'fpga-toolchain-output');
 	rawOutputPanel.show(true);
 	outputPanel.show(false);
+}
+
+async function getOssCadSuitePath(): Promise<string | undefined> {
+	const config = vscode.workspace.getConfiguration('lushay');
+	if (!config.has('OssCadSuite') || !config.OssCadSuite.path) {
+		const selection = await vscode.window.showErrorMessage('OSS Cad Suite Path not setup', 'Setup Now', 'Get OSS Cad Suite');
+		if (selection === 'Setup Now') {
+			setupOssCadSuitePath();
+		}
+		if (selection === 'Get OSS Cad Suite') {
+			getOssCadSuite();
+		}
+		return;
+	}
+	let ossCadPath: string = config.OssCadSuite.path;
+	if (!ossCadPath.replace(/\/\\/g, '').endsWith('bin')) {
+		ossCadPath = path.join(ossCadPath, 'bin');
+	}
+	const cadPathInfo = statSync(ossCadPath);
+	if (!cadPathInfo || !cadPathInfo.isDirectory()) {
+		return;
+	}
+	return ossCadPath;
 }
 
 async function clickedPanelButton(): Promise<void> {

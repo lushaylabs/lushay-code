@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.11]
+
+### Added
+- Added option to choose port name from top module
+
 ## [0.0.10]
 
 ### Added

@@ -353,11 +353,19 @@ function main() {
     const pinContainer = document.getElementById('pin-container');
     const cancelBoardPopupBtn = document.getElementById('cancel-board');
     const boardPopup = document.getElementById('board-popup-container');
+    const selectPortBtn = document.getElementById('select-port');
+    const cancelPortPopupBtn = document.getElementById('cancel-port');
+    const portPopup = document.getElementById('port-popup-container');
+    const portContainer = document.getElementById('port-container');
+    const noPortsMessage = document.getElementById('no-ports');
+    const portsLoader = document.getElementById('port-loading');
+    const savePortSelection = document.getElementById('save-port-selection');
     const boardImages = getBoardImages();
     let isEditable = false;
     let templates = {}
     let pins = {};
     let board = 'Tang Nano 9K';
+    let ports = [];
 
     constraintsTable.rowsData = [];
     constraintsTable.columnDefinitions = [
@@ -441,6 +449,85 @@ function main() {
             boardPopup.classList.add('hide');
         }
     });
+
+    selectPortBtn.addEventListener('click', async () => {
+        portContainer.innerHTML = '';
+        portsLoader.classList.remove('hide');
+        if (!noPortsMessage.classList.contains('hide')) {
+            noPortsMessage.classList.add('hide');
+        }
+        if (!portContainer.classList.contains('hide')) {
+            portContainer.classList.add('hide');
+        }
+        ports = [];
+        portPopup.classList.remove('hide');
+        vscode.postMessage({ 
+            type: 'getPorts'
+        });
+    })
+    portPopup.addEventListener('click', (e) => {
+        if (e.target === portPopup) {
+            portPopup.classList.add('hide');
+        }
+    });
+    cancelPortPopupBtn.addEventListener('click', () => {
+        if (!portPopup.classList.contains('hide')) {
+            portPopup.classList.add('hide');
+        }
+    })
+    savePortSelection.addEventListener('click', () => {
+        const radioGroup = document.getElementById('port-radio-group');
+        if (!radioGroup || !radioGroup.value || !constraintsTable.rowsData[editRowIndex]) { return; }
+        const newName = radioGroup.value;
+        constraintsTable.rowsData[editRowIndex] = {
+            ...constraintsTable.rowsData[editRowIndex],
+            name: newName
+        };
+        vscode.postMessage({ 
+            type: 'edit', 
+            editType: 'change',
+            rowIndex: editRowIndex,
+            field: 'name',
+            newValue: constraintsTable.rowsData[editRowIndex].name
+        });
+        portPopup.classList.add('hide');
+
+        updateEditWindow();
+        recalculateOptions(constraintsTable.rowsData[editRowIndex]);
+        updateConstraintsTable();
+    });
+
+    const updatePortList = () => {
+        portContainer.innerHTML = '';
+        if (!portsLoader.classList.contains('hide')) {
+            portsLoader.classList.add('hide');
+        }
+        if (ports.length === 0) {
+            noPortsMessage.classList.remove('hide');
+            if (!portContainer.classList.contains('hide')) {
+                portContainer.classList.add('hide');
+            }
+            return;
+        }
+        const radioGroup = document.createElement('vscode-radio-group');
+        radioGroup.setAttribute('orientation', 'vertical');
+        radioGroup.id = 'port-radio-group';
+        
+        const radioLabel = document.createElement('label');
+        radioLabel.setAttribute('slot', 'label');
+        radioLabel.innerText = 'Ports Found:'
+        radioGroup.appendChild(radioLabel);
+
+        for (const port of ports) {
+            const radio = document.createElement('vscode-radio');
+            radio.setAttribute('value', port);
+            radio.innerText = port;
+            radioGroup.appendChild(radio);
+        }
+        portContainer.appendChild(radioGroup);
+       
+        portContainer.classList.remove('hide');
+    }
 
     showTemplateWindowBtn.addEventListener('click', () => {
         const options = templateContainer.querySelectorAll('vscode-checkbox');
@@ -794,6 +881,11 @@ function main() {
                     await loadFile(body.content, body.edits)
 					return;
 				}
+            case 'portResponse':
+                {
+                    ports = body.ports;
+                    updatePortList();
+                }
 			case 'getFileData':
 				{
 					const constraintsData = await convertToConstraintsText();
