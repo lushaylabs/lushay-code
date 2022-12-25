@@ -522,6 +522,8 @@ function main() {
             const radio = document.createElement('vscode-radio');
             radio.setAttribute('value', port);
             radio.innerText = port;
+            const content = radio.innerHTML;
+            radio.innerHTML = content.replace(/\<br ?\/?>/g, '');;
             radioGroup.appendChild(radio);
         }
         portContainer.appendChild(radioGroup);

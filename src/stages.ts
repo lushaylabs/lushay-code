@@ -551,7 +551,7 @@ export class YosysCSTCheckStage extends ToolchainStage {
             ToolchainStage.logger.logToSummary(`        - Module ${moduleMatch[1]} parsed`);
             return;
         }
-        const portMatch = line.match(/(input|output) \[([0-9]+):([0-9]+)\] ([^\n]+)/);
+        const portMatch = line.match(/(input|output|inout) \[([0-9]+):([0-9]+)\] ([^\n]+)/);
         if (portMatch) {
             const portSize = Math.abs((+portMatch[2]) - (+portMatch[3])) + 1;
             if (portSize === 1) {

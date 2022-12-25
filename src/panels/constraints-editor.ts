@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { exec, spawnSync } from "child_process";
 import path = require("path");
 import { workspace, Disposable as VSCodeDisposable, window as vsCodeWindow, commands, ExtensionContext, EventEmitter, CancellationToken, CustomDocumentBackup, Uri, ViewColumn, WebviewPanel, window, CustomDocument, CustomEditorProvider, CustomDocumentBackupContext, CustomDocumentContentChangeEvent, CustomDocumentEditEvent, CustomDocumentOpenContext, Event, Webview } from "vscode";
 import { parseProjectFile } from "../projecfile";
@@ -410,24 +410,35 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
         }
 
         const yosysPath = path.join(ossCadPath, 'yosys');
-        exec(`${yosysPath} -p '${`read_verilog ${projectFile.includedFilePaths.join(' ')}; portlist ${projectFile.top || 'top'}`}'`, (err, stdout) => {
-            const ports: string[] = [];
-            const lines = stdout.split('\n');
-            lines.forEach((line) => {
-                const portMatch = line.match(/(input|output) \[([0-9]+):([0-9]+)\] ([^\n]+)/);
-                if (portMatch) {
-                    const portSize = Math.abs((+portMatch[2]) - (+portMatch[3])) + 1;
-                    if (portSize === 1) {
-                        ports.push(portMatch[4]);
-                    } else {
-                        for (let i = 0; i < portSize; i += 1) {
-                            ports.push(`${portMatch[4]}[${i}]`);
-                        }
+        const ossRootPath = path.resolve(ossCadPath, '..');
+        const res = spawnSync(yosysPath,  ['-p', `read_verilog ${projectFile.includedFilePaths.join(' ')}; portlist ${projectFile.top || 'top'}`], {
+            env: {
+                PATH: [
+                    path.join(ossRootPath, 'bin'),
+                    path.join(ossRootPath, 'lib'),
+                    path.join(ossRootPath, 'py3bin'),
+                    process.env.PATH
+                ].join(process.platform === 'win32' ? ';' : ':')
+            },
+            cwd: projectFile.basePath
+        });
+        const ports: string[] = [];
+        const lines = res.stdout.toString().split('\n');
+        lines.forEach((line) => {
+            const portMatch = line.match(/(input|output|inout) \[([0-9]+):([0-9]+)\] ([^\n]+)/);
+            if (portMatch) {
+                const portSize = Math.abs((+portMatch[2]) - (+portMatch[3])) + 1;
+                if (portSize === 1) {
+                    ports.push(portMatch[4]);
+                } else {
+                    for (let i = 0; i < portSize; i += 1) {
+                        ports.push(`${portMatch[4]}[${i}]`);
                     }
                 }
-            })
-            this.postMessage(webview, 'portResponse', {ports})
-        });
+            }
+        })
+        this.postMessage(webview, 'portResponse', {ports})
+        
     }
 
     // public static render(extensionUri: Uri) {

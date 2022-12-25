@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.12]
+
+### Changed
+- Fix for port checking, was missing inout ports
+- Fix for port selection on windows
+
 ## [0.0.11]
 
 ### Added
