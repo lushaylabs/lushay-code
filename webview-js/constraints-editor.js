@@ -32,8 +32,8 @@ const TEMPLATES = {
             {name: 'flashCs', location: '60', standard: 'LVCMOS33', pullMode: 'Pull Up', drive: '8ma'}
         ],
         'UART': [
-            {name: 'uartTx', location: '17', standard: 'LVCMOS33', pullMode: 'Pull Up', drive: '8ma'},
-            {name: 'uartRx', location: '18', standard: 'LVCMOS33', pullMode: 'Pull Up', drive: '8ma'}
+            {name: 'uartTx', location: '17', standard: 'LVCMOS33', pullMode: 'Pull Up'},
+            {name: 'uartRx', location: '18', standard: 'LVCMOS33', pullMode: 'Pull Up'}
         ],
         'HDMI': [
             {name: 'hdmiTmdsData[0]', location: '71,70', drive: '8ma'},
