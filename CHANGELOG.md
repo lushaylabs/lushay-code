@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.0.13]
+
+### Added
+- Verilog Linting thanks to verilator
+
+### Changed
+- Fix to UART tx/rx `DRIVE` setting ([PR #1](https://github.com/lushaylabs/lushay-code/pull/1))
+
 ## [0.0.12]
 
 ### Changed

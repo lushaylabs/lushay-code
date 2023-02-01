@@ -10,6 +10,7 @@ import { SerialPort } from 'serialport';
 import { PortInfo } from '@serialport/bindings-cpp';
 import { ConstraintsEditor } from './panels/constraints-editor';
 import { writeFileSync } from 'fs';
+import { spawnSync } from 'child_process';
 
 let myStatusBarItem: vscode.StatusBarItem;
 let projectStatusBarItem: vscode.StatusBarItem;
@@ -35,6 +36,120 @@ enum CommandOption {
 	CANCEL = 'Cancel'
 }
 
+async function refreshDiagnostics(doc: vscode.TextDocument, verilogDiagnostics: vscode.DiagnosticCollection) {
+	const diagnostics: Record<string, vscode.Diagnostic[]> = {};
+	if (!selectedProject) {
+		const projectFiles = await vscode.workspace.findFiles('**/*.lushay.json');
+		if (projectFiles.length > 0) {
+			verilogDiagnostics.clear();
+			return;
+		}
+	}
+	const projectFile = await parseProjectFile(undefined, selectedProject?.path);
+	const ossCadPath = await getOssCadSuitePath();
+	if (!projectFile || !ossCadPath) {
+		verilogDiagnostics.clear();
+		return;
+	}
+	const verilatorPath = path.join(ossCadPath, 'verilator');
+	const ossRootPath = path.resolve(ossCadPath, '..');
+	const res = spawnSync(
+		verilatorPath,  
+		[
+			'--lint-only', 
+			`-Wall`, 
+			...projectFile.includedFilePaths
+		], 
+		{
+		env: {
+			PATH: [
+				path.join(ossRootPath, 'bin'),
+				path.join(ossRootPath, 'lib'),
+				path.join(ossRootPath, 'py3bin'),
+				process.env.PATH
+			].join(process.platform === 'win32' ? ';' : ':')
+		},
+		cwd: projectFile.basePath
+	});
+	const errorLines = res.stderr.toString().split('\n');
+	let subGroup: string[] = [];
+	let inGroup = false;
+	errorLines.forEach((line) => {
+		if (inGroup) {
+			if (line.startsWith(' ')) {
+				subGroup.push(line);
+			} else {
+				inGroup = false;
+				if (subGroup.length > 0) {
+					const issue = convertLinesToIssue(subGroup);
+					if (issue) {
+						if (!diagnostics[issue.file]) {
+							diagnostics[issue.file] = [];
+						}
+						diagnostics[issue.file].push(new vscode.Diagnostic(
+							new vscode.Range(issue.line-1, issue.col-1, issue.line-1, issue.col + issue.length),
+							issue.message,
+							issue.type === IssueType.WARNING ? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Error
+						));
+					}
+				}
+			}
+		}
+		if (line.match((/^%(Error|Warning)/i))) {
+			inGroup = true;
+			subGroup = [line];
+		} 
+	});
+	verilogDiagnostics.clear();
+	for (const path in diagnostics) {
+		verilogDiagnostics.set(vscode.Uri.file(path), diagnostics[path]);
+	}
+}
+
+enum IssueType {
+	WARNING = 'warning',
+	ERROR = 'error'
+}
+interface Issue {
+	type: IssueType;
+	file: string;
+	line: number;
+	col: number;
+	length: number;
+	message: string;
+}
+
+function convertLinesToIssue(lines: string[]): Issue | undefined {
+	const type = lines[0].toLowerCase().startsWith('%error') ? IssueType.ERROR : IssueType.WARNING;
+	const fileInfo = lines[0].match(/^%[^ ]+: ([^:]+):([^:]+):([^:]+):(.*)$/);
+	if (!fileInfo) {
+		return;
+	}
+	const file = fileInfo[1];
+	const line = +fileInfo[2];
+	const col = +fileInfo[3];
+	const message = fileInfo[4].trim();
+	let length = 0;
+	lines.forEach((line) => {
+		const lengthIndicator = line.match(/\| *\^(~+)/);
+		if (lengthIndicator) {
+			length = lengthIndicator[1].length;
+		}
+	});
+	if (message.includes("does not match MODULE name")) {
+		return;
+	}
+
+	return {
+		type,
+		file,
+		line,
+		col,
+		message,
+		length
+	}
+}
+
 export async function activate(context: vscode.ExtensionContext) {
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 	myStatusBarItem.text = '$(megaphone) FPGA Toolchain';
@@ -54,6 +169,28 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
 	updateStatusBarItem();
 	ConstraintsEditor.register(context, getOssCadSuitePath, () => selectedProject);
+
+	// diagnostics
+	const verilogDiagnostics = vscode.languages.createDiagnosticCollection("verilog");
+	context.subscriptions.push(verilogDiagnostics);
+
+	if (vscode.window.activeTextEditor) {
+		await refreshDiagnostics(vscode.window.activeTextEditor.document, verilogDiagnostics);
+	}
+	context.subscriptions.push(
+		vscode.workspace.onDidSaveTextDocument(document => {
+			refreshDiagnostics(document, verilogDiagnostics);
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeTextDocument(e => refreshDiagnostics(e.document, verilogDiagnostics))
+	);
+
+	context.subscriptions.push(
+		vscode.workspace.onDidCloseTextDocument(doc => verilogDiagnostics.delete(doc.uri))
+	);
+
 }
 
 async function selectProjectFile(): Promise<void> {
@@ -83,7 +220,7 @@ async function selectProjectFile(): Promise<void> {
 	if (!selected) {
 		return;
 	}
-	if (selected === 'Unset selected project') {
+	if (selected === 'Unset Selected Project') {
 		selectedProject = undefined;
 		projectStatusBarItem.text = '<Auto-Detect Project>';
 		return;

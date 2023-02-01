@@ -2,7 +2,7 @@
   "name": "lushay-code",
   "displayName": "Lushay Code",
   "description": "Open Source FPGA Toolchain using OSS-Cad-Suite",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "license": "MIT",
   "engines": {
     "vscode": "^1.72.0"
@@ -28,7 +28,8 @@
     "workspaceContains:**/*.v",
     "workspaceContains:**/*.cst",
     "onCommand:lushay-code.runFPGAToolchain",
-    "onCommand:lushay-code.selectProject"
+    "onCommand:lushay-code.selectProject",
+    "onLanguage:verilog"
   ],
   "publisher": "lushay-labs",
   "main": "./out/extension.js",

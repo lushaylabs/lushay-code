@@ -21,6 +21,7 @@ Features Include:
 - Serial Console for UART communication
 - Terminal pre-configured with OSS-CAD-Suite
 - Visual constraints editor
+- Verilog Linting (using verilator)
 
 ## Requirements
 
@@ -54,6 +55,9 @@ You can edit the name, location and other options on the constraint. For locatio
 Both the "Select IO Pin" and "Add From Template" are board specific so you have to choose the correct board from the dropdown at the top.
 
 If you prefer to edit your .cst files manually using a text editor you can right click on the file and press "Open With". This will open a dropdown with options and there is even an option to set the default editor so it will always use your preference in the future.
+
+### Linting
+For linting to be enabled you need to have your project chosen in the bottom bar since the linter needs to know which files are included in the build to properly lint. There is a button next to the "FPGA Toolchain" button which by default says `<Auto-Detect Project>`. You can click this button to select your project file which will enable linting. If your workspace has no project file (`.lushay.json` file) then linting will also be enabled automatically and it will include all verilog files in the current workspace.
 
 ## Configuration
 You can override the default behaviour of the extension by creating a file called `<name>.lushay.json` for example `demo.lushay.json` with overrides for all the settings. The name can be whatever you want and it will be used as the default output name so in this example if I would compile the code I would get a file called `demo.fs`.
