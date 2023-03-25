@@ -56,6 +56,7 @@ async function refreshDiagnostics(doc: vscode.TextDocument, verilogDiagnostics: 
 	const res = spawnSync(
 		verilatorPath,  
 		[
+			'--top-module', projectFile.top || 'top',
 			'--lint-only', 
 			`-Wall`, 
 			...projectFile.includedFilePaths
@@ -71,7 +72,7 @@ async function refreshDiagnostics(doc: vscode.TextDocument, verilogDiagnostics: 
 		},
 		cwd: projectFile.basePath
 	});
-	const errorLines = res.stderr.toString().split('\n');
+	const errorLines = res.stderr?.toString().split('\n') || [];
 	let subGroup: string[] = [];
 	let inGroup = false;
 	errorLines.forEach((line) => {
@@ -317,8 +318,12 @@ async function getOssCadSuitePath(): Promise<string | undefined> {
 	if (!ossCadPath.replace(/\/\\/g, '').endsWith('bin')) {
 		ossCadPath = path.join(ossCadPath, 'bin');
 	}
-	const cadPathInfo = statSync(ossCadPath);
-	if (!cadPathInfo || !cadPathInfo.isDirectory()) {
+	try {
+		const cadPathInfo = statSync(ossCadPath);
+		if (!cadPathInfo || !cadPathInfo.isDirectory()) {
+			return;
+		}
+	} catch (e) {
 		return;
 	}
 	return ossCadPath;
