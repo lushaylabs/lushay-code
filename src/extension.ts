@@ -3,7 +3,6 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { GowinPackStage, IVerilogTestbenchStage, NextPnrGowinStage, YosysCSTCheckStage, OpenFPGALoaderExternalFlashStage, OpenFPGALoaderFsStage, ToolchainStage, YosysGowinStage } from './stages';
 import { parseProjectFile, ProjectFile } from './projecfile';
 import { existsSync, fstat, statSync } from 'fs';
 import { SerialPort } from 'serialport';
@@ -11,11 +10,13 @@ import { PortInfo } from '@serialport/bindings-cpp';
 import { ConstraintsEditor } from './panels/constraints-editor';
 import { writeFileSync } from 'fs';
 import { spawnSync } from 'child_process';
+import { ToolchainStage } from './stages/stage';
+import { CommandOption } from './utils/command-options';
+import { getStagesForOption } from './stages';
 
 let myStatusBarItem: vscode.StatusBarItem;
 let projectStatusBarItem: vscode.StatusBarItem;
 let selectedProject: {name: string, path: string} | undefined;
-type StageClass = new (projectFile: ProjectFile) => ToolchainStage;
 
 const RUN_TOOLCHAIN_CMD_ID = 'lushay-code.runFPGAToolchain';
 const SELECT_PROJECT_CMD_ID = 'lushay-code.selectProject';
@@ -24,17 +25,6 @@ const SELECT_PROJECT_CMD_ID = 'lushay-code.selectProject';
 
 let outputPanel: vscode.OutputChannel | undefined;
 let rawOutputPanel: vscode.OutputChannel | undefined;
-
-enum CommandOption {
-	BUILD_AND_PROGRAM = 'Build and Program',
-	BUILD_ONLY = 'Build Only',
-	PROGRAM_ONLY = 'Program Only',
-	EXTERNAL_FLASH = 'External Flash',
-	RUN_TESTBENCH = 'Run Testbench',
-	OPEN_TERMINAL = 'Open Terminal',
-	SERIAL_CONSOLE = 'Open Serial Console',
-	CANCEL = 'Cancel'
-}
 
 async function refreshDiagnostics(doc: vscode.TextDocument, verilogDiagnostics: vscode.DiagnosticCollection) {
 	const diagnostics: Record<string, vscode.Diagnostic[]> = {};
@@ -428,39 +418,6 @@ async function clickedPanelButton(): Promise<void> {
 		stageInstances.push(nextStage);
 	}
 	logToBoth('Toolchain Completed');
-}
-
-function getStagesForOption(projectFile: ProjectFile, option: CommandOption): StageClass[] {
-	if (option === CommandOption.BUILD_ONLY) {
-		return [
-			...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
-			YosysGowinStage,
-			NextPnrGowinStage,
-			GowinPackStage
-		];
- 	}
-	if (option === CommandOption.BUILD_AND_PROGRAM) {
-		return [
-			...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
-			YosysGowinStage,
-			NextPnrGowinStage,
-			GowinPackStage,
-			OpenFPGALoaderFsStage
-		];
-	}
-	if (option === CommandOption.PROGRAM_ONLY) {
-		return [OpenFPGALoaderFsStage];
-	}
-
-	if (option === CommandOption.EXTERNAL_FLASH) {
-		return [OpenFPGALoaderExternalFlashStage];
-	}
-
-	if (option === CommandOption.RUN_TESTBENCH) {
-		return [IVerilogTestbenchStage];
-	}
-
-	return [];
 }
 
 async function chooseFile(title: string, files: string[]): Promise<string | undefined> {

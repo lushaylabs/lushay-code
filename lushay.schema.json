@@ -138,6 +138,22 @@
         "title": "Additional nextpnr-gowin flags",
         "description": "Extra flags which will be passed to nextpnr-gowin"
       },
+      "nextPnrEcp5Options": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "title": "Additional nextpnr-ecp5 flags",
+        "description": "Extra flags which will be passed to nextpnr-ecp5"
+      },
+      "nextPnrIce40Options": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "title": "Additional nextpnr-ice40 flags",
+        "description": "Extra flags which will be passed to nextpnr-ice40"
+      },
       "synthGowinOptions": {
         "type": "array",
         "uniqueItems": true,
@@ -159,12 +175,84 @@
         "title": "Additional synth_gowin flags",
         "description": "Extra flags which will be passed to synth_gowin as part of yosys"
       },
+      "synthEcp5Options": {
+        "type": "array",
+        "items": {
+        "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "-blif",
+                "-edif",
+                "-run",
+                "-noflatten",
+                "-dff",
+                "-retime",
+                "-noccu2",
+                "-nodffe",
+                "-nobram",
+                "-nolutram",
+                "-nowidelut",
+                "-asyncprld",
+                "-abc2",
+                "-abc9",
+                "-vpr",
+                "-nodsp",
+                "-no-rw-check"
+              ]
+            }, 
+            {
+                "type": "string"
+            }
+          ]
+        },
+        "title": "Additional synth_ecp5 flags",
+        "description": "Extra flags which will be passed to synth_ecp5 as part of yosys"
+      },
+      "synthIce40Options": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "-device",
+                "-blif",
+                "-edif",
+                "-run",
+                "-noflatten",
+                "-dff",
+                "-retime",
+                "-nocarry",
+                "-nodffe",
+                "-dffe_min_ce_use",
+                "-nobram",
+                "-spram",
+                "-dsp",
+                "-noabc",
+                "-abc2",
+                "-abc9",
+                "-vpr",
+                "-flowmap",
+                "-no-rw-check"
+              ]
+            }, 
+            {
+                "type": "string"
+            }
+          ]
+        },
+        "title": "Additional synth_ice40 flags",
+        "description": "Extra flags which will be passed to synth_ice40 as part of yosys"
+      },
       "board": {
         "enum": [
           "tangnano9k",
           "tangnano4k",
           "tangnano1k",
-          "tangnano"
+          "tangnano",
+          "icebreaker",
+          "orangeCrab"
         ],
         "description": "The FPGA development board",
         "title": "Dev Board"

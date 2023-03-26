@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { boardToToolchain, ToolchainProject } from './utils/device-info';
 
 export interface ProjectFile {
 	name: string;
@@ -12,7 +13,11 @@ export interface ProjectFile {
 	testBenches: string[] | 'all';
 	baudRate: number;
 	nextPnrGowinOptions: string[];
+	nextPnrIce40Options: string[];
+	nextPnrEcp5Options: string[];
 	synthGowinOptions: string[];
+	synthIce40Options: string[];
+	synthEcp5Options: string[];
 	basePath: string;
 	fileName: string;
 	includedFilePaths: string[];
@@ -42,11 +47,19 @@ export async function parseProjectFile(logger?: Logger, selectedProject?: string
 	}
 	const projectFolderName = vscode.workspace.workspaceFolders[0].name;
 	if (projectFiles.length === 0) {
-
-		const constraintsFiles = await vscode.workspace.findFiles(path.join('**','*.cst'));
+		let defaultBoard = 'tangnano9k';
+		let constraintsFiles = await vscode.workspace.findFiles(path.join('**','*.cst'));
 		if (constraintsFiles.length === 0) {
-			logger?.logToBoth('Error no constraints (.cst) file found');	
-			return
+			defaultBoard = 'icebreaker';
+			constraintsFiles = await vscode.workspace.findFiles(path.join('**','*.pcf'));
+			if (constraintsFiles.length === 0) {
+				defaultBoard = 'orangeCrab';
+				constraintsFiles = await vscode.workspace.findFiles(path.join('**','*.lpf'));
+				if (constraintsFiles.length === 0) {
+					logger?.logToBoth('Error no constraints file found');
+					return;
+				}
+			}
 		}
 		return expandProjectFile({
 			name: projectFolderName,
@@ -56,12 +69,16 @@ export async function parseProjectFile(logger?: Logger, selectedProject?: string
 			basePath: vscode.workspace.workspaceFolders[0].uri.fsPath,
 			fileName: projectFolderName,
 			includedFilePaths: [],
-			board: 'tangnano9k',
+			board: defaultBoard,
 			externalFlashFilePath: '',
 			testBenches: 'all',
 			testBenchPath: '',
 			synthGowinOptions: [],
 			nextPnrGowinOptions: [],
+			nextPnrIce40Options: [],
+			nextPnrEcp5Options: [],
+			synthIce40Options: [],
+			synthEcp5Options: [],
 			baudRate: 115200,
 			skipCstChecking: false
 		})
@@ -112,15 +129,65 @@ export async function parseProjectFile(logger?: Logger, selectedProject?: string
 			projectFile.synthGowinOptions = [];
 		}
 
+		if (!projectFile.synthEcp5Options) {
+			projectFile.synthEcp5Options = [];
+		}
+
+		if (!projectFile.synthIce40Options) {
+			projectFile.synthIce40Options = [];
+		}
+
 		if (!projectFile.nextPnrGowinOptions) {
 			projectFile.nextPnrGowinOptions = [];
 		}
+
+		if (!projectFile.nextPnrEcp5Options) {
+			projectFile.nextPnrEcp5Options = [];
+		}
+
+		if (!projectFile.nextPnrIce40Options) {
+			projectFile.nextPnrIce40Options = [];
+		}
 	
 		if (!projectFile.constraintsFile) {
+			let defaultToolchain: ToolchainProject | null = null;
+			if (projectFile.board) {
+				defaultToolchain = boardToToolchain(projectFile.board);
+			}
 			const basePathRelativetoProject = path.relative(workspaceFolder, projectFile.basePath);
-			const constraintsFile = await vscode.workspace.findFiles(path.join(basePathRelativetoProject, '*.cst'));
-			if (constraintsFile.length > 0) {
-				projectFile.constraintsFile = constraintsFile[0].fsPath;
+			if (!defaultToolchain) {
+				const hasCstFiles = await vscode.workspace.findFiles(path.join(basePathRelativetoProject, '*.cst'));
+				if (hasCstFiles.length > 0) {
+					defaultToolchain = ToolchainProject.APICULA;
+				} else {
+					const hasPcfFiles = await vscode.workspace.findFiles(path.join(basePathRelativetoProject, '*.pcf'));
+					if (hasPcfFiles.length > 0) {
+						defaultToolchain = ToolchainProject.ICESTORM;
+					} else {
+						const hasLpfFiles = await vscode.workspace.findFiles(path.join(basePathRelativetoProject, '*.lpf'));
+						if (hasLpfFiles.length > 0) {
+							defaultToolchain = ToolchainProject.TRELIS;
+						} 
+					}
+				}
+			}
+			if (!defaultToolchain) {
+				logger?.logToBoth('    No constraints file found, set (key: `constraintsFile`) inside ' + projectFile.fileName);
+				return;
+			}
+			
+			let constraintsFiles: vscode.Uri[] = (defaultToolchain === ToolchainProject.APICULA) ?
+				await vscode.workspace.findFiles(path.join(basePathRelativetoProject, '*.cst')) :
+				(defaultToolchain === ToolchainProject.ICESTORM) ?
+					await vscode.workspace.findFiles(path.join(basePathRelativetoProject, '*.pcf')) :
+					await vscode.workspace.findFiles(path.join(basePathRelativetoProject, '*.lpf'));
+
+			if (defaultToolchain === ToolchainProject.TRELIS && constraintsFiles.length === 0) {
+				constraintsFiles = await vscode.workspace.findFiles(path.join(basePathRelativetoProject, '*.pcf'));
+			}
+
+			if (constraintsFiles.length > 0) {
+				projectFile.constraintsFile = constraintsFiles[0].fsPath;
 			} else {
 				logger?.logToBoth('    No constraints file found, set (key: `constraintsFile`) inside ' + projectFile.fileName);
 				return;
@@ -142,7 +209,17 @@ async function expandProjectFile(projectFile: ProjectFile): Promise<ProjectFile>
 	}
 
 	if (!projectFile.board) {
-		projectFile.board = 'tangnano9k';
+		if (projectFile.constraintsFile) {
+			if (projectFile.constraintsFile.endsWith('.cst')) {
+				projectFile.board = 'tangnano9k';
+			} else if (projectFile.constraintsFile.endsWith('.pcf')) {
+				projectFile.board = 'icebreaker';
+			} else if (projectFile.constraintsFile.endsWith('.lpf')) {
+				projectFile.board = 'orangeCrab';
+			}
+		} else {
+			projectFile.board = 'tangnano9k';
+		}
 	}
 
 	const basePathRelativetoProject = path.relative(workspaceFolder, projectFile.basePath);
