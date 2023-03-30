@@ -1,6 +1,5 @@
 import { ToolchainStage } from "./stage";
 import * as path from 'path';
-import { ecp5DeviceInfo } from "../utils/device-info";
 
 export class EcpPackStage extends ToolchainStage {
     public async runProg(previousStage: ToolchainStage | undefined): Promise<number | null> {
@@ -21,7 +20,7 @@ export class EcpPackStage extends ToolchainStage {
         return this.runCommand(bitstreamCommand);
     }
     protected onCommandStart(): void {
-        ToolchainStage.logger.logToBoth('Starting Bitstream Generation with IceStorm');
+        ToolchainStage.logger.logToBoth('Starting Bitstream Generation with Trelis');
     }
     protected onCommandPrintLine(line: string): void {
         if (line.toLowerCase().includes('numpy')) {
