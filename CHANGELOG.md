@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.0.14]
+
+### Added
+- Support for new boards and toolchains, OrangeCrab board and Icebreaker board options added to project file powered by project trelis and project icestorm
+
+### Changed
+- Fixes to linting
+- Fix to constraints editor "Select from Top Module" not trimming line carriage on windows
+- Fix to constraints editor pull mode setting pull down to pull up
+
 ## [0.0.13]
 
 ### Added

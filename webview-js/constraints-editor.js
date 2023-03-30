@@ -833,7 +833,7 @@ function main() {
                 if (constraint.pullMode === 'Pull Up') {
                     constraintOptions.push('PULL_MODE=UP');
                 } else if (constraint.pullMode === 'Pull Down') {
-                    constraintOptions.push('PULL_MODE=UP');
+                    constraintOptions.push('PULL_MODE=DOWN');
                 } else {
                     constraintOptions.push(`PULL_MODE=${constraint.pullMode}`);
                 }

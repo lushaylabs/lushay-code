@@ -429,10 +429,10 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
             if (portMatch) {
                 const portSize = Math.abs((+portMatch[2]) - (+portMatch[3])) + 1;
                 if (portSize === 1) {
-                    ports.push(portMatch[4]);
+                    ports.push(portMatch[4].trim());
                 } else {
                     for (let i = 0; i < portSize; i += 1) {
-                        ports.push(`${portMatch[4]}[${i}]`);
+                        ports.push(`${portMatch[4].trim()}[${i}]`);
                     }
                 }
             }

@@ -12,11 +12,13 @@ Currently only the following boards are supported:
 - Tang Nano 4K
 - Tang Nano 1K
 - Tang Nano
+- icebreaker
+- Orange Crab
 
 Support for other FPGAs is planned and welcomed.
 
 Features Include:
-- Building Project (yosys + nextpnr + apicula)
+- Building Project (yosys + nextpnr + apicula / trelis / icestorm)
 - Programming (openFPGALoader)
 - Serial Console for UART communication
 - Terminal pre-configured with OSS-CAD-Suite
@@ -31,8 +33,10 @@ OSS-CAD-Suite can be downloaded from [here](https://github.com/YosysHQ/oss-cad-s
 
 There is also a link from within the extension which will appear once running the extension to download OSS-CAD-Suite.
 
+> There is an issue when the path or folder to oss-cad-suite contains spaces, to be safe you can for example put it at the root of your drive and name it "oss-cad-suite" without spaces
+
 ## Getting Started
-To get started you need to open a new folder and have at least 1 verilog file (`.v`) and 1 constraints file (`.cst`). With these two files created you can press the "FPGA Toolchain" button on the right side of the bottom bar.
+To get started you need to open a new folder and have at least 1 verilog file (`.v`) and 1 constraints file (`.cst` / `.lpf` / `.pcf`). With these two files created you can press the "FPGA Toolchain" button on the right side of the bottom bar.
 
 If you have not yet linked OSS-Cad-Suite you will get a popup message with a button where you can link the oss-cad-suite folder. Simply select the extracted folder called oss-cad-suite and then you can reclick on the "FPGA Toolchain" button.
 
@@ -41,6 +45,8 @@ Once setup clicking this button will open a dropdown with multiple options like 
 By default all verilog files in the current project except those ending with `_tb.v` (which are considered test benches) will be built and you should have a top module called `top`.
 
 If you have a testbench file you will also get an option to run the testbench. The testbench top module needs to be called `test`.
+
+By default a project with a `.cst` file will use project apicula, `.lpf` will use project icestorm and `.pcf` will use project trelis but this can be overwritten by setting the `board` option in your project file.
 
 ### CST Editor
 
@@ -102,6 +108,8 @@ values for board are:
 - tangnano4k
 - tangnano1k
 - tangnano
+- icebreaker
+- orangeCrab
 
 ### Ubuntu USB Setup
 On Ubuntu by default users don't have the required permissions that openFPGALoader needs in-order to function. To fix this you can open up a terminal and run the following to give your user the required permission.
