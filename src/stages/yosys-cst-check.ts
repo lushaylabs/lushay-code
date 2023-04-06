@@ -79,7 +79,6 @@ export class YosysCSTCheckStage extends ToolchainStage {
 			'-p',
 			`read_verilog ${this.projectFile.includedFilePaths.join(' ')}; portlist ${this.projectFile.top || 'top'}`
 		];
-        console.log(this.projectFile.board);
         const toolchain = boardToToolchain(this.projectFile.board);
 
         let code = await this.runCommand(checkCommand);

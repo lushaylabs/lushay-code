@@ -3,6 +3,7 @@ import { EcpPackStage } from './stages/ecp-pack';
 import { GowinPackStage } from './stages/gowin-pack';
 import { IcePackStage } from './stages/ice-pack';
 import { IVerilogTestbenchStage } from './stages/iverilog';
+import { SendToServerStage, YosysGowinPrepareProjectStage } from './stages/lushay-cloud-stages';
 import { NextPnrEcp5Stage, NextPnrGowinStage, NextPnrIce40Stage } from './stages/nextpnr';
 import { OpenFPGALoaderExternalFlashStage } from './stages/openfpgaloader-external-flash';
 import { OpenFPGALoaderProgramStage } from './stages/openfpgaloader-program';
@@ -39,9 +40,26 @@ export function getBuildStagesForToolchain(toolchain: ToolchainProject): StageCl
     throw new Error('Unknown toolchain');
 }
 
-export function getStagesForOption(projectFile: ProjectFile, option: CommandOption): StageClass[] {
+export function getStagesForOption(projectFile: ProjectFile, option: CommandOption, toolchainSource: 'open-source' | 'cloud'): StageClass[] {
     const toolchain = boardToToolchain(projectFile.board);
-	if (option === CommandOption.BUILD_ONLY) {
+	if (toolchain == ToolchainProject.APICULA && toolchainSource === 'cloud') {
+		if (option === CommandOption.BUILD_ONLY) {
+			return [
+				...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
+				YosysGowinPrepareProjectStage,
+				SendToServerStage
+			]
+		}
+		if (option === CommandOption.BUILD_AND_PROGRAM) {
+			return [
+				...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
+				YosysGowinPrepareProjectStage,
+				SendToServerStage,
+				OpenFPGALoaderProgramStage
+			];
+		}
+	}
+    if (option === CommandOption.BUILD_ONLY) {
 		return [
 			...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
 			...getBuildStagesForToolchain(toolchain)
@@ -65,9 +83,5 @@ export function getStagesForOption(projectFile: ProjectFile, option: CommandOpti
 	if (option === CommandOption.RUN_TESTBENCH) {
 		return [IVerilogTestbenchStage];
 	}
-
-	return [];
+    return [];
 }
-
-
-

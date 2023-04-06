@@ -5,13 +5,16 @@ import { spawn } from 'child_process';
 export abstract class ToolchainStage {
     protected static ossCadSuiteBinPath: string;
     protected static logger: Logger;
+    public static apiKey: string;
 
     public static initialize(
         ossCadSuitPath: string,
-        logger: Logger
+        logger: Logger,
+        apiKey: string
     ) {
         this.ossCadSuiteBinPath = ossCadSuitPath;
         this.logger = logger;
+        this.apiKey = apiKey;
     }
 
     protected filesCreated: string[] = [];

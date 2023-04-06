@@ -64,6 +64,20 @@
             "type": "string",
             "default": "",
             "description": "The path to OSS Cad Suite"
+          },
+          "lushay.Build.toolchain": {
+            "type": "string",
+            "enum": [
+              "open-source",
+              "cloud"
+            ],
+            "description": "The toolchain to use for building",
+            "default": "open-source"
+          },
+          "lushay.Build.cloudApiKey": {
+            "type": "string",
+            "description": "API Key for cloud build",
+            "default": ""
           }
         }
       }

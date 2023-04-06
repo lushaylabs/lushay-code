@@ -4,7 +4,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { parseProjectFile, ProjectFile } from './projecfile';
-import { existsSync, fstat, statSync } from 'fs';
+import { existsSync, fstat, rm, rmSync, statSync } from 'fs';
 import { SerialPort } from 'serialport';
 import { PortInfo } from '@serialport/bindings-cpp';
 import { ConstraintsEditor } from './panels/constraints-editor';
@@ -43,12 +43,20 @@ async function refreshDiagnostics(doc: vscode.TextDocument, verilogDiagnostics: 
 	}
 	const verilatorPath = path.join(ossCadPath, 'verilator');
 	const ossRootPath = path.resolve(ossCadPath, '..');
+	const gowinCellsPath = path.join(ossRootPath, 'share/yosys/gowin/cells_sim.v');
+	const vltConfigPath = path.join(projectFile.basePath, `___tempbuild_1${projectFile.name}.vlt`);
+	const vltContent = `\`verilator_config
+lint_off -file "${gowinCellsPath}"
+`;
+	writeFileSync(vltConfigPath, vltContent);
 	const res = spawnSync(
 		verilatorPath,  
 		[
 			'--top-module', projectFile.top || 'top',
 			'--lint-only', 
 			`-Wall`, 
+			gowinCellsPath,
+			vltConfigPath,
 			...projectFile.includedFilePaths
 		], 
 		{
@@ -62,6 +70,7 @@ async function refreshDiagnostics(doc: vscode.TextDocument, verilogDiagnostics: 
 		},
 		cwd: projectFile.basePath
 	});
+	rmSync(vltConfigPath);
 	const errorLines = res.stderr?.toString().split('\n') || [];
 	let subGroup: string[] = [];
 	let inGroup = false;
@@ -239,6 +248,10 @@ function updateStatusBarItem(): void {
 	myStatusBarItem.show();
 }
 
+function writeToBoth(str: string) {
+	outputPanel?.append(str);
+	rawOutputPanel?.append(str);
+}
 
 function logToBoth(str: string) {
 	outputPanel?.appendLine(str);
@@ -347,12 +360,15 @@ async function clickedPanelButton(): Promise<void> {
 	const logger = {
 		logToBoth,
 		logToRaw,
-		logToSummary
+		logToSummary,
+		writeToBoth
 	}
+	const apiKey = config.Build.cloudApiKey || '';
 
 	ToolchainStage.initialize(
 		ossCadPath,
-		logger
+		logger,
+		apiKey
 	)
 
 
@@ -401,12 +417,13 @@ async function clickedPanelButton(): Promise<void> {
 	}
 
 	logToBoth('Starting FPGA Toolchain');
+	const toolchain = config.has('Build') ? config.Build.toolchain : 'open-source';
 
 	const validSettings = await validateProjectFileAndOption(projectFile, option as CommandOption);
 	if (!validSettings) {
 		return;
 	}
-	const stages = await getStagesForOption(projectFile, option as CommandOption);
+	const stages = await getStagesForOption(projectFile, option as CommandOption, toolchain);
 	const stageInstances: ToolchainStage[] = [];
 	for (const stageClass of stages) {
 		const nextStage = new stageClass(projectFile);

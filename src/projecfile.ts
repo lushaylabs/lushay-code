@@ -31,6 +31,7 @@ export interface Logger {
     logToBoth(msg: string): void;
     logToSummary(msg: string): void;
     logToRaw(msg: string): void;
+	writeToBoth(msg: string): void;
 }
 
 export async function parseProjectFile(logger?: Logger, selectedProject?: string): Promise<ProjectFile | undefined> {
