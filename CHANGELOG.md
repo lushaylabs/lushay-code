@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.15]
+
+### Added
+- Cloud builds option for Tang Nano boards using Gowin EDA educational edition
+
 ## [0.0.14]
 
 ### Added

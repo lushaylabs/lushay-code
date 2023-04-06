@@ -24,6 +24,7 @@ Features Include:
 - Terminal pre-configured with OSS-CAD-Suite
 - Visual constraints editor
 - Verilog Linting (using verilator)
+- Cloud Builds
 
 ## Requirements
 
@@ -137,11 +138,24 @@ Once selected just the replace driver button and wait a minute or two, once done
 
 If you ever want to uninstall this driver and go back to the default driver (for example to use the official gowin IDE) all you have to do is go to "Device Manager" select the device called "JTAG Debugger" under "Universal Serial Bus devices" right-click on it and press "uninstall device" from the popup also select the checkbox to attempt to remove the driver. Once removed right click on any item in the device manager window and press "Scan for hardware changes" this should reconnect the device back with the original driver.
 
+## Cloud Builds
+Cloud builds use our servers to synthesize and generate the bitsream for your project. Currently this is only supported for tang nano boards and the cloud will use the official Gowin EDA (educational edition) to synthesize your bitstream. This allows you to use features not yet covered by the open source toolchain / to compare the results from the opensource toolchain to the official toolchain.
+
+This option still requires OSS-CAD-Suite to be setup as it is used for preparing the files for the cloud build.
+
+To setup cloud builds you need to go to the extension settings for the Lushay Code extension. You can get there in VSCode by going to the extensions tab and clicking on the Lushay Code extension and then from the Cog-wheel you can select "Extension Settings". Alternatively you can go directly to the settings and search for "lushay" to filter all the settings to only the relevent ones.
+
+With the settings open you can select "cloud" as your prefered toolchain, and you must enter an API key for the cloud service. You can recieve an API key by signing up for our Cloud service [here](https://lushay-code.lushaylabs.com/).
+
+With the settings configured you can then build your project regularly using the "FPGA Toolchain" button and instead of using the local toolchain it will build the bitstream remotely.
+
 ## Extension Settings
 
 This extension contributes the following settings:
 
 * `lushay.OssCadSuite.path`: You need to set this to the path of OSS-CAD-Suite on your computer
+* `lushay.Build.toolchain`: This can be set to 'open-source' or 'cloud' to choose the desired toolchain
+* `"lushay.Build.cloudApiKey`: If cloud is selected this setting must contain a valid API key
 
 ## Release Notes
 
