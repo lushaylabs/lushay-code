@@ -288,11 +288,12 @@ export class SendToServerStage extends ToolchainStage {
             ToolchainStage.logger.writeToBoth('    Uploading project to cloud -');
             const location = await sendRequest(signedUrl.url);
             const {device, family} = gowinDeviceInfo(this.projectFile.board);
+            const deviceToSend = device === 'GW1NSR-LV4CQN48PC7/I6' ? 'GW1NSR-LV4CQN48PC6/I5' : device;
             const projectContent = {
                 verilog,
                 contraintFile,
                 top: this.projectFile.top || 'top',
-                device,
+                device: deviceToSend,
                 family
             }
             await uploadContent(location, Buffer.from(JSON.stringify(projectContent)));

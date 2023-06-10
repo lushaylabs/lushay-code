@@ -13,6 +13,7 @@ import { spawnSync } from 'child_process';
 import { ToolchainStage } from './stages/stage';
 import { CommandOption } from './utils/command-options';
 import { getStagesForOption } from './stages';
+// import { ModuleDebuggerWebviewContentProvider } from './panels/module-debugger';
 
 let myStatusBarItem: vscode.StatusBarItem;
 let projectStatusBarItem: vscode.StatusBarItem;
@@ -168,7 +169,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
 	updateStatusBarItem();
-	ConstraintsEditor.register(context, getOssCadSuitePath, () => selectedProject);
+	context.subscriptions.push(ConstraintsEditor.register(context, getOssCadSuitePath, () => selectedProject));
 
 	// diagnostics
 	const verilogDiagnostics = vscode.languages.createDiagnosticCollection("verilog");
@@ -191,6 +192,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.onDidCloseTextDocument(doc => verilogDiagnostics.delete(doc.uri))
 	);
 
+	// context.subscriptions.push(ModuleDebuggerWebviewContentProvider.register(context.extensionUri, getOssCadSuitePath, () => selectedProject));
 }
 
 async function selectProjectFile(): Promise<void> {

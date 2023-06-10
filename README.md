@@ -13,6 +13,7 @@ Currently only the following boards are supported:
 - Tang Nano 1K
 - Tang Nano
 - icebreaker
+- icestick
 - Orange Crab
 
 Support for other FPGAs is planned and welcomed.
@@ -51,7 +52,7 @@ By default a project with a `.cst` file will use project apicula, `.lpf` will us
 
 ### CST Editor
 
-When opening a .cst file it will open by default with the visual constraints editor. Here you have a table with the current constraints and two main buttons "Add Constraint" and "Add From Template". The "Add From Template" button is to easily add constraints for built in hardware on the development board, things like LEDs, buttons, Flash IC, etc. The "Add Constraint" is to add a new custom constraint. When you add a new constraint (via either method) you will see it show up in the table as a row. You can click on any row to edit it in the side panel.
+When opening a .cst / .pcf or .lpf file it will open by default with the visual constraints editor. Here you have a table with the current constraints and two main buttons "Add Constraint" and "Add From Template". The "Add From Template" button is to easily add constraints for built in hardware on the development board, things like LEDs, buttons, Flash IC, etc. The "Add Constraint" is to add a new custom constraint. When you add a new constraint (via either method) you will see it show up in the table as a row. You can click on any row to edit it in the side panel.
 
  ![Constraints Editor](./docs/constraints-editor-view.jpg)
 
@@ -61,7 +62,7 @@ You can edit the name, location and other options on the constraint. For locatio
 
 Both the "Select IO Pin" and "Add From Template" are board specific so you have to choose the correct board from the dropdown at the top.
 
-If you prefer to edit your .cst files manually using a text editor you can right click on the file and press "Open With". This will open a dropdown with options and there is even an option to set the default editor so it will always use your preference in the future.
+If you prefer to edit your constraints files manually using a text editor you can right click on the file and press "Open With". This will open a dropdown with options and there is even an option to set the default editor so it will always use your preference in the future.
 
 ### Linting
 For linting to be enabled you need to have your project chosen in the bottom bar since the linter needs to know which files are included in the build to properly lint. There is a button next to the "FPGA Toolchain" button which by default says `<Auto-Detect Project>`. You can click this button to select your project file which will enable linting. If your workspace has no project file (`.lushay.json` file) then linting will also be enabled automatically and it will include all verilog files in the current workspace.
@@ -105,11 +106,13 @@ All fields are option and have default values as detailed below
 | skipCstChecking | Skip the prestage of making sure all ports are defined | false |
 
 values for board are:
+- tangnano20k
 - tangnano9k
 - tangnano4k
 - tangnano1k
 - tangnano
 - icebreaker
+- icestick
 - orangeCrab
 
 ### Ubuntu USB Setup

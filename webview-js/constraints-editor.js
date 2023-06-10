@@ -42,6 +42,33 @@ const TEMPLATES = {
             {name: 'hdmiTmdsClk', location: '69,68', drive: '8ma'}
         ]
     },
+    'Tang Nano 20K': {
+        'Clock': [
+            {name: 'clk', location: '4', pullMode: 'Pull Up', standard: 'LVCMOS33'}
+        ],
+        'LEDs': [
+            {name: 'led[0]', location: '20', standard: 'LVCMOS18', drive: '8ma'},
+            {name: 'led[1]', location: '19', standard: 'LVCMOS18', drive: '8ma'},
+            {name: 'led[2]', location: '18', standard: 'LVCMOS18', drive: '8ma'},
+            {name: 'led[3]', location: '17', standard: 'LVCMOS18', drive: '8ma'},
+            {name: 'led[4]', location: '16', standard: 'LVCMOS18', drive: '8ma'},
+            {name: 'led[5]', location: '15', standard: 'LVCMOS18', drive: '8ma'}
+        ],
+        'Buttons': [
+            {name: 'btn1', location: '88', standard: 'LVCMOS33'},
+            {name: 'btn2', location: '87', standard: 'LVCMOS33'}
+        ],
+        'UART': [
+            {name: 'uartTx', location: '69', standard: 'LVCMOS33', pullMode: 'Pull Up'},
+            {name: 'uartRx', location: '70', standard: 'LVCMOS33', pullMode: 'Pull Up'}
+        ],
+        'HDMI': [
+            {name: 'hdmiTmdsData[0]', location: '35,36', drive: '8ma'},
+            {name: 'hdmiTmdsData[1]', location: '37,38', drive: '8ma'},
+            {name: 'hdmiTmdsData[2]', location: '39,40', drive: '8ma'},
+            {name: 'hdmiTmdsClk', location: '33,34', drive: '8ma'}
+        ],
+    },
     'Tang Nano 4K': {
         'Clock': [
             {name: 'clk', location: '45', pullMode: 'Pull Up', standard: 'LVCMOS33'}
@@ -93,6 +120,11 @@ const TEMPLATES = {
             {name: 'btn1', location: '14'},
             {name: 'btn2', location: '15'}
         ],
+    },
+    'iCEBreaker': {
+        'Clock': [
+            {name: 'clk', location: '21'}
+        ]
     }
 }
 
@@ -147,6 +179,49 @@ const pinLocations = {
         { x: 434, y: 203, pinNumber: 57 },
         { x: 453, y: 203, pinNumber: 68 },
         { x: 472, y: 203, pinNumber: 69 }
+    ],
+    'Tang Nano 20K': [
+        // { x: 85, y: 33, pinNumber: 63 },
+        // { x: 105, y: 33, pinNumber: 86 },
+        { x: 126, y: 33, pinNumber: 76 },
+        { x: 146, y: 33, pinNumber: 80 },
+        { x: 166, y: 33, pinNumber: 42 },
+        { x: 186, y: 33, pinNumber: 41 },
+        { x: 207, y: 33, pinNumber: 56 },
+        { x: 227, y: 33, pinNumber: 54 },
+        { x: 248, y: 33, pinNumber: 51 },
+        { x: 268, y: 33, pinNumber: 48 },
+        { x: 289, y: 33, pinNumber: 55 },
+        { x: 309, y: 33, pinNumber: 49 },
+        { x: 330, y: 33, pinNumber: 86 },
+        { x: 350, y: 33, pinNumber: 79 },
+        // { x: 370, y: 33, pinNumber: 72 },
+        // { x: 391, y: 33, pinNumber: 71 },
+        { x: 411, y: 33, pinNumber: 72 },
+        { x: 431, y: 33, pinNumber: 71 },
+        { x: 452, y: 33, pinNumber: 53 },
+        { x: 473, y: 33, pinNumber: 52 },
+
+        { x: 85, y: 202, pinNumber: 73 },
+        { x: 105, y: 202, pinNumber: 74 },
+        { x: 126, y: 202, pinNumber: 75 },
+        { x: 146, y: 202, pinNumber: 85 },
+        { x: 166, y: 202, pinNumber: 77 },
+        { x: 186, y: 202, pinNumber: 15 },
+        { x: 207, y: 202, pinNumber: 16 },
+        { x: 227, y: 202, pinNumber: 27 },
+        { x: 248, y: 202, pinNumber: 28 },
+        { x: 268, y: 202, pinNumber: 25 },
+        { x: 289, y: 202, pinNumber: 26 },
+        { x: 309, y: 202, pinNumber: 29 },
+        { x: 330, y: 202, pinNumber: 30 },
+        { x: 350, y: 202, pinNumber: 31 },
+        { x: 370, y: 202, pinNumber: 17 },
+        { x: 391, y: 202, pinNumber: 20 },
+        { x: 411, y: 202, pinNumber: 19 },
+        { x: 431, y: 202, pinNumber: 18 },
+        // { x: 452, y: 202, pinNumber: 54 },
+        // { x: 473, y: 202, pinNumber: 55 }
     ],
     'Tang Nano 4K': [
         { x: 57, y: 26, pinNumber: 14 },
@@ -288,20 +363,167 @@ const pinLocations = {
         { x: 511, y: 200, pinNumber: 29 },
         { x: 534, y: 200, pinNumber: 28 },
         { x: 556, y: 200, pinNumber: 27 },
+    ],
+    'Orange Crab': [
+        // { x: 205, y: 20, pinNumber: 1 },
+        // { x: 230, y: 20, pinNumber: 2 },
+        // { x: 256, y: 20, pinNumber: 3 },
+        { x: 281, y: 20, pinNumber: 'J2' },
+        { x: 305, y: 20, pinNumber: 'H2' },
+        { x: 330, y: 20, pinNumber: 'A8' },
+        { x: 355, y: 20, pinNumber: 'B8' },
+        { x: 381, y: 20, pinNumber: 'C8' },
+        { x: 406, y: 20, pinNumber: 'B9' },
+        { x: 431, y: 20, pinNumber: 'B10' },
+        { x: 456, y: 20, pinNumber: 'C9' },
+        { x: 484, y: 20, pinNumber: 'C10' },
+        { x: 105, y: 218, pinNumber: 'T15' },
+        // { x: 130, y: 218, pinNumber: 25 },
+        // { x: 156, y: 218, pinNumber: 25 },
+        // { x: 181, y: 218, pinNumber: 25 },
+        { x: 205, y: 218, pinNumber: 'L4' },
+        { x: 230, y: 218, pinNumber: 'N3' },
+        { x: 256, y: 218, pinNumber: 'N4' },
+        { x: 281, y: 218, pinNumber: 'H4' },
+        { x: 305, y: 218, pinNumber: 'G4' },
+        { x: 330, y: 218, pinNumber: 'T17' },
+        { x: 355, y: 218, pinNumber: 'R17' },
+        { x: 381, y: 218, pinNumber: 'N16' },
+        { x: 406, y: 218, pinNumber: 'N15' },
+        { x: 431, y: 218, pinNumber: 'N17' },
+        { x: 456, y: 218, pinNumber: 'M18' },
+        // { x: 484, y: 218, pinNumber: 24 },
+    ],
+    'iCEBreaker': [
+        { x: 100, y: 11, pinNumber: 3 },
+        { x: 117, y: 11, pinNumber: 48 },
+        { x: 135, y: 11, pinNumber: 46 },
+        { x: 150, y: 11, pinNumber: 44 },
+        // { x: 167, y: 11, pinNumber: 5 },
+        // { x: 183, y: 11, pinNumber: 6 },
+        { x: 100, y: 27, pinNumber: 4 },
+        { x: 117, y: 27, pinNumber: 2 },
+        { x: 135, y: 27, pinNumber: 47 },
+        { x: 150, y: 27, pinNumber: 45 },
+        // { x: 167, y: 27, pinNumber: 5 },
+        // { x: 183, y: 27, pinNumber: 6 },
+
+        // { x: 216, y: 11, pinNumber: 1 },
+        // { x: 216, y: 27, pinNumber: 1 },
+
+        { x: 248, y: 11, pinNumber: 42 },
+        { x: 265, y: 11, pinNumber: 36 },
+        { x: 282, y: 11, pinNumber: 32 },
+        { x: 299, y: 11, pinNumber: 28 },
+        // { x: 316, y: 11, pinNumber: 5 },
+        // { x: 333, y: 11, pinNumber: 6 },
+        { x: 248, y: 27, pinNumber: 43 },
+        { x: 265, y: 27, pinNumber: 38 },
+        { x: 282, y: 27, pinNumber: 34 },
+        { x: 299, y: 27, pinNumber: 31 },
+        // { x: 316, y: 27, pinNumber: 5 },
+        // { x: 333, y: 27, pinNumber: 6 },
+
+        { x: 132, y: 212, pinNumber: 39 },
+        { x: 149, y: 212, pinNumber: 41 },
+        // { x: 166, y: 212, pinNumber: 40 },
+        // { x: 183, y: 212, pinNumber: 40 },
+        { x: 132, y: 228, pinNumber: 40 },
+        // { x: 149, y: 228, pinNumber: 40 },
+        // { x: 166, y: 228, pinNumber: 40 },
+        // { x: 183, y: 228, pinNumber: 40 },
+
+        { x: 216, y: 228, pinNumber: 16 },
+        { x: 233, y: 228, pinNumber: 15 },
+        { x: 250, y: 228, pinNumber: 17 },
+        { x: 266, y: 228, pinNumber: 14 },
+        { x: 283, y: 228, pinNumber: 12 },
+        { x: 300, y: 228, pinNumber: 13 },
+        // { x: 317, y: 228, pinNumber: 37 },
+
+        { x: 350, y: 78, pinNumber: 27 },
+        { x: 365, y: 78, pinNumber: 26 },
+        { x: 350, y: 95, pinNumber: 25 },
+        { x: 365, y: 95, pinNumber: 23 },
+        { x: 350, y: 112, pinNumber: 21 },
+        { x: 365, y: 112, pinNumber: 20 },
+        { x: 350, y: 128, pinNumber: 19 },
+        { x: 365, y: 128, pinNumber: 18 },
+        // { x: 350, y: 145, pinNumber: 18 },
+        // { x: 365, y: 145, pinNumber: 18 },
+        // { x: 350, y: 162, pinNumber: 18 },
+        // { x: 365, y: 162, pinNumber: 18 },
+
+        { x: 406, y: 78, pinNumber: 26 },
+        { x: 422, y: 78, pinNumber: 27 },
+        { x: 406, y: 95, pinNumber: 23 },
+        { x: 422, y: 95, pinNumber: 25 },
+        { x: 406, y: 112, pinNumber: 20 },
+        { x: 422, y: 112, pinNumber: 21 },
+        { x: 406, y: 128, pinNumber: 18 },
+        { x: 422, y: 128, pinNumber: 19 },
+        // { x: 406, y: 145, pinNumber: 18 },
+        // { x: 422, y: 145, pinNumber: 18 },
+        // { x: 406, y: 162, pinNumber: 18 },
+        // { x: 422, y: 162, pinNumber: 18 },
+    ],
+    'iCEStick': [
+        { x: 425, y: 59, pinNumber: 119 },
+        { x: 438, y: 59, pinNumber: 118 },
+        { x: 453, y: 59, pinNumber: 117 },
+        { x: 467, y: 59, pinNumber: 116 },
+        { x: 482, y: 59, pinNumber: 115 },
+        { x: 496, y: 59, pinNumber: 114 },
+        { x: 511, y: 59, pinNumber: 113 },
+        { x: 525, y: 59, pinNumber: 112 },
+        // { x: 540, y: 59, pinNumber: 0 },
+        // { x: 554, y: 59, pinNumber: 0 },
+
+        { x: 425, y: 182, pinNumber: 44 },
+        { x: 438, y: 182, pinNumber: 45 },
+        { x: 453, y: 182, pinNumber: 47 },
+        { x: 467, y: 182, pinNumber: 48 },
+        { x: 482, y: 182, pinNumber: 56 },
+        { x: 496, y: 182, pinNumber: 60 },
+        { x: 511, y: 182, pinNumber: 61 },
+        { x: 525, y: 182, pinNumber: 62 },
+        // { x: 540, y: 182, pinNumber: 0 },
+        // { x: 554, y: 182, pinNumber: 0 },
+
+        // { x: 511, y: 87, pinNumber: 3 },
+        // { x: 524, y: 87, pinNumber: 3 },
+        // { x: 511, y: 100, pinNumber: 3 },
+        // { x: 524, y: 100, pinNumber: 3 },
+        { x: 511, y: 113, pinNumber: 91 },
+        { x: 524, y: 113, pinNumber: 81 },
+        { x: 511, y: 125, pinNumber: 90 },
+        { x: 524, y: 125, pinNumber: 80 },
+        { x: 511, y: 138, pinNumber: 88 },
+        { x: 524, y: 138, pinNumber: 79 },
+        { x: 511, y: 150, pinNumber: 87 },
+        { x: 524, y: 150, pinNumber: 78 },
     ]
 }
 
 const getBoardImages = () => {
+    const tangnano20kBoard = document.getElementById('tangnano20k-board');
     const tangnano9kBoard = document.getElementById('tangnano9k-board');
     const tangnano4kBoard = document.getElementById('tangnano4k-board');
     const tangnano1kBoard = document.getElementById('tangnano1k-board');
     const tangnanoBoard = document.getElementById('tangnano-board');
+    const orangeCrabBoard = document.getElementById('orangecrab-board');
+    const icebreakerBoard = document.getElementById('icebreaker-board');
+    const icestickBoard = document.getElementById('icestick-board');
 
     return {
+        'Tang Nano 20K': tangnano20kBoard,
         'Tang Nano 9K': tangnano9kBoard,
         'Tang Nano 4K': tangnano4kBoard,
         'Tang Nano 1K': tangnano1kBoard,
-        'Tang Nano': tangnanoBoard
+        'Tang Nano': tangnanoBoard,
+        'iCEBreaker': icebreakerBoard,
+        'iCEStick': icestickBoard,
+        'Orange Crab': orangeCrabBoard,
     }
 }
 
@@ -327,6 +549,30 @@ const recalculateOptions = (row) => {
     if (row.standard) {
         options.push(`${row.standard}`);
     }
+    
+    if (row.frequency) {
+        options.push(`${row.frequency} MHz`);
+    }
+
+    if (row.termination) {
+        if (row.termination === 'OFF') {
+            options.push('Termination off');
+        } else {
+            options.push(`${row.termination} Termination`);
+        }
+    }
+
+    if (row.slewRate) {
+        options.push(`${row.slewRate} Slew Rate`);
+    }
+
+    if (row.diffResistor) {
+        if (row.diffResistor === 'OFF') {
+            options.push('Diff Resistor off');
+        } else {
+            options.push(`${row.diffResistor} Diff Resistor`);
+        }
+    }
 
     row.options = options.join(', ');
 } 
@@ -337,12 +583,17 @@ function main() {
     const noConstraintMessage = document.getElementById("no-constraint");
     const editPanel = document.getElementById("edit-window");
     const editPortName = document.getElementById("edit-port-name");
+    const frequencyInput = document.getElementById("frequency");
     const editPortLocation = document.getElementById("edit-port-location");
     const removeConstraintBtn = document.getElementById("remove-constraint");
     const addConstraintBtn = document.getElementById("add-constraint");
     const driveSelect = document.getElementById("drive-select");
     const standardSelect = document.getElementById("standard-select");
     const pullModeSelect = document.getElementById("pull-select");
+    const slewRateSelect = document.getElementById("slew-select");
+    const terminationSelect = document.getElementById("term-select");
+    const diffResistorSelect = document.getElementById("diff-resistor-select");
+    const standardSelectEcp5 = document.getElementById("standard-select-ecp5");
     const addConstraintTemplateBtn = document.getElementById('add-constraint-templates');
     const showTemplateWindowBtn = document.getElementById('show-templates');
     const popup = document.getElementById('popup-container');
@@ -414,9 +665,10 @@ function main() {
         }).join('');
         showBoardImage(boardImages, board);
         pinContainer.innerHTML = '';
-        pins.forEach((pin) => {
+        pins.forEach((pin, i) => {
             const button = document.createElement('vscode-button');
-            button.id = `pin${pin.pinNumber}`;
+            button.id = `pin${i}`;
+            button.setAttribute('pinNumber', `${pin.pinNumber}`);
             button.classList.add('pin-btn');
             button.setAttribute('appearance', 'icon');
             const icon = document.createElement('span');
@@ -607,25 +859,55 @@ function main() {
         constraintsTable.rowsData.forEach((row, i) => {
             if (i === editRowIndex) { return; }
             const numbers = row.location.split(',');
-            numbers.map((n) => +(n.trim())).forEach(number => {
-                const button = pinContainer.querySelector(`#pin${number}`);
-                if (button) {
-                    button.classList.add('used');
+            numbers.map((n) => (n.trim())).forEach(number => {
+                const buttons = pinContainer.querySelectorAll(`.pin-btn[pinNumber="${number}"]`);
+                if (buttons.length > 0) {
+                    buttons.forEach((b) => b.classList.add('used'));
                 }
             });
         })
         if (data.location) {
             const numbers = data.location.split(',');
-            numbers.map((n) => +(n.trim())).forEach(number => {
-                const button = pinContainer.querySelector(`#pin${number}`);
-                if (button) {
-                    button.classList.add('selected');
+            numbers.map((n) => (n.trim())).forEach(number => {
+                const buttons = pinContainer.querySelectorAll(`.pin-btn[pinNumber="${number}"]`);
+                if (buttons.length > 0) {
+                    buttons.forEach((b) => b.classList.add('selected'));
                 }
             });
         }
 
         editPortName.value = data.name;
         editPortLocation.value = data.location === '<Not Selected>' ? '' : data.location;
+        const boardType = detectConstraintsType(undefined, undefined, board);
+        if (boardType === 'gowin') {
+            standardSelectEcp5.parentElement.classList.add('hide');
+            slewRateSelect.parentElement.classList.add('hide');
+            terminationSelect.parentElement.classList.add('hide');
+            diffResistorSelect.parentElement.classList.add('hide');
+            frequencyInput.parentElement.classList.add('hide');
+            standardSelect.parentElement.classList.remove('hide');
+            pullModeSelect.parentElement.classList.remove('hide');
+            driveSelect.parentElement.classList.remove('hide');
+        } else if (boardType === 'ecp5') {
+            standardSelect.parentElement.classList.add('hide');
+            standardSelectEcp5.parentElement.classList.remove('hide');
+            slewRateSelect.parentElement.classList.remove('hide');
+            terminationSelect.parentElement.classList.remove('hide');
+            diffResistorSelect.parentElement.classList.remove('hide');
+            pullModeSelect.parentElement.classList.remove('hide');
+            driveSelect.parentElement.classList.remove('hide');
+            frequencyInput.parentElement.classList.remove('hide');
+        } else if (boardType === 'ice') {
+            standardSelect.parentElement.classList.add('hide');
+            standardSelectEcp5.parentElement.classList.add('hide');
+            slewRateSelect.parentElement.classList.add('hide');
+            terminationSelect.parentElement.classList.add('hide');
+            diffResistorSelect.parentElement.classList.add('hide');
+            pullModeSelect.parentElement.classList.add('hide');
+            driveSelect.parentElement.classList.add('hide');
+            frequencyInput.parentElement.classList.remove('hide');
+        }
+
         if (data.drive) {
             driveSelect.value = data.drive;
         } else {
@@ -633,14 +915,41 @@ function main() {
         }
         if (data.standard) {
             standardSelect.value = data.standard;
+            standardSelectEcp5.value = data.standard;
         } else {
             standardSelect.value = 'Unset';
+            standardSelectEcp5.value = 'Unset';
         }
         if (data.pullMode) {
             pullModeSelect.value = data.pullMode;
         } else {
             pullModeSelect.value = 'None';
         }
+
+        if (data.slewRate) {
+            slewRateSelect.value = data.slewRate;
+        } else {
+            slewRateSelect.value = 'Unset';
+        }
+
+        if (data.termination) {
+            terminationSelect.value = data.termination;
+        } else {
+            terminationSelect.value = 'Unset';
+        }
+
+        if (data.diffResistor) {
+            diffResistorSelect.value = data.diffResistor;
+        } else {
+            diffResistorSelect.value = 'Unset';
+        }
+
+        if (data.frequency) {
+            frequencyInput.value = data.frequency;
+        } else {
+            frequencyInput.value = '';
+        }
+
     }
 
     const updateTableHighlight = () => {
@@ -730,10 +1039,15 @@ function main() {
     }
 
     editPortName.addEventListener('input', changeCallbackForField('name'));
+    frequencyInput.addEventListener('input', changeCallbackForField('frequency', ''));
     editPortLocation.addEventListener('input', changeCallbackForField('location', '<Not Selected>'));
     driveSelect.addEventListener('change', changeCallbackForField('drive', '').bind(driveSelect));
     pullModeSelect.addEventListener('change', changeCallbackForField('pullMode', '').bind(pullModeSelect));
     standardSelect.addEventListener('change', changeCallbackForField('standard', '').bind(standardSelect));
+    standardSelectEcp5.addEventListener('change', changeCallbackForField('standard', '').bind(standardSelectEcp5));
+    slewRateSelect.addEventListener('change', changeCallbackForField('slewRate', '').bind(slewRateSelect));
+    terminationSelect.addEventListener('change', changeCallbackForField('termination', '').bind(terminationSelect));
+    diffResistorSelect.addEventListener('change', changeCallbackForField('diffResistor', '').bind(diffResistorSelect));
 
     const setDefaults = async () => {
         constraintsTable.rowsData = [];
@@ -742,13 +1056,103 @@ function main() {
         updateEditWindow();
     }
 
-    const loadFile = async (body, edits) => {
-        const decoder = new TextDecoder();
-        const text = body ? decoder.decode(body) : '';
-        const rows = text.split('\n');
+    const loadIceFile = async (rows, edits) => {
+        const portMap = {};
+        const ioRegex = /set_io\s+(([-]+[^\s]+\s+)*)([^\s]+)\s+([^\s]+\s*,?\s*(\d+)?)\s*/;
+        const clockRegex = /set_frequency\s+([^\s]+)\s+([^\s]+\s*)\s*/;
+        rows.forEach((row) => {
+            const ioMatch = ioRegex.exec(row);
+            if (ioMatch) {
+                if (!portMap[ioMatch[3]]) {
+                    portMap[ioMatch[3]] = {name: ioMatch[3]};
+                }
+                portMap[ioMatch[3]].location = ioMatch[4];
+                if (ioMatch[1] && ioMatch[1].trim().length > 0) {
+                    const options = ioMatch[1].trim().split(/\s+/);
+                    portMap[ioMatch[3]].ice_options = options;
+                }
+                return;
+            }
+            const clockMatch = clockRegex.exec(row);
+            if (clockMatch) {
+                if (!portMap[clockMatch[1]]) {
+                    portMap[clockMatch[1]] = {name: clockMatch[1]};
+                }
+                portMap[clockMatch[1]].frequency = clockMatch[2];
+                return;
+            }
+        });
+        return portMap;
+    }
+
+    const loadEcp5File = async (rows, edits) => {
+        const portMap = {};
+        const ioLocRegex = /LOCATE\s+COMP\s+"([^"]+)"\s+SITE\s+"([^"]+)"\s*;/;
+        const ioPortRegex = /IOBUF\s+PORT\s+"([^"]+)"\s+(([^=]+=[^\s;]+\s*)+);/;
+        const ioFrequencyRegex = /FREQUENCY\s+PORT\s+"([^"]+)"\s+([0-9]+([.][0-9]+)?)\s+([^\s]+)\s*;/;
+        rows.forEach((row) => {
+            const ioLocMatch = ioLocRegex.exec(row);
+            if (ioLocMatch) {
+                if (!portMap[ioLocMatch[1]]) {
+                    portMap[ioLocMatch[1]] = {name: ioLocMatch[1]};
+                }
+                portMap[ioLocMatch[1]].location = ioLocMatch[2];
+                return;
+            }
+            const ioPortMatch = ioPortRegex.exec(row);
+            if (ioPortMatch) {
+                if (!portMap[ioPortMatch[1]]) {
+                    portMap[ioPortMatch[1]] = {name: ioPortMatch[1]};
+                }
+                const options = ioPortMatch[2].trim().split(/\s+/);
+                options.forEach((option) => {
+                    const parts = option.split('=');
+                    if (parts.length === 2) {
+                        const key = parts[0].trim();
+                        const value = parts[1].trim();
+                        if (key === 'IO_TYPE') {
+                            portMap[ioPortMatch[1]].standard = value;
+                        } else if (key === 'SLEWRATE') {
+                            portMap[ioPortMatch[1]].slewRate = value === 'FAST' ? 'Fast' : value === 'SLOW' ? 'Slow' : value;
+                        } else if (key === 'TERMINATION') {
+                            portMap[ioPortMatch[1]].termination = value;
+                        } else if (key === 'PULLMODE') {
+                            portMap[ioPortMatch[1]].pullMode = (value === 'DOWN') ? 'Pull Down' : (value === 'UP') ? 'Pull Up' : (value === 'NONE') ? '' : value;
+                        } else if (key === 'DRIVE') {
+                            const driveMap = {
+                                '4': '4ma',
+                                '8': '8ma',
+                                '12': '12ma',
+                                '16': '16ma',
+                                '24': '24ma'
+                            }
+                            const driveOption = driveMap[value];
+                            if (driveOption) {
+                                portMap[ioPortMatch[1]].drive = driveOption;
+                            }
+                        } else if (key === 'DIFFRESISTOR') {
+                            portMap[ioPortMatch[1]].diffResistor = value;
+                        }
+                    }
+                });
+                return;
+            }
+            const ioFrequencyMatch = ioFrequencyRegex.exec(row);
+            if (ioFrequencyMatch) {
+                if (!portMap[ioFrequencyMatch[1]]) {
+                    portMap[ioFrequencyMatch[1]] = {name: ioFrequencyMatch[1]};
+                }
+                portMap[ioFrequencyMatch[1]].frequency = ioFrequencyMatch[2];
+                return;
+            }
+        });
+        return portMap;
+    }
+
+    const loadGowinFile = async (rows, edits) => {
+        const portMap = {};
         const ioLocRegex = /IO_LOC\s+"([^"]+)"\s+(\d+\s*,?\s*(\d+)?)\s*;/;
         const ioPortRegex = /IO_PORT\s+"([^"]+)"\s+([^;]+)\s*;/;
-        const portMap = {};
         rows.forEach((row) => {
             const ioLocMatch = ioLocRegex.exec(row);
             if (ioLocMatch) {
@@ -790,6 +1194,63 @@ function main() {
                 return;
             }
         })
+        return portMap;
+    }
+
+    const detectConstraintsType = (uri, rows, board) => {
+        if (board) {
+            if (board.startsWith('Tang Nano')) {
+                return 'gowin';
+            }
+            if (['Orange Crab'].includes(board)) {
+                return 'ecp5';
+            }
+            if (['iCEBreaker', 'iCEStick'].includes(board)) {
+                return 'ice';
+            }
+        }
+        if (rows) {
+            if (rows.some((row) => row.trim().startsWith('set_io'))) {
+                return 'ice';
+            }
+            if (rows.some((row) => row.trim().startsWith('IO_PORT'))) {
+                return 'gowin';
+            }
+            if (rows.some((row) => row.trim().startsWith('IOBUF'))) {
+                return 'ecp5';
+            }
+        }
+
+        if (uri) {
+            if (uri.endsWith('.cst')) {
+                return 'gowin';
+            }
+            if (uri.endsWith('.pcf')) {
+                return 'ice';
+            }
+            if (uri.endsWith('.lpf')) {
+                return 'ecp5';
+            }
+        }
+        return 'gowin';
+    }
+
+
+    const loadFile = async (body, edits, uri) => {
+        const decoder = new TextDecoder();
+        const text = body ? decoder.decode(body) : '';
+        const rows = text.split('\n');
+
+        const constraintsType = detectConstraintsType(uri, rows);
+        let portMap = {}
+        if (constraintsType === 'gowin') {
+            portMap = await loadGowinFile(rows, edits);
+        } else if (constraintsType === 'ice') {
+            portMap = await loadIceFile(rows, edits);
+        } else if (constraintsType === 'ecp5') {
+            portMap = await loadEcp5File(rows, edits);
+        }
+        
         const constraintsToAdd = Object.values(portMap);
         constraintsToAdd.forEach((constraintRow) => {
             recalculateOptions(constraintRow);
@@ -804,12 +1265,7 @@ function main() {
         updateEditWindow();
     }
 
-    const convertToConstraintsText = async () => {
-        const constraints = constraintsTable.rowsData;
-        let fileRows = [
-            '// Generated with Lushay Code',
-            ''
-        ];
+    const convertToGowinConstraintsText = (constraints, fileRows) => {
         constraints.forEach((constraint) => {
             if (constraint.location && constraint.location !== '<Not Selected>') {
                 fileRows.push(`IO_LOC  "${constraint.name}" ${constraint.location};`);
@@ -843,6 +1299,84 @@ function main() {
             }
             fileRows.push('');
         });
+    }
+
+    const convertToEcp5ConstraintsText = (constraints, fileRows) => {
+        constraints.forEach((constraint) => {
+            if (constraint.location && constraint.location !== '<Not Selected>') {
+                fileRows.push(`LOCATE COMP "${constraint.name}" SITE "${constraint.location}";`);
+            }
+            const constraintOptions = [];
+            if (constraint.slewRate && ['Fast', 'Slow'].includes(constraint.slewRate)) {
+                constraintOptions.push(`SLEWRATE=${constraint.slewRate === 'Fast' ? 'FAST' : 'SLOW'}`);
+            }
+            if (constraint.drive) {
+                const driveMap = {
+                    '4ma': '4',
+                    '8ma': '8',
+                    '12ma': '12',
+                    '16ma': '16',
+                    '24ma': '24'
+                }
+                const driveOption = driveMap[constraint.drive];
+                constraintOptions.push(`DRIVE=${driveOption ? driveOption : constraint.drive}`);
+            }
+            if (constraint.termination) {
+                constraintOptions.push(`TERMINATION=${constraint.termination}`);
+            }
+            if (constraint.standard) {
+                constraintOptions.push(`IO_TYPE=${constraint.standard}`);
+            }
+            if (constraint.pullMode) {
+                if (constraint.pullMode === 'Pull Up') {
+                    constraintOptions.push('PULLMODE=UP');
+                } else if (constraint.pullMode === 'Pull Down') {
+                    constraintOptions.push('PULLMODE=DOWN');
+                }
+            }
+            if (constraint.diffResistor) {
+                constraintOptions.push(`DIFFRESISTOR=${constraint.diffResistor}`);
+            }
+            if (constraintOptions.length > 0) {
+                fileRows.push(`IOBUF PORT "${constraint.name}" ${constraintOptions.join(' ')};`);
+            }
+            if (constraint.frequency) {
+                fileRows.push(`FREQUENCY PORT "${constraint.name}" ${constraint.frequency} MHz;`);
+            }
+            fileRows.push('');
+        });
+    }
+
+    const convertToIceConstraintsText = (constraints, fileRows) => {
+        constraints.forEach((constraint) => {
+            if (constraint.location && constraint.location !== '<Not Selected>') {
+                let constraintOptions = '';
+                if (constraint.ice_options) {
+                    constraintOptions = `${constraint.ice_options} `;
+                }
+                fileRows.push(`set_io ${constraintOptions}${constraint.name} ${constraint.location}`);
+                if (constraint.frequency) {
+                    fileRows.push(`set_frequency ${constraint.name} ${constraint.frequency}`);
+                }
+                fileRows.push('');
+            }
+        });
+    }
+
+    const convertToConstraintsText = async (uri) => {
+        const constraints = constraintsTable.rowsData;
+        let fileRows = [
+            '// Generated with Lushay Code',
+            ''
+        ];
+        const constraintsType = detectConstraintsType(uri, undefined, board);
+        if (constraintsType === 'gowin') {
+            convertToGowinConstraintsText(constraints, fileRows);
+        } else if (constraintsType === 'ice') {
+            convertToIceConstraintsText(constraints, fileRows);
+        } else if (constraintsType === 'ecp5') {
+            convertToEcp5ConstraintsText(constraints, fileRows);
+        }
         return fileRows.join('\n');
     }
 
@@ -869,18 +1403,31 @@ function main() {
 			case 'init':
 				{
                     isEditable = body.editable;
+                    const reverseBoardMap = {
+                        'tangnano9k': 'Tang Nano 9K',
+                        'tangnano4k': 'Tang Nano 4K',
+                        'tangnano1k': 'Tang Nano 1K',
+                        'tangnano': 'Tang Nano',
+                        'tangnano20k': 'Tang Nano 20K',
+                        'orangeCrab': 'Orange Crab',
+                        'icebreaker': 'iCEBreaker',
+                        'icestick': 'iCEStick',
+                    }
+                    const boardName = reverseBoardMap[body.board] || 'Tang Nano 9K';
+                    board = boardSelect.value = boardName;
+                    setupBoard();
 					if (body.untitled) {
 						await setDefaults();
 						return;
 					} else {
 						// Load the initial image into the canvas.
-						await loadFile(body.value, []);
+						await loadFile(body.value, [], body.uri);
 						return;
 					}
 				}
 			case 'update':
 				{
-                    await loadFile(body.content, body.edits)
+                    await loadFile(body.content, body.edits, body.uri)
 					return;
 				}
             case 'portResponse':
@@ -890,7 +1437,7 @@ function main() {
                 }
 			case 'getFileData':
 				{
-					const constraintsData = await convertToConstraintsText();
+					const constraintsData = await convertToConstraintsText(body.uri);
                     let utf8Encode = new TextEncoder();
                     vscode.postMessage({ type: 'response', requestId, body: utf8Encode.encode(constraintsData) });
 					return;

@@ -1,4 +1,4 @@
-import { exec, spawnSync } from "child_process";
+import { spawnSync } from "child_process";
 import path = require("path");
 import { workspace, Disposable as VSCodeDisposable, window as vsCodeWindow, commands, ExtensionContext, EventEmitter, CancellationToken, CustomDocumentBackup, Uri, ViewColumn, WebviewPanel, window, CustomDocument, CustomEditorProvider, CustomDocumentBackupContext, CustomDocumentContentChangeEvent, CustomDocumentEditEvent, CustomDocumentOpenContext, Event, Webview } from "vscode";
 import { parseProjectFile } from "../projecfile";
@@ -303,7 +303,7 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
 					throw new Error('Could not find webview to save for');
 				}
 				const panel = webviewsForDocument[0];
-				const response = await this.postMessageWithResponse<number[]>(panel, 'getFileData', {});
+				const response = await this.postMessageWithResponse<number[]>(panel, 'getFileData', {uri: document.uri.toString()});
 				return new Uint8Array(response);
 			}
 		});
@@ -324,6 +324,7 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
 				this.postMessage(webviewPanel, 'update', {
 					edits: e.edits,
 					content: e.content,
+                    uri: document.uri.toString(),
 				});
 			}
 		}));
@@ -347,14 +348,18 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
 		webviewPanel.webview.html = this.getHTML(webviewPanel.webview);
 
 		webviewPanel.webview.onDidReceiveMessage(e => this.onMessage(document, e));
-
+        const selectedProject = ConstraintsEditor.getSelectedProject?.();
+        const projectFile = await parseProjectFile(undefined, selectedProject?.path);
 		// Wait for the webview to be properly ready before we init
 		webviewPanel.webview.onDidReceiveMessage(e => {
 			if (e.type === 'ready') {
+                
 				if (document.uri.scheme === 'untitled') {
 					this.postMessage(webviewPanel, 'init', {
 						untitled: true,
 						editable: true,
+                        uri: document.uri.toString(),
+                        board: projectFile?.board || 'tangnano9k'
 					});
 				} else {
 					const editable = workspace.fs.isWritableFileSystem(document.uri.scheme);
@@ -362,6 +367,8 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
 					this.postMessage(webviewPanel, 'init', {
 						value: document.documentData,
 						editable,
+                        uri: document.uri.toString(),
+                        board: projectFile?.board || 'tangnano9k'
 					});
 				}
 			} else if (e.type === 'getPorts') {
@@ -472,10 +479,14 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
         const toolkitUri = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode', 'webview-ui-toolkit', 'dist', 'toolkit.js'));
         const mainUri = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'constraints-editor.js'));
         const codiconsUri = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode', 'codicons', 'dist', 'codicon.css'));
+        const boardImageTangNano20K = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-tangnano20k.png'));
         const boardImageTangNano9K = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-tangnano9k.png'));
         const boardImageTangNano4K = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-tangnano4k.png'));
         const boardImageTangNano1K = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-tangnano1k.png'));
         const boardImageTangNano = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-tangnano.png'));
+        const boardImageIceBreaker = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-icebreaker.png'));
+        const boardImageIcestick = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-icestick.png'));
+        const boardImageOrangeCrab = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-orangecrab.png'));
 
         return `
             <!DOCTYPE html>
@@ -507,7 +518,7 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                             border-left: 1px solid rgba(255,255,255,0.2);
                             padding-left: 10px;
                             box-sizing: border-box;
-                            width: 250px;
+                            width: 300px;
                         }
                         #panel-side > #edit-row {
                             height: 100%;
@@ -516,7 +527,7 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                             flex-direction: column;
                         }
                         .hide {
-                            display: none;
+                            display: none !important;
                         }
                         .highlight {
                             background: rgba(255, 255, 255, 0.1);
@@ -670,9 +681,13 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                         <h1>Constraints Editor 
                         <vscode-dropdown id="board-select" position="below">
                             <vscode-option>Tang Nano 9K</vscode-option>
+                            <vscode-option>Tang Nano 20K</vscode-option>
                             <vscode-option>Tang Nano 4K</vscode-option>
                             <vscode-option>Tang Nano 1K</vscode-option>
                             <vscode-option>Tang Nano</vscode-option>
+                            <vscode-option>iCEBreaker</vscode-option>
+                            <vscode-option>iCEStick</vscode-option>
+                            <vscode-option>Orange Crab</vscode-option>
                         </vscode-dropdown>
                         </h1>
                         <div id="table-split">
@@ -731,6 +746,35 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                                             </vscode-dropdown>
                                         </section>
                                         <section>
+                                            <label>Frequency (MHz):</label>
+                                            <vscode-text-field id="frequency"></vscode-text-field>
+                                        </section>
+                                        <section>
+                                            <label>Slew Rate:</label>
+                                            <vscode-dropdown id="slew-select" position="below">
+                                                <vscode-option>Unset</vscode-option>
+                                                <vscode-option>Slow</vscode-option>
+                                                <vscode-option>Fast</vscode-option>
+                                            </vscode-dropdown>
+                                        </section>
+                                        <section>
+                                            <label>Termination:</label>
+                                            <vscode-dropdown id="term-select" position="below">
+                                                <vscode-option>Unset</vscode-option>
+                                                <vscode-option>OFF</vscode-option>
+                                                <vscode-option>50</vscode-option>
+                                                <vscode-option>75</vscode-option>
+                                                <vscode-option>100</vscode-option>
+                                        </section>
+                                        <section>  
+                                            <label>Diff. Resistor:</label>
+                                            <vscode-dropdown id="diff-resistor-select" position="below">
+                                                <vscode-option>Unset</vscode-option>
+                                                <vscode-option>OFF</vscode-option>
+                                                <vscode-option>100</vscode-option>
+                                            </vscode-dropdown>
+                                        </section>
+                                        <section>
                                             <label>IO Standard:</label>
                                             <vscode-dropdown id="standard-select" position="below">
                                                 <vscode-option>Unset</vscode-option>
@@ -752,6 +796,47 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                                                 <vscode-option>PCI33</vscode-option>
                                             </vscode-dropdown>
                                         </section>
+                                        <section>
+                                            <label>IO Standard:</label>
+                                            <vscode-dropdown id="standard-select-ecp5" position="below">
+                                                <vscode-option>Unset</vscode-option>
+                                                <vscode-option>LVCMOS25</vscode-option>
+                                                <vscode-option>LVDS</vscode-option>
+                                                <vscode-option>LVDS25E</vscode-option>
+                                                <vscode-option>BLVDS25</vscode-option>
+                                                <vscode-option>BLVDS25E</vscode-option>
+                                                <vscode-option>LVPECL33</vscode-option>
+                                                <vscode-option>LVPECL33E</vscode-option>
+                                                <vscode-option>MLVDS</vscode-option>
+                                                <vscode-option>MLVDS25E</vscode-option>
+                                                <vscode-option>SLVS</vscode-option>
+                                                <vscode-option>SUBLVDS</vscode-option>
+                                                <vscode-option>HSUL12</vscode-option>
+                                                <vscode-option>HSUL12D</vscode-option>
+                                                <vscode-option>SSTL15_I</vscode-option>
+                                                <vscode-option>SSTL15_II</vscode-option>
+                                                <vscode-option>SSTL15D_I</vscode-option>
+                                                <vscode-option>SSTL15D_II</vscode-option>
+                                                <vscode-option>SSTL135_I</vscode-option>
+                                                <vscode-option>SSTL135_II</vscode-option>
+                                                <vscode-option>SSTL135D_I</vscode-option>
+                                                <vscode-option>SSTL135D_II</vscode-option>
+                                                <vscode-option>SSTL18_I</vscode-option>
+                                                <vscode-option>SSTL18_II</vscode-option>
+                                                <vscode-option>SSTL18D_I</vscode-option>
+                                                <vscode-option>SSTL18D_II</vscode-option>
+                                                <vscode-option>LVTTL33D</vscode-option>
+                                                <vscode-option>LVTTL33</vscode-option>
+                                                <vscode-option>LVCMOS33</vscode-option>
+                                                <vscode-option>LVCMOS25</vscode-option>
+                                                <vscode-option>LVCMOS18</vscode-option>
+                                                <vscode-option>LVCMOS15</vscode-option>
+                                                <vscode-option>LVCMOS12</vscode-option>
+                                                <vscode-option>LVCMOS33D</vscode-option>
+                                                <vscode-option>LVCMOS25D</vscode-option>
+                                                <vscode-option>LVCMOS18D</vscode-option>
+                                            </vscode-dropdown>
+                                        </section>
                                     </section>
                                 </section>
                             </div>
@@ -771,10 +856,14 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                         <div id="board-popup">
                             <h3>Select Pin</h3>
                             <div id="board-container">
+                                <img class="board-pic hide" id="tangnano20k-board" src="${boardImageTangNano20K}" />
                                 <img class="board-pic hide" id="tangnano9k-board" src="${boardImageTangNano9K}" />
                                 <img class="board-pic hide" id="tangnano4k-board" src="${boardImageTangNano4K}" />
                                 <img class="board-pic hide" id="tangnano1k-board" src="${boardImageTangNano1K}" />
                                 <img class="board-pic hide" id="tangnano-board" src="${boardImageTangNano}" />
+                                <img class="board-pic hide" id="icebreaker-board" src="${boardImageIceBreaker}" />
+                                <img class="board-pic hide" id="icestick-board" src="${boardImageIcestick}" />
+                                <img class="board-pic hide" id="orangecrab-board" src="${boardImageOrangeCrab}" />
                                 <div id="pin-container"></div>
                             </div>
                             <vscode-button appearance="secondary" id="cancel-board">Cancel</vscode-button>

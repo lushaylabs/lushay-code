@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.0.16]
+
+### Added
+- iCEStick support
+- Visual constraints editor for project icestorm and project trellis
+- Cloud build support for tang nano 20k
+
+### Changed
+- Fixed to cloud builds for tang nano 9k
+
 ## [0.0.15]
 
 ### Added

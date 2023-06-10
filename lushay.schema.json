@@ -247,11 +247,13 @@
       },
       "board": {
         "enum": [
+          "tangnano20k",
           "tangnano9k",
           "tangnano4k",
           "tangnano1k",
           "tangnano",
           "icebreaker",
+          "icestick",
           "orangeCrab"
         ],
         "description": "The FPGA development board",

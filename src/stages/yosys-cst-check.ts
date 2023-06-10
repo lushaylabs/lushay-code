@@ -28,11 +28,11 @@ export class YosysCSTCheckStage extends ToolchainStage {
     private parseIceConstraintFile(constraintsFile: string): string[] {
         const constraintNamesMap: Record<string, boolean> = {}
         const rows = constraintsFile.split('\n');
-        const ioRegex = /set_io\s+(-nowarn\s+)?(-pullup\s+(yes|no)\s+)?(-pullup_resistor\s+(3P3K|6P8K|10K|100K)\s+)?([^;]+)\s*;/;
+        const ioRegex = /set_io\s+(([-]+[^\s]+\s+)*)([^\s]+)\s+(\d+\s*,?\s*(\d+)?)\s*/;
         rows.forEach((row) => {
             const match = row.match(ioRegex);
             if (match) {
-                constraintNamesMap[match[6]] = true;
+                constraintNamesMap[match[3]] = true;
             }
         });
         return Object.keys(constraintNamesMap);

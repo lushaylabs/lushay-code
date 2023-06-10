@@ -24,6 +24,12 @@ export const gowinDeviceInfo = (board: string):  {device: string, family: string
             family: 'GW1N-1',
             freq: '24'
         }
+    } else if (board === 'tangnano20k') {
+        return {
+            device: 'GW2AR-LV18QN88C8/I7',
+            family: 'GW2AR-18C',
+            freq: '27'
+        }
     }
     throw new Error('Board not supported');
 }
@@ -48,6 +54,13 @@ export const ice40DeviceInfo = (board: string):  {device: string, deviceFlag: st
             deviceFlag: '--up5k',
             freq: '48'
         }
+    } else if (board === 'icestick') {
+        return {
+            device: 'iCE40HX1K',
+            package: 'tq144',
+            deviceFlag: '--hx1k',
+            freq: '12'
+        }
     }
     throw new Error('Board not supported');
 }
@@ -65,11 +78,13 @@ export function boardToToolchain(board: string): ToolchainProject {
         'tangnano1k',
         'tangnano4k',
         'tangnano9k',
+        'tangnano20k'
     ].includes(board)) {
         return ToolchainProject.APICULA;
     }
     if ([
         'icebreaker',
+        'icestick'
     ].includes(board)) {
         return ToolchainProject.ICESTORM;
     }
