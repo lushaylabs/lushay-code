@@ -123,9 +123,68 @@ const TEMPLATES = {
     },
     'iCEBreaker': {
         'Clock': [
+            {name: 'clk', location: '35'}
+        ],
+        'UART': [
+            {name: 'uartTx', location: '9'},
+            {name: 'uartRx', location: '6'}
+        ],
+        'Button': [
+            {name: 'btn', location: '10'},
+        ],
+        'LEDs': [
+            {name: 'ledG', location: '37'},
+            {name: 'ledR', location: '11'}
+        ],
+        'Extension LEDs': [
+            {name: 'led[0]', location: '26'},
+            {name: 'led[1]', location: '23'},
+            {name: 'led[2]', location: '27'},
+            {name: 'led[3]', location: '21'},
+            {name: 'led[4]', location: '25'},
+        ],
+        'Extension Buttons': [
+            {name: 'btn[0]', location: '20'},
+            {name: 'btn[1]', location: '19'},
+            {name: 'btn[2]', location: '18'},
+        ]
+    },
+    'iCEStick': {
+        'Clock': [
             {name: 'clk', location: '21'}
+        ],
+        'LEDs': [
+            {name: 'led[0]', location: '95'},
+            {name: 'led[1]', location: '96'},
+            {name: 'led[2]', location: '97'},
+            {name: 'led[3]', location: '98'},
+            {name: 'led[4]', location: '99'},
+        ],
+        'UART': [
+            {name: 'uartTx', location: '8'},
+            {name: 'uartRx', location: '9'}
+        ],
+        'IR': [
+            {name: 'irTx', location: '105'},
+            {name: 'irRx', location: '106'},
+            {name: 'irSD', location: '107'}
+        ]
+    },
+    'Orange Crab': {
+        'Clock': [
+            {name: 'clk', location: 'A9', frequency: '48', standard: 'LVCMOS33'}
+        ],
+        'RGB LED': [
+            {name: 'ledR', location: 'K4', standard: 'LVCMOS33'},
+            {name: 'ledG', location: 'M3', standard: 'LVCMOS33'},
+            {name: 'ledB', location: 'J3', standard: 'LVCMOS33'}
+        ],
+        'Buttons': [
+            {name: 'btn1', location: 'J17', standard: 'LVCMOS33'},
+            {name: 'btn2', location: 'V17', standard: 'LVCMOS33'}
         ]
     }
+
 }
 
 const pinLocations = {

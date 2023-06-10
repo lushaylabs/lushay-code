@@ -52,7 +52,7 @@ export const ice40DeviceInfo = (board: string):  {device: string, deviceFlag: st
             device: 'iCE40UP5K',
             package: 'sg48',
             deviceFlag: '--up5k',
-            freq: '48'
+            freq: '12'
         }
     } else if (board === 'icestick') {
         return {
