@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.0.17]
+
+### Added
+- Visual realtime debugger panel for verilog modules
+
+### Changed
+- Fixed PCF file generation by removing comment that broke compatibility
+
 ## [0.0.16]
 
 ### Added

@@ -34,7 +34,7 @@ export interface Logger {
 	writeToBoth(msg: string): void;
 }
 
-export async function parseProjectFile(logger?: Logger, selectedProject?: string): Promise<ProjectFile | undefined> {
+export async function parseProjectFile(logger?: Logger, selectedProject?: string, promptUser = true): Promise<ProjectFile | undefined> {
 	const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	if (!workspaceFolder) {
 		logger?.logToBoth('    Error: No workspace open');
@@ -84,7 +84,9 @@ export async function parseProjectFile(logger?: Logger, selectedProject?: string
 			skipCstChecking: false
 		})
 	}
-	
+	if (!selectedProject && !promptUser) {
+		return;
+	}
 	const projectFilePath = selectedProject ? selectedProject : await selectProjectFile(projectFiles);
 	if (!projectFilePath) {
 		return;

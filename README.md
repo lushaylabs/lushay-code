@@ -26,6 +26,7 @@ Features Include:
 - Visual constraints editor
 - Verilog Linting (using verilator)
 - Cloud Builds
+- Visual Module Debugger
 
 ## Requirements
 
@@ -140,6 +141,20 @@ So select "JTAG Debugger (Interface 0)" and underneath you should see it show th
 Once selected just the replace driver button and wait a minute or two, once done it should work in openFPGALoader.
 
 If you ever want to uninstall this driver and go back to the default driver (for example to use the official gowin IDE) all you have to do is go to "Device Manager" select the device called "JTAG Debugger" under "Universal Serial Bus devices" right-click on it and press "uninstall device" from the popup also select the checkbox to attempt to remove the driver. Once removed right click on any item in the device manager window and press "Scan for hardware changes" this should reconnect the device back with the original driver.
+
+## Visual Module Debugger
+
+By opening any verilog file you should see a new panel next to the toolchain output panel called Module Debugger. Once open the you should see a dropdown box where you can select which module from the currently open file you would like to debug (relevant for files with more then 1 module inside). Once you have your module selected the panel will show you a table with all input and output ports. The input ports can be modified visually by clicking and dragging on single bit rows, or by double clicking on multi-bit rows, whenever an input is changed / the verilog code updated the simulation will be run updating the outputs.
+
+![Module Debugger](./docs/module-debugger-view.jpg)
+
+There is a button on each single bit line with a watch icon, this can be used to pulse the signal of that input on and off, useful for clock signals, it can be clicked multiple times to shift the phase of the signal by 1 time frame. You can also use the `alt` key while dragging to alternate between high and low on a line to create a specific area with a clock signal.
+
+The other button on a single-bit line clears the row setting all time frames low.
+
+For multi-bit rows you have a button to expand / contract the value to display the individual bits, and on the multi-bit row you will get the value of all bits together. You can double click any empty time frame on the multi-bit row to create a new value. Values can be dragged from each end to extend or shorten their length and you can double click a value box to open a text input where you can enter a new value in hex.
+
+Inputs will be persisted for each module and are stored in a `.dbgmodule` file next to the source verilog file, and you can clear all signals in the current module by using the "Clear All" button at the top.
 
 ## Cloud Builds
 Cloud builds use our servers to synthesize and generate the bitsream for your project. Currently this is only supported for tang nano boards and the cloud will use the official Gowin EDA (educational edition) to synthesize your bitstream. This allows you to use features not yet covered by the open source toolchain / to compare the results from the opensource toolchain to the official toolchain.

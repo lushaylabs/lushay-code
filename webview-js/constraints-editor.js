@@ -1424,10 +1424,7 @@ function main() {
 
     const convertToConstraintsText = async (uri) => {
         const constraints = constraintsTable.rowsData;
-        let fileRows = [
-            '// Generated with Lushay Code',
-            ''
-        ];
+        let fileRows = [];
         const constraintsType = detectConstraintsType(uri, undefined, board);
         if (constraintsType === 'gowin') {
             convertToGowinConstraintsText(constraints, fileRows);

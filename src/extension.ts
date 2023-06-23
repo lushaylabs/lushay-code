@@ -13,7 +13,7 @@ import { spawnSync } from 'child_process';
 import { ToolchainStage } from './stages/stage';
 import { CommandOption } from './utils/command-options';
 import { getStagesForOption } from './stages';
-// import { ModuleDebuggerWebviewContentProvider } from './panels/module-debugger';
+import { ModuleDebuggerWebviewContentProvider } from './panels/module-debugger';
 
 let myStatusBarItem: vscode.StatusBarItem;
 let projectStatusBarItem: vscode.StatusBarItem;
@@ -167,7 +167,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand(SELECT_PROJECT_CMD_ID, selectProjectFile));
 	projectStatusBarItem.show();
 
-	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
+	context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor((editor) => {
+		updateStatusBarItem();
+		if (editor?.document.uri) {
+			ModuleDebuggerWebviewContentProvider.updateCurrentFile(editor.document.uri);
+		}
+	}));
 	updateStatusBarItem();
 	context.subscriptions.push(ConstraintsEditor.register(context, getOssCadSuitePath, () => selectedProject));
 
@@ -181,18 +186,27 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.workspace.onDidSaveTextDocument(document => {
 			refreshDiagnostics(document, verilogDiagnostics);
+			if (document.uri) {
+				ModuleDebuggerWebviewContentProvider.updateCurrentFile(document.uri);
+			}
 		})
 	);
 
 	context.subscriptions.push(
-		vscode.workspace.onDidChangeTextDocument(e => refreshDiagnostics(e.document, verilogDiagnostics))
+		vscode.workspace.onDidChangeTextDocument(e => () => {
+			refreshDiagnostics(e.document, verilogDiagnostics);
+			ModuleDebuggerWebviewContentProvider.updateCurrentFile(e.document.uri);
+		})
 	);
 
 	context.subscriptions.push(
 		vscode.workspace.onDidCloseTextDocument(doc => verilogDiagnostics.delete(doc.uri))
 	);
 
-	// context.subscriptions.push(ModuleDebuggerWebviewContentProvider.register(context.extensionUri, getOssCadSuitePath, () => selectedProject));
+	context.subscriptions.push(ModuleDebuggerWebviewContentProvider.register(context.extensionUri, getOssCadSuitePath, () => selectedProject));
+	if (vscode.window.activeTextEditor?.document.uri) {
+		ModuleDebuggerWebviewContentProvider.updateCurrentFile(vscode.window.activeTextEditor?.document.uri);
+	}
 }
 
 async function selectProjectFile(): Promise<void> {
@@ -225,6 +239,9 @@ async function selectProjectFile(): Promise<void> {
 	if (selected === 'Unset Selected Project') {
 		selectedProject = undefined;
 		projectStatusBarItem.text = '<Auto-Detect Project>';
+		if (vscode.window.activeTextEditor?.document.uri) {
+			ModuleDebuggerWebviewContentProvider.updateCurrentFile(vscode.window.activeTextEditor?.document.uri);
+		}
 		return;
 	}
 	if (selected === '+ Create new Project File') {
@@ -244,6 +261,9 @@ async function selectProjectFile(): Promise<void> {
 	}
 	projectStatusBarItem.text = selected;
 	selectedProject = {name: selected, path: useFullMap ? projectFullMap[selected] : projectMap[selected]};
+	if (vscode.window.activeTextEditor?.document.uri) {
+		ModuleDebuggerWebviewContentProvider.updateCurrentFile(vscode.window.activeTextEditor?.document.uri);
+	}
 }
 
 function updateStatusBarItem(): void {

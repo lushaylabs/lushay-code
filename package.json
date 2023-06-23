@@ -2,7 +2,7 @@
   "name": "lushay-code",
   "displayName": "Lushay Code",
   "description": "Open Source FPGA Toolchain using OSS-Cad-Suite",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "license": "MIT",
   "engines": {
     "vscode": "^1.72.0"
@@ -34,6 +34,27 @@
   "publisher": "lushay-labs",
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "lushay-code-module-debugger",
+          "title": "Module Debugger",
+          "icon": "$(clear-all)"
+        }
+      ]
+    },
+    "views": {
+      "lushay-code-module-debugger": [
+        {
+        "type": "webview",
+        "id": "lushay-code-module-debugger-content",
+        "name": "Module Debugger",
+        "canToggleVisibility": true,
+        "order": 10,
+        "when": "resourceExtname == .v"
+        }
+      ]
+    },
     "customEditors": [
       {
         "viewType": "lushay-code.constraintsEditor",
