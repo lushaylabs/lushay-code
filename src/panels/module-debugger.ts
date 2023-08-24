@@ -236,7 +236,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
             console.log(vvp.stderr?.toString());
             return;
         }
-        const caseGroups = vvp.stdout?.toString().split('\n\n').filter((a) => a.includes(' = '));
+        const caseGroups = vvp.stdout?.toString().replace(/\r/g, '').split('\n\n').filter((a) => a.includes(' = '));
         const cases = caseGroups?.map(c => c.split('\n').map(l => l.split(' = ')).filter((a) => a.toString().trim().length > 0 && a.length === 2).reduce((acc, [key, value]) => {
             if (!key || !value) {
                 return acc;
@@ -254,7 +254,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         if (!currentFile) {
             return;
         }
-        const pathWithoutExtension = currentFile.path.split('.').slice(0, -1).join('.');
+        const pathWithoutExtension = currentFile.fsPath.split('.').slice(0, -1).join('.');
         const dModulePath = `${pathWithoutExtension}.dbgmodule`;
         let fileContent: Record<string, {inputs: typeof inputs, cases: typeof cases}> = {};
         if (fs.existsSync(dModulePath)) {

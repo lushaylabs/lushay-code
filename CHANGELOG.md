@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.18]
+
+### Changed
+- Fixes to Module Debugger on Windows
+
 ## [0.0.17]
 
 ### Added
