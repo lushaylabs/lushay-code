@@ -55,7 +55,7 @@ By default a project with a `.cst` file will use project apicula, `.lpf` will us
 
 When opening a .cst / .pcf or .lpf file it will open by default with the visual constraints editor. Here you have a table with the current constraints and two main buttons "Add Constraint" and "Add From Template". The "Add From Template" button is to easily add constraints for built in hardware on the development board, things like LEDs, buttons, Flash IC, etc. The "Add Constraint" is to add a new custom constraint. When you add a new constraint (via either method) you will see it show up in the table as a row. You can click on any row to edit it in the side panel.
 
- ![Constraints Editor](./docs/constraints-editor-view.jpg)
+![Constraints Editor](./docs/constraints-editor-view.jpg)
 
 You can edit the name, location and other options on the constraint. For location you can either enter the pin number if you know it, or press the "Select IO Pin" to visually select the pin from the board.
 
@@ -173,10 +173,10 @@ This extension contributes the following settings:
 
 * `lushay.OssCadSuite.path`: You need to set this to the path of OSS-CAD-Suite on your computer
 * `lushay.Build.toolchain`: This can be set to 'open-source' or 'cloud' to choose the desired toolchain
-* `"lushay.Build.cloudApiKey`: If cloud is selected this setting must contain a valid API key
-* `"lushay.Build.overrideYosysPath`: If you want to use a custom yosys binary you can set the path here"
-* `"lushay.Build.overrideNextpnrPath`: If you want to use a custom nextpnr binary you can set the path here
-* `"lushay.Build.overrideOpenFpgaLoaderPath`: If you want to use a custom openFPGALoader binary you can set the path here"
+* `lushay.Build.cloudApiKey`: If cloud is selected this setting must contain a valid API key
+* `lushay.Build.overrideYosysPath`: If you want to use a custom yosys binary you can set the path here
+* `lushay.Build.overrideNextpnrPath`: If you want to use a custom nextpnr binary you can set the path here
+* `lushay.Build.overrideOpenFpgaLoaderPath`: If you want to use a custom openFPGALoader binary you can set the path here
 
 ## Release Notes
 
