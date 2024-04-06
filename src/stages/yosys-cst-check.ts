@@ -72,13 +72,13 @@ export class YosysCSTCheckStage extends ToolchainStage {
     public async runProg(previousStage: ToolchainStage | undefined): Promise<number | null> {
         ToolchainStage.logger.logToBoth('Starting Yosys CST Checking');
 
-        const yosysPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'yosys');
+        const yosysPath = ToolchainStage.overrides['yosys'] || path.join(ToolchainStage.ossCadSuiteBinPath, 'yosys');
 
         const checkCommand = [
-			yosysPath,
-			'-p',
-			`read_verilog ${this.projectFile.includedFilePaths.join(' ')}; portlist ${this.projectFile.top || 'top'}`
-		];
+            yosysPath,
+            '-p',
+            `read_verilog ${this.projectFile.includedFilePaths.join(' ')}; portlist ${this.projectFile.top || 'top'}`
+        ];
         const toolchain = boardToToolchain(this.projectFile.board);
 
         let code = await this.runCommand(checkCommand);
@@ -104,10 +104,10 @@ export class YosysCSTCheckStage extends ToolchainStage {
     }
     protected onCommandPrintLine(line: string): void {
         if (['|', '/', '\\'].includes(line.trim()[0])) {
-			// copyright area
+            // copyright area
             ToolchainStage.logger.logToSummary('    ' + line);
-			return;
-		}
+            return;
+        }
         const parseMatch = line.match(/Parsing Verilog input from `([^']+)' to AST/);
         if (parseMatch) {
             ToolchainStage.logger.logToSummary(`    Parsing ${path.basename(parseMatch[1])}`);

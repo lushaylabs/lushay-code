@@ -105,6 +105,21 @@
             "type": "string",
             "description": "API Key for cloud build",
             "default": ""
+          },
+          "lushay.Build.overrideNextpnrPath": {
+            "type": "string",
+            "description": "Override the path to nextpnr",
+            "default": ""
+          },
+          "lushay.Build.overrideYosysPath": {
+            "type": "string",
+            "description": "Override the path to yosys",
+            "default": ""
+          },
+          "lushay.Build.overrideOpenFpgaLoaderPath": {
+            "type": "string",
+            "description": "Override the path to openFPGALoader",
+            "default": ""
           }
         }
       }

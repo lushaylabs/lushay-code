@@ -42,46 +42,46 @@ export function getBuildStagesForToolchain(toolchain: ToolchainProject): StageCl
 
 export function getStagesForOption(projectFile: ProjectFile, option: CommandOption, toolchainSource: 'open-source' | 'cloud'): StageClass[] {
     const toolchain = boardToToolchain(projectFile.board);
-	if (toolchain == ToolchainProject.APICULA && toolchainSource === 'cloud') {
-		if (option === CommandOption.BUILD_ONLY) {
-			return [
-				...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
-				YosysGowinPrepareProjectStage,
-				SendToServerStage
-			]
-		}
-		if (option === CommandOption.BUILD_AND_PROGRAM) {
-			return [
-				...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
-				YosysGowinPrepareProjectStage,
-				SendToServerStage,
-				OpenFPGALoaderProgramStage
-			];
-		}
-	}
+    if (toolchain == ToolchainProject.APICULA && toolchainSource === 'cloud') {
+        if (option === CommandOption.BUILD_ONLY) {
+            return [
+                ...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
+                YosysGowinPrepareProjectStage,
+                SendToServerStage
+            ]
+        }
+        if (option === CommandOption.BUILD_AND_PROGRAM) {
+            return [
+                ...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
+                YosysGowinPrepareProjectStage,
+                SendToServerStage,
+                OpenFPGALoaderProgramStage
+            ];
+        }
+    }
     if (option === CommandOption.BUILD_ONLY) {
-		return [
-			...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
-			...getBuildStagesForToolchain(toolchain)
-		];
- 	}
-	if (option === CommandOption.BUILD_AND_PROGRAM) {
-		return [
-			...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
-			...getBuildStagesForToolchain(toolchain),
-			OpenFPGALoaderProgramStage
-		];
-	}
-	if (option === CommandOption.PROGRAM_ONLY) {
-		return [OpenFPGALoaderProgramStage];
-	}
+        return [
+            ...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
+            ...getBuildStagesForToolchain(toolchain)
+        ];
+    }
+    if (option === CommandOption.BUILD_AND_PROGRAM) {
+        return [
+            ...(projectFile.skipCstChecking ? [] : [YosysCSTCheckStage]),
+            ...getBuildStagesForToolchain(toolchain),
+            OpenFPGALoaderProgramStage
+        ];
+    }
+    if (option === CommandOption.PROGRAM_ONLY) {
+        return [OpenFPGALoaderProgramStage];
+    }
 
-	if (option === CommandOption.EXTERNAL_FLASH) {
-		return [OpenFPGALoaderExternalFlashStage];
-	}
+    if (option === CommandOption.EXTERNAL_FLASH) {
+        return [OpenFPGALoaderExternalFlashStage];
+    }
 
-	if (option === CommandOption.RUN_TESTBENCH) {
-		return [IVerilogTestbenchStage];
-	}
+    if (option === CommandOption.RUN_TESTBENCH) {
+        return [IVerilogTestbenchStage];
+    }
     return [];
 }

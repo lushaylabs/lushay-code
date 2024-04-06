@@ -4,17 +4,17 @@ import * as path from 'path';
 export class IcePackStage extends ToolchainStage {
     public async runProg(previousStage: ToolchainStage | undefined): Promise<number | null> {
         const icePackPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'icepack');
-		const inputPath = previousStage?.getFilesCreated()[0];
+        const inputPath = previousStage?.getFilesCreated()[0];
         if (!inputPath) {
             ToolchainStage.logger.logToBoth('    Error: no routed netlist file');
             return null;
         }
-		const outputPath = path.join(this.projectFile.basePath, this.projectFile.name + '.bin');
+        const outputPath = path.join(this.projectFile.basePath, this.projectFile.name + '.bin');
 
         const bitstreamCommand = [
-        	icePackPath,
-        	inputPath,
-        	outputPath
+            icePackPath,
+            inputPath,
+            outputPath
         ];
 
         this.filesCreated.push(outputPath);

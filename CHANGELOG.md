@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.19]
+
+### Added
+- Added support for nextpnr-himbaechel
+- Added overrideYosysPath, overrideNextpnrPath, overrideOpenFpgaLoaderPath to settings
+
 ## [0.0.18]
 
 ### Changed

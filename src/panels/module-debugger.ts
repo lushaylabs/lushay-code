@@ -11,6 +11,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
     private _view?: vscode.WebviewView;
     public static ossCadSuitePath?: () => Promise<string | undefined>;
     public static selectedProject?: () => {name: string, path: string} | undefined;
+    public static getOverridePaths?: () => Promise<Record<string, string>>;
     public static currentFile?: vscode.Uri;
     private static _instance?: ModuleDebuggerWebviewContentProvider;
     private modulesInFile: Array<{ name: string; ports: Array<{ name: string; direction: string; size: number; }>; }>;
@@ -26,7 +27,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         if (this._instance) {
             this._instance.updateCurrentFile(fileChanged);
         }
-	}
+    }
 
     public async updateCurrentFile(changedFile: boolean) {
         if (!ModuleDebuggerWebviewContentProvider.currentFile || !ModuleDebuggerWebviewContentProvider.currentFile.fsPath.endsWith('.v')) {
@@ -66,7 +67,8 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
             })
             return;
         }
-        const yosysPath = path.join(ossCadPath, 'yosys');
+        const overrides = await ModuleDebuggerWebviewContentProvider.getOverridePaths?.() || {};
+        const yosysPath = overrides['yosys'] || path.join(ossCadPath, 'yosys');
         const ossRootPath = path.resolve(ossCadPath, '..');
         const res = spawnSync(yosysPath,  ['-p', `read_verilog "${ModuleDebuggerWebviewContentProvider.currentFile.fsPath}"; portlist *`], {
             env: {
@@ -199,7 +201,10 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         }
         const iverilogPath = path.join(ossCadPath, 'iverilog');
         const ossRootPath = path.resolve(ossCadPath, '..');
-        const res = spawnSync(iverilogPath,  ['-o', `${moduleName}_test.vvp`, '-s', `${moduleName}_test`, `${moduleName}_test.v`, ...(projectFile.includedFilePaths)], {
+        const gowinCellsPath = path.join(ossRootPath, 'share/yosys/gowin/cells_sim.v');
+        const gowinXtraCellsPath = path.join(ossRootPath, 'share/yosys/gowin/cells_xtra.v');
+
+        const res = spawnSync(iverilogPath,  ['-o', `${moduleName}_test.vvp`, '-s', `${moduleName}_test`, `${moduleName}_test.v`, ...(projectFile.includedFilePaths), gowinCellsPath, ...(fs.existsSync(gowinXtraCellsPath) ? [gowinXtraCellsPath] : [])], {
             cwd: testFile,
             env: {
                 PATH: [
@@ -268,7 +273,8 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         fs.writeFileSync(dModulePath, JSON.stringify(fileContent, null, 4));
     }
 
-    public static register(extensionUri: vscode.Uri, getOssCadSuitePath: (() => Promise<string | undefined>), getSelectedProject: () => {name: string, path: string} | undefined) {
+    public static register(extensionUri: vscode.Uri, getOssCadSuitePath: (() => Promise<string | undefined>), getSelectedProject: () => {name: string, path: string} | undefined, getOverridePaths: () => Promise<Record<string, string>>) {
+        this.getOverridePaths = getOverridePaths;
         this.ossCadSuitePath = getOssCadSuitePath;
         this.selectedProject = getSelectedProject;
         this._instance = new ModuleDebuggerWebviewContentProvider(extensionUri);

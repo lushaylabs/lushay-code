@@ -35,7 +35,7 @@ function createYosysSynthStage(edition: YosysEditions) {
         }
     
         public async runProg(): Promise<number | null> {
-            const yosysPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'yosys');
+            const yosysPath = ToolchainStage.overrides['yosys'] || path.join(ToolchainStage.ossCadSuiteBinPath, 'yosys');
             const outPath = path.join(this.projectFile.basePath, this.projectFile.name + '.json');
             const options = this.getOptions();
             const synthCommand = this.getSynthCommand();

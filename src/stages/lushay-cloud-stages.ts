@@ -8,85 +8,87 @@ import { gowinDeviceInfo } from '../utils/device-info';
 const SERVER_URL = 'https://lushay-code.lushaylabs.com'
 
 export class YosysGowinPrepareProjectStage extends ToolchainStage {
-	private startedCounter: boolean = false;
-	private counter: string[] = [];
+    private startedCounter: boolean = false;
+    private counter: string[] = [];
 
-	public async runProg(): Promise<number | null> {
-		const yosysPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'yosys');
-		const outPath = path.join(this.projectFile.basePath, `___tempbuild_1${this.projectFile.name}.v`);
-		const preparationCommand = [
-			yosysPath,
-			'-p',
-			`read_verilog ${this.projectFile.includedFilePaths.join(' ')}; read_verilog -specify -lib +/gowin/cells_sim.v; hierarchy -check  -top ${this.projectFile.top || 'top'}; proc; flatten`,
+    public async runProg(): Promise<number | null> {
+        const yosysPath = ToolchainStage.overrides['yosys'] || path.join(ToolchainStage.ossCadSuiteBinPath, 'yosys');
+        const outPath = path.join(this.projectFile.basePath, `___tempbuild_1${this.projectFile.name}.v`);
+        const gowinXtraCellsPath = path.join(ToolchainStage.ossCadSuiteBinPath, '..', 'share/yosys/gowin/cells_xtra.v');
+
+        const preparationCommand = [
+            yosysPath,
+            '-p',
+            `read_verilog ${this.projectFile.includedFilePaths.join(' ')}; read_verilog -specify -lib +/gowin/cells_sim.v;${fs.existsSync(gowinXtraCellsPath) ? ' read_verilog -specify -lib +/gowin/cells_xtra.v;' : ''} hierarchy -check  -top ${this.projectFile.top || 'top'}; proc; flatten`,
             '-o',
             outPath
-		];
+        ];
         this.filesCreated.push(outPath);
         if (this.projectFile.top && !this.projectFile.top.match(/^[a-zA-Z0-9_]+$/)) {
             ToolchainStage.logger.logToBoth(`    Error: Top module name ${this.projectFile.top} is not a currently supported, please use only letters, numbers and underscores`)
             return 1;
         }
-		return this.runCommand(preparationCommand);
-	}
+        return this.runCommand(preparationCommand);
+    }
 
-	protected onCommandStart(): void {
-		ToolchainStage.logger.logToBoth("Starting Yosys Preparation");
-	}
+    protected onCommandStart(): void {
+        ToolchainStage.logger.logToBoth("Starting Yosys Preparation");
+    }
 
-	protected onCommandEnd(): void {
-		if (this.counter.length > 0) {
-			ToolchainStage.logger.logToSummary("\n    Summary");
-			const rows = this.counter.map((c) => {
-				const lineType = c.includes(':') ? 'topLevel' : 'subLevel';
-				if (lineType === 'topLevel') {
-					const parts = c.split(':').map((p) => p.trim());
-					return {
-						name: parts[0] + ':',
-						val: parts[1]
-					}
-				} else {
-					const parts = c.trim().split(' ');
-					return {
-						name: '    ' + parts[0],
-						val: parts[parts.length-1]
-					}
-				}
-			});
-			const longestName = rows.reduce((longest, row) => row.name.length > longest ? row.name.length : longest, 0);
-			const longestVal = rows.reduce((longest, row) => row.val.length > longest ? row.val.length : longest, 0);
-			rows.forEach((row) => {
-				ToolchainStage.logger.logToSummary('        ' + row.name.padEnd(longestName + 6, ' ') + row.val.padStart(longestVal, ' '));
-			});
+    protected onCommandEnd(): void {
+        if (this.counter.length > 0) {
+            ToolchainStage.logger.logToSummary("\n    Summary");
+            const rows = this.counter.map((c) => {
+                const lineType = c.includes(':') ? 'topLevel' : 'subLevel';
+                if (lineType === 'topLevel') {
+                    const parts = c.split(':').map((p) => p.trim());
+                    return {
+                        name: parts[0] + ':',
+                        val: parts[1]
+                    }
+                } else {
+                    const parts = c.trim().split(' ');
+                    return {
+                        name: '    ' + parts[0],
+                        val: parts[parts.length-1]
+                    }
+                }
+            });
+            const longestName = rows.reduce((longest, row) => row.name.length > longest ? row.name.length : longest, 0);
+            const longestVal = rows.reduce((longest, row) => row.val.length > longest ? row.val.length : longest, 0);
+            rows.forEach((row) => {
+                ToolchainStage.logger.logToSummary('        ' + row.name.padEnd(longestName + 6, ' ') + row.val.padStart(longestVal, ' '));
+            });
             ToolchainStage.logger.logToSummary('');
-		}
-		ToolchainStage.logger.logToBoth("Finished Preparation");
-	}
+        }
+        ToolchainStage.logger.logToBoth("Finished Preparation");
+    }
 
-	protected onCommandPrintLine(line: string): void {
-		if (['|', '/', '\\'].includes(line.trim()[0])) {
-			// skipping copyright area here as printed in CST check stage
-			return;
-		}
-		const titleRegexp = /^([0-9.]+)\. (.+)$/;
-		const titleMatch = titleRegexp.exec(line);
-		if (titleMatch) {
-			this.startedCounter = false;
-			const titleLength = titleMatch[1].split('.').length-1;
-			if (titleLength > 1) {return}
-			let spacing = ''.padEnd(titleLength * 4, ' ');
-			ToolchainStage.logger.logToSummary(spacing + "    Step " + (titleMatch[1] + ':').padEnd(6, ' ') + ' ' + titleMatch[2])
-		}
-		if (line && this.startedCounter) {
-			this.counter.push(line);
-		}
+    protected onCommandPrintLine(line: string): void {
+        if (['|', '/', '\\'].includes(line.trim()[0])) {
+            // skipping copyright area here as printed in CST check stage
+            return;
+        }
+        const titleRegexp = /^([0-9.]+)\. (.+)$/;
+        const titleMatch = titleRegexp.exec(line);
+        if (titleMatch) {
+            this.startedCounter = false;
+            const titleLength = titleMatch[1].split('.').length-1;
+            if (titleLength > 1) {return}
+            let spacing = ''.padEnd(titleLength * 4, ' ');
+            ToolchainStage.logger.logToSummary(spacing + "    Step " + (titleMatch[1] + ':').padEnd(6, ' ') + ' ' + titleMatch[2])
+        }
+        if (line && this.startedCounter) {
+            this.counter.push(line);
+        }
 
-		if (line.match(/=== .* ===/)) {
-			this.startedCounter = true;
-		}
-	}
+        if (line.match(/=== .* ===/)) {
+            this.startedCounter = true;
+        }
+    }
 
-	protected onCommandPrintErrorLine(line: string): void {
-		ToolchainStage.logger.logToSummary('    Error: ' + line.trimEnd());
+    protected onCommandPrintErrorLine(line: string): void {
+        ToolchainStage.logger.logToSummary('    Error: ' + line.trimEnd());
         if (line.includes('ERROR: syntax error, unexpected')) {
             const errorLocation = line.match(/([^/\\]+\.v):([0-9]+):/);
             if (errorLocation && +errorLocation[2] > 1) {
@@ -100,7 +102,7 @@ export class YosysGowinPrepareProjectStage extends ToolchainStage {
                 ToolchainStage.logger.logToSummary(`    Check if module instantiation \`${moduleMatches[1]} ${moduleMatches[3]}(...)\` in module ${moduleMatches[2]} is a typo or maybe the module is not included in your projectfile`)
             }
         }
-	}
+    }
 }
 
 
@@ -274,7 +276,7 @@ export class SendToServerStage extends ToolchainStage {
         if (!ToolchainStage.apiKey) {
             ToolchainStage.logger.logToBoth('    Error: No API Key setup');
         }
-		const fileName = path.join(this.projectFile.basePath, `___tempbuild_1${this.projectFile.name}.v`);
+        const fileName = path.join(this.projectFile.basePath, `___tempbuild_1${this.projectFile.name}.v`);
         const verilog = fs.readFileSync(fileName).toString();
         fs.unlinkSync(fileName);
         const contraintFile = fs.readFileSync(this.projectFile.constraintsFile).toString();
@@ -297,8 +299,8 @@ export class SendToServerStage extends ToolchainStage {
                 family
             }
             await uploadContent(location, Buffer.from(JSON.stringify(projectContent)));
-		    const destFileName = path.join(this.projectFile.basePath, `___tempbuild_1${this.projectFile.name}.json`);
-		    const fsFileName = path.join(this.projectFile.basePath, `${this.projectFile.name}.fs`);
+            const destFileName = path.join(this.projectFile.basePath, `___tempbuild_1${this.projectFile.name}.json`);
+            const fsFileName = path.join(this.projectFile.basePath, `${this.projectFile.name}.fs`);
             await makeGetRequest(SERVER_URL + '/startBuild/' + signedUrl.number + '/' + signedUrl.uuid);
             ToolchainStage.logger.logToBoth(' Done');
             ToolchainStage.logger.writeToBoth('    Waiting for build to complete ');;

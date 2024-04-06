@@ -3,17 +3,17 @@ import { ToolchainStage } from "./stage";
 
 export class OpenFPGALoaderExternalFlashStage extends ToolchainStage {
     private detectedUsbNotFound: boolean = false;
-	private detectedError: boolean = false;
+    private detectedError: boolean = false;
 
     public async runProg(previousStage: ToolchainStage | undefined): Promise<number | null> {
-        const openFpgaLoaderPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'openFPGALoader');
+        const openFpgaLoaderPath = ToolchainStage.overrides['openFPGALoader'] || path.join(ToolchainStage.ossCadSuiteBinPath, 'openFPGALoader');
 
         const programCommand = [
-        	openFpgaLoaderPath,
-        	'-b',
-        	this.projectFile.board,
+            openFpgaLoaderPath,
+            '-b',
+            this.projectFile.board,
             '--external-flash',
-        	this.projectFile.externalFlashFilePath
+            this.projectFile.externalFlashFilePath
         ];
 
         return this.runCommand(programCommand);

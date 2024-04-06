@@ -4,39 +4,39 @@ import { workspace, Disposable as VSCodeDisposable, window as vsCodeWindow, comm
 import { parseProjectFile } from "../projecfile";
 
 export function disposeAll(disposables: VSCodeDisposable[]): void {
-	while (disposables.length) {
-		const item = disposables.pop();
-		if (item) {
-			item.dispose();
-		}
-	}
+    while (disposables.length) {
+        const item = disposables.pop();
+        if (item) {
+            item.dispose();
+        }
+    }
 }
 
 export abstract class Disposable {
-	private _isDisposed = false;
+    private _isDisposed = false;
 
-	protected _disposables: VSCodeDisposable[] = [];
+    protected _disposables: VSCodeDisposable[] = [];
 
-	public dispose(): any {
-		if (this._isDisposed) {
-			return;
-		}
-		this._isDisposed = true;
-		disposeAll(this._disposables);
-	}
+    public dispose(): any {
+        if (this._isDisposed) {
+            return;
+        }
+        this._isDisposed = true;
+        disposeAll(this._disposables);
+    }
 
-	protected _register<T extends VSCodeDisposable>(value: T): T {
-		if (this._isDisposed) {
-			value.dispose();
-		} else {
-			this._disposables.push(value);
-		}
-		return value;
-	}
+    protected _register<T extends VSCodeDisposable>(value: T): T {
+        if (this._isDisposed) {
+            value.dispose();
+        } else {
+            this._disposables.push(value);
+        }
+        return value;
+    }
 
-	protected get isDisposed(): boolean {
-		return this._isDisposed;
-	}
+    protected get isDisposed(): boolean {
+        return this._isDisposed;
+    }
 }
 
 interface ConstraintsRowEdit {
@@ -67,161 +67,161 @@ interface ConstraintsTemplateAddition {
 type ConstraintsFileEdit = ConstraintsRowEdit | ConstraintsRowDeletion | ConstraintsRowAddition | ConstraintsTemplateAddition;
 
 interface ConstraintsFileDelegate {
-	getFileData(): Promise<Uint8Array>;
+    getFileData(): Promise<Uint8Array>;
 }
 class ConstraintsFileDocument extends Disposable implements CustomDocument {
     static async create(
-		uri: Uri,
-		backupId: string | undefined,
+        uri: Uri,
+        backupId: string | undefined,
         delegate: ConstraintsFileDelegate
-	): Promise<ConstraintsFileDocument | PromiseLike<ConstraintsFileDocument>> {
-		// If we have a backup, read that. Otherwise read the resource from the workspace
-		const dataFile = typeof backupId === 'string' ? Uri.parse(backupId) : uri;
-		const fileData = await ConstraintsFileDocument.readFile(dataFile);
-		return new ConstraintsFileDocument(uri, fileData, delegate);
-	}
+    ): Promise<ConstraintsFileDocument | PromiseLike<ConstraintsFileDocument>> {
+        // If we have a backup, read that. Otherwise read the resource from the workspace
+        const dataFile = typeof backupId === 'string' ? Uri.parse(backupId) : uri;
+        const fileData = await ConstraintsFileDocument.readFile(dataFile);
+        return new ConstraintsFileDocument(uri, fileData, delegate);
+    }
     private static async readFile(uri: Uri): Promise<Uint8Array> {
-		if (uri.scheme === 'untitled') {
-			return new Uint8Array();
-		}
-		return new Uint8Array(await workspace.fs.readFile(uri));
-	}
+        if (uri.scheme === 'untitled') {
+            return new Uint8Array();
+        }
+        return new Uint8Array(await workspace.fs.readFile(uri));
+    }
 
     private readonly _uri: Uri;
-	private _documentData: Uint8Array;
-	private _edits: Array<ConstraintsFileEdit> = [];
-	private _savedEdits: Array<ConstraintsFileEdit> = [];
-	private readonly _delegate: ConstraintsFileDelegate;
+    private _documentData: Uint8Array;
+    private _edits: Array<ConstraintsFileEdit> = [];
+    private _savedEdits: Array<ConstraintsFileEdit> = [];
+    private readonly _delegate: ConstraintsFileDelegate;
 
     private constructor(
-		uri: Uri,
-		initialContent: Uint8Array,
-		delegate: ConstraintsFileDelegate
-	) {
-		super();
-		this._uri = uri;
-		this._documentData = initialContent;
-		this._delegate = delegate;
-	}
+        uri: Uri,
+        initialContent: Uint8Array,
+        delegate: ConstraintsFileDelegate
+    ) {
+        super();
+        this._uri = uri;
+        this._documentData = initialContent;
+        this._delegate = delegate;
+    }
     public get uri() { return this._uri; }
 
-	public get documentData(): Uint8Array { return this._documentData; }
+    public get documentData(): Uint8Array { return this._documentData; }
 
-	private readonly _onDidDispose = this._register(new EventEmitter<void>());
+    private readonly _onDidDispose = this._register(new EventEmitter<void>());
     /**
-	 * Fired when the document is disposed of.
-	 */
-	public readonly onDidDispose = this._onDidDispose.event;
+     * Fired when the document is disposed of.
+     */
+    public readonly onDidDispose = this._onDidDispose.event;
 
-	private readonly _onDidChangeDocument = this._register(new EventEmitter<{
-		readonly content?: Uint8Array;
-		readonly edits: readonly ConstraintsFileEdit[];
-	}>());
-	/**
-	 * Fired to notify webviews that the document has changed.
-	 */
-	public readonly onDidChangeContent = this._onDidChangeDocument.event;
+    private readonly _onDidChangeDocument = this._register(new EventEmitter<{
+        readonly content?: Uint8Array;
+        readonly edits: readonly ConstraintsFileEdit[];
+    }>());
+    /**
+     * Fired to notify webviews that the document has changed.
+     */
+    public readonly onDidChangeContent = this._onDidChangeDocument.event;
 
-	private readonly _onDidChange = this._register(new EventEmitter<{
-		readonly label: string,
-		undo(): void,
-		redo(): void,
-	}>());
-	/**
-	 * Fired to tell VS Code that an edit has occurred in the document.
-	 *
-	 * This updates the document's dirty indicator.
-	 */
-	public readonly onDidChange = this._onDidChange.event;
-
-	/**
-	 * Called by VS Code when there are no more references to the document.
-	 *
-	 * This happens when all editors for it have been closed.
-	 */
-	dispose(): void {
-		this._onDidDispose.fire();
-		super.dispose();
-	}
-
-	/**
-	 * Called when the user edits the document in a webview.
-	 *
-	 * This fires an event to notify VS Code that the document has been edited.
-	 */
-	makeEdit(edit: ConstraintsFileEdit) {
-		this._edits.push(edit);
-
-		this._onDidChange.fire({
-			label: 'Update',
-			undo: async () => {
-				this._edits.pop();
-				this._onDidChangeDocument.fire({
-                    content: this.documentData,
-					edits: this._edits,
-				});
-			},
-			redo: async () => {
-				this._edits.push(edit);
-				this._onDidChangeDocument.fire({
-                    content: this.documentData,
-					edits: this._edits,
-				});
-			}
-		});
-	}
+    private readonly _onDidChange = this._register(new EventEmitter<{
+        readonly label: string,
+        undo(): void,
+        redo(): void,
+    }>());
+    /**
+     * Fired to tell VS Code that an edit has occurred in the document.
+     *
+     * This updates the document's dirty indicator.
+     */
+    public readonly onDidChange = this._onDidChange.event;
 
     /**
-	 * Called by VS Code when the user saves the document.
-	 */
-	async save(cancellation: CancellationToken): Promise<void> {
-		await this.saveAs(this.uri, cancellation);
-		this._savedEdits = Array.from(this._edits);
-	}
+     * Called by VS Code when there are no more references to the document.
+     *
+     * This happens when all editors for it have been closed.
+     */
+    dispose(): void {
+        this._onDidDispose.fire();
+        super.dispose();
+    }
 
-	/**
-	 * Called by VS Code when the user saves the document to a new location.
-	 */
-	async saveAs(targetResource: Uri, cancellation: CancellationToken): Promise<void> {
-		const fileData = await this._delegate.getFileData();
-		if (cancellation.isCancellationRequested) {
-			return;
-		}
-		await workspace.fs.writeFile(targetResource, fileData);
-	}
+    /**
+     * Called when the user edits the document in a webview.
+     *
+     * This fires an event to notify VS Code that the document has been edited.
+     */
+    makeEdit(edit: ConstraintsFileEdit) {
+        this._edits.push(edit);
 
-	/**
-	 * Called by VS Code when the user calls `revert` on a document.
-	 */
-	async revert(_cancellation: CancellationToken): Promise<void> {
-		const diskContent = await ConstraintsFileDocument.readFile(this.uri);
-		this._documentData = diskContent;
-		this._edits = this._savedEdits;
-		this._onDidChangeDocument.fire({
-			content: diskContent,
-			edits: this._edits,
-		});
-	}
+        this._onDidChange.fire({
+            label: 'Update',
+            undo: async () => {
+                this._edits.pop();
+                this._onDidChangeDocument.fire({
+                    content: this.documentData,
+                    edits: this._edits,
+                });
+            },
+            redo: async () => {
+                this._edits.push(edit);
+                this._onDidChangeDocument.fire({
+                    content: this.documentData,
+                    edits: this._edits,
+                });
+            }
+        });
+    }
 
-	/**
-	 * Called by VS Code to backup the edited document.
-	 *
-	 * These backups are used to implement hot exit.
-	 */
-	async backup(destination: Uri, cancellation: CancellationToken): Promise<CustomDocumentBackup> {
-		await this.saveAs(destination, cancellation);
+    /**
+     * Called by VS Code when the user saves the document.
+     */
+    async save(cancellation: CancellationToken): Promise<void> {
+        await this.saveAs(this.uri, cancellation);
+        this._savedEdits = Array.from(this._edits);
+    }
 
-		return {
-			id: destination.toString(),
-			delete: async () => {
-				try {
-					await workspace.fs.delete(destination);
-				} catch {
-					// noop
-				}
-			}
-		};
-	}
+    /**
+     * Called by VS Code when the user saves the document to a new location.
+     */
+    async saveAs(targetResource: Uri, cancellation: CancellationToken): Promise<void> {
+        const fileData = await this._delegate.getFileData();
+        if (cancellation.isCancellationRequested) {
+            return;
+        }
+        await workspace.fs.writeFile(targetResource, fileData);
+    }
+
+    /**
+     * Called by VS Code when the user calls `revert` on a document.
+     */
+    async revert(_cancellation: CancellationToken): Promise<void> {
+        const diskContent = await ConstraintsFileDocument.readFile(this.uri);
+        this._documentData = diskContent;
+        this._edits = this._savedEdits;
+        this._onDidChangeDocument.fire({
+            content: diskContent,
+            edits: this._edits,
+        });
+    }
+
+    /**
+     * Called by VS Code to backup the edited document.
+     *
+     * These backups are used to implement hot exit.
+     */
+    async backup(destination: Uri, cancellation: CancellationToken): Promise<CustomDocumentBackup> {
+        await this.saveAs(destination, cancellation);
+
+        return {
+            id: destination.toString(),
+            delete: async () => {
+                try {
+                    await workspace.fs.delete(destination);
+                } catch {
+                    // noop
+                }
+            }
+        };
+    }
 }
 
 export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDocument> {
@@ -231,43 +231,45 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
     private static newConstraintsFileId: number = 1;
     private static getOssCadSuitePath: undefined | (() => Promise<string | undefined>);
     private static getSelectedProject: undefined | (() => {name: string, path: string} | undefined);
+    private static getOverridePaths: undefined | (() => Promise<Record<string, string>>);
 
-	public static register(context: ExtensionContext, getOssCadSuitePath: (() => Promise<string | undefined>), getSelectedProject: () => {name: string, path: string} | undefined): VSCodeDisposable {
+    public static register(context: ExtensionContext, getOssCadSuitePath: (() => Promise<string | undefined>), getSelectedProject: () => {name: string, path: string} | undefined, getOverridePaths: () => Promise<Record<string, string>>): VSCodeDisposable {
         ConstraintsEditor.getSelectedProject = getSelectedProject;
         ConstraintsEditor.getOssCadSuitePath = getOssCadSuitePath;
-		commands.registerCommand('lushay-code.constraintsEditor.new', () => {
-			const workspaceFolders = workspace.workspaceFolders;
-			if (!workspaceFolders) {
-				vsCodeWindow.showErrorMessage("Creating new Paw Draw files currently requires opening a workspace");
-				return;
-			}
+        ConstraintsEditor.getOverridePaths = getOverridePaths;
+        commands.registerCommand('lushay-code.constraintsEditor.new', () => {
+            const workspaceFolders = workspace.workspaceFolders;
+            if (!workspaceFolders) {
+                vsCodeWindow.showErrorMessage("Creating new Paw Draw files currently requires opening a workspace");
+                return;
+            }
 
-			const uri = Uri.joinPath(workspaceFolders[0].uri, `new-${ConstraintsEditor.newConstraintsFileId++}.pawdraw`)
-				.with({ scheme: 'untitled' });
+            const uri = Uri.joinPath(workspaceFolders[0].uri, `new-${ConstraintsEditor.newConstraintsFileId++}.pawdraw`)
+                .with({ scheme: 'untitled' });
 
-			commands.executeCommand('vscode.openWith', uri, ConstraintsEditor.viewType);
-		});
+            commands.executeCommand('vscode.openWith', uri, ConstraintsEditor.viewType);
+        });
 
-		return window.registerCustomEditorProvider(
-			ConstraintsEditor.viewType,
-			new ConstraintsEditor(context),
-			{
-				// For this demo extension, we enable `retainContextWhenHidden` which keeps the
-				// webview alive even when it is not visible. You should avoid using this setting
-				// unless is absolutely required as it does have memory overhead.
-				webviewOptions: {
-					retainContextWhenHidden: true,
-				},
-				supportsMultipleEditorsPerDocument: false,
-			});
-	}
+        return window.registerCustomEditorProvider(
+            ConstraintsEditor.viewType,
+            new ConstraintsEditor(context),
+            {
+                // For this demo extension, we enable `retainContextWhenHidden` which keeps the
+                // webview alive even when it is not visible. You should avoid using this setting
+                // unless is absolutely required as it does have memory overhead.
+                webviewOptions: {
+                    retainContextWhenHidden: true,
+                },
+                supportsMultipleEditorsPerDocument: false,
+            });
+    }
 
-	private static readonly viewType = 'lushay-code.constraintsEditor';
+    private static readonly viewType = 'lushay-code.constraintsEditor';
 
-	/**
-	 * Tracks all known webviews
-	 */
-	private readonly webviews = new WebviewCollection();
+    /**
+     * Tracks all known webviews
+     */
+    private readonly webviews = new WebviewCollection();
 
     // private constructor(private panel: WebviewPanel, extensionUri: Uri) {
     //     this.panel.onDidDispose(this.dispose, null, this._disposables);
@@ -277,11 +279,11 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
     //     }, undefined, this._disposables);
     // }
     constructor(
-		private readonly _context: ExtensionContext
-	) { }
+        private readonly _context: ExtensionContext
+    ) { }
 
     private readonly _onDidChangeCustomDocument = new EventEmitter<CustomDocumentEditEvent<ConstraintsFileDocument>>();
-	public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
+    public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
 
     saveCustomDocument(document: ConstraintsFileDocument, cancellation: CancellationToken): Thenable<void> {
         return document.save(cancellation);
@@ -297,113 +299,113 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
     }
     async openCustomDocument(uri: Uri, openContext: CustomDocumentOpenContext, token: CancellationToken): Promise<ConstraintsFileDocument> {
         const document: ConstraintsFileDocument = await ConstraintsFileDocument.create(uri, openContext.backupId, {
-			getFileData: async () => {
-				const webviewsForDocument = Array.from(this.webviews.get(document.uri));
-				if (!webviewsForDocument.length) {
-					throw new Error('Could not find webview to save for');
-				}
-				const panel = webviewsForDocument[0];
-				const response = await this.postMessageWithResponse<number[]>(panel, 'getFileData', {uri: document.uri.toString()});
-				return new Uint8Array(response);
-			}
-		});
+            getFileData: async () => {
+                const webviewsForDocument = Array.from(this.webviews.get(document.uri));
+                if (!webviewsForDocument.length) {
+                    throw new Error('Could not find webview to save for');
+                }
+                const panel = webviewsForDocument[0];
+                const response = await this.postMessageWithResponse<number[]>(panel, 'getFileData', {uri: document.uri.toString()});
+                return new Uint8Array(response);
+            }
+        });
 
-		const listeners: VSCodeDisposable[] = [];
+        const listeners: VSCodeDisposable[] = [];
 
-		listeners.push(document.onDidChange(e => {
-			// Tell VS Code that the document has been edited by the use.
-			this._onDidChangeCustomDocument.fire({
-				document,
-				...e,
-			});
-		}));
+        listeners.push(document.onDidChange(e => {
+            // Tell VS Code that the document has been edited by the use.
+            this._onDidChangeCustomDocument.fire({
+                document,
+                ...e,
+            });
+        }));
 
-		listeners.push(document.onDidChangeContent(e => {
-			// Update all webviews when the document changes
-			for (const webviewPanel of this.webviews.get(document.uri)) {
-				this.postMessage(webviewPanel, 'update', {
-					edits: e.edits,
-					content: e.content,
+        listeners.push(document.onDidChangeContent(e => {
+            // Update all webviews when the document changes
+            for (const webviewPanel of this.webviews.get(document.uri)) {
+                this.postMessage(webviewPanel, 'update', {
+                    edits: e.edits,
+                    content: e.content,
                     uri: document.uri.toString(),
-				});
-			}
-		}));
+                });
+            }
+        }));
 
-		document.onDidDispose(() => disposeAll(listeners));
+        document.onDidDispose(() => disposeAll(listeners));
 
-		return document;
+        return document;
     }
     async resolveCustomEditor(
-		document: ConstraintsFileDocument,
-		webviewPanel: WebviewPanel,
-		_token: CancellationToken
-	): Promise<void> {
-		// Add the webview to our internal set of active webviews
-		this.webviews.add(document.uri, webviewPanel);
+        document: ConstraintsFileDocument,
+        webviewPanel: WebviewPanel,
+        _token: CancellationToken
+    ): Promise<void> {
+        // Add the webview to our internal set of active webviews
+        this.webviews.add(document.uri, webviewPanel);
 
-		// Setup initial content for the webview
-		webviewPanel.webview.options = {
-			enableScripts: true,
-		};
-		webviewPanel.webview.html = this.getHTML(webviewPanel.webview);
+        // Setup initial content for the webview
+        webviewPanel.webview.options = {
+            enableScripts: true,
+        };
+        webviewPanel.webview.html = this.getHTML(webviewPanel.webview);
 
-		webviewPanel.webview.onDidReceiveMessage(e => this.onMessage(document, e));
+        webviewPanel.webview.onDidReceiveMessage(e => this.onMessage(document, e));
         const selectedProject = ConstraintsEditor.getSelectedProject?.();
         const projectFile = await parseProjectFile(undefined, selectedProject?.path);
-		// Wait for the webview to be properly ready before we init
-		webviewPanel.webview.onDidReceiveMessage(e => {
-			if (e.type === 'ready') {
+        // Wait for the webview to be properly ready before we init
+        webviewPanel.webview.onDidReceiveMessage(e => {
+            if (e.type === 'ready') {
                 
-				if (document.uri.scheme === 'untitled') {
-					this.postMessage(webviewPanel, 'init', {
-						untitled: true,
-						editable: true,
+                if (document.uri.scheme === 'untitled') {
+                    this.postMessage(webviewPanel, 'init', {
+                        untitled: true,
+                        editable: true,
                         uri: document.uri.toString(),
                         board: projectFile?.board || 'tangnano9k'
-					});
-				} else {
-					const editable = workspace.fs.isWritableFileSystem(document.uri.scheme);
+                    });
+                } else {
+                    const editable = workspace.fs.isWritableFileSystem(document.uri.scheme);
 
-					this.postMessage(webviewPanel, 'init', {
-						value: document.documentData,
-						editable,
+                    this.postMessage(webviewPanel, 'init', {
+                        value: document.documentData,
+                        editable,
                         uri: document.uri.toString(),
                         board: projectFile?.board || 'tangnano9k'
-					});
-				}
-			} else if (e.type === 'getPorts') {
+                    });
+                }
+            } else if (e.type === 'getPorts') {
                 this.getPorts(webviewPanel);
             }
-		});
-	}
+        });
+    }
 
     private _requestId = 1;
-	private readonly _callbacks = new Map<number, (response: any) => void>();
+    private readonly _callbacks = new Map<number, (response: any) => void>();
 
-	private postMessageWithResponse<R = unknown>(panel: WebviewPanel, type: string, body: any): Promise<R> {
-		const requestId = this._requestId++;
-		const p = new Promise<R>(resolve => this._callbacks.set(requestId, resolve));
-		panel.webview.postMessage({ type, requestId, body });
-		return p;
-	}
+    private postMessageWithResponse<R = unknown>(panel: WebviewPanel, type: string, body: any): Promise<R> {
+        const requestId = this._requestId++;
+        const p = new Promise<R>(resolve => this._callbacks.set(requestId, resolve));
+        panel.webview.postMessage({ type, requestId, body });
+        return p;
+    }
 
-	private postMessage(panel: WebviewPanel, type: string, body: any): void {
-		panel.webview.postMessage({ type, body });
-	}
+    private postMessage(panel: WebviewPanel, type: string, body: any): void {
+        panel.webview.postMessage({ type, body });
+    }
 
-	private onMessage(document: ConstraintsFileDocument, message: any) {
-		switch (message.type) {
-			case 'edit':
-				document.makeEdit(message as ConstraintsFileEdit);
-				return;
-			case 'response':
-				{
-					const callback = this._callbacks.get(message.requestId);
-					callback?.(message.body);
-					return;
-				}
-		}
-	}
+    private onMessage(document: ConstraintsFileDocument, message: any) {
+        switch (message.type) {
+            case 'edit':
+                document.makeEdit(message as ConstraintsFileEdit);
+                return;
+            case 'response':
+                {
+                    const callback = this._callbacks.get(message.requestId);
+                    callback?.(message.body);
+                    return;
+                }
+        }
+    }
 
     private async getPorts(webview: WebviewPanel) {
         const ossCadPath = await ConstraintsEditor.getOssCadSuitePath?.();
@@ -415,8 +417,8 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
         if (!projectFile) {
             return;
         }
-
-        const yosysPath = path.join(ossCadPath, 'yosys');
+        const overrides = await ConstraintsEditor.getOverridePaths?.() || {};
+        const yosysPath = overrides['yosys'] || path.join(ossCadPath, 'yosys');
         const ossRootPath = path.resolve(ossCadPath, '..');
         const res = spawnSync(yosysPath,  ['-p', `read_verilog ${projectFile.includedFilePaths.join(' ')}; portlist ${projectFile.top || 'top'}`], {
             env: {
@@ -891,32 +893,32 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
  */
 class WebviewCollection {
 
-	private readonly _webviews = new Set<{
-		readonly resource: string;
-		readonly webviewPanel: WebviewPanel;
-	}>();
+    private readonly _webviews = new Set<{
+        readonly resource: string;
+        readonly webviewPanel: WebviewPanel;
+    }>();
 
-	/**
-	 * Get all known webviews for a given uri.
-	 */
-	public *get(uri: Uri): Iterable<WebviewPanel> {
-		const key = uri.toString();
-		for (const entry of this._webviews) {
-			if (entry.resource === key) {
-				yield entry.webviewPanel;
-			}
-		}
-	}
+    /**
+     * Get all known webviews for a given uri.
+     */
+    public *get(uri: Uri): Iterable<WebviewPanel> {
+        const key = uri.toString();
+        for (const entry of this._webviews) {
+            if (entry.resource === key) {
+                yield entry.webviewPanel;
+            }
+        }
+    }
 
-	/**
-	 * Add a new webview to the collection.
-	 */
-	public add(uri: Uri, webviewPanel: WebviewPanel) {
-		const entry = { resource: uri.toString(), webviewPanel };
-		this._webviews.add(entry);
+    /**
+     * Add a new webview to the collection.
+     */
+    public add(uri: Uri, webviewPanel: WebviewPanel) {
+        const entry = { resource: uri.toString(), webviewPanel };
+        this._webviews.add(entry);
 
-		webviewPanel.onDidDispose(() => {
-			this._webviews.delete(entry);
-		});
-	}
+        webviewPanel.onDidDispose(() => {
+            this._webviews.delete(entry);
+        });
+    }
 }

@@ -4,19 +4,19 @@ import { ToolchainStage } from "./stage";
 
 export class OpenFPGALoaderProgramStage extends ToolchainStage {
     private detectedUsbNotFound: boolean = false;
-	private detectedError: boolean = false;
+    private detectedError: boolean = false;
 
     public async runProg(previousStage: ToolchainStage | undefined): Promise<number | null> {
-        const openFpgaLoaderPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'openFPGALoader');
+        const openFpgaLoaderPath = ToolchainStage.overrides['openFPGALoader'] || path.join(ToolchainStage.ossCadSuiteBinPath, 'openFPGALoader');
         const toolchain = boardToToolchain(this.projectFile.board);
         const extension = toolchain === ToolchainProject.APICULA ? '.fs' : toolchain === ToolchainProject.ICESTORM ? '.bin' : '.bit';
-		const inputPath = path.join(this.projectFile.basePath, this.projectFile.name + extension);
+        const inputPath = path.join(this.projectFile.basePath, this.projectFile.name + extension);
 
         const programCommand = [
-        	openFpgaLoaderPath,
-        	'-b',
-        	this.projectFile.board,
-        	inputPath,
+            openFpgaLoaderPath,
+            '-b',
+            this.projectFile.board,
+            inputPath,
             '-v',
             ...(this.projectFile.programMode === 'flash' ? ['-f'] : [])
         ];

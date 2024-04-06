@@ -1,6 +1,8 @@
 import { ToolchainStage } from "./stage";
 import * as path from 'path';
 import { gowinDeviceInfo, ecp5DeviceInfo, ice40DeviceInfo } from "../utils/device-info";
+import * as fs from 'fs';
+import { spawnSync } from "child_process";
 
 enum NextPnREditions {
     GOWIN = 'Gowin',
@@ -9,7 +11,6 @@ enum NextPnREditions {
 }
 
 function createNextPnRStage(edition: NextPnREditions) {
-
     class NextPnrStage extends ToolchainStage {
         private deviceUtilisation: string[] = [];
         private utilisationStarted = false;
@@ -17,6 +18,10 @@ function createNextPnRStage(edition: NextPnREditions) {
         private getExectuable(): string {
             switch (edition) {
                 case NextPnREditions.GOWIN:
+                    const himbaechelPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'nextpnr-himbaechel');
+                    if (fs.existsSync(himbaechelPath)) {
+                        return 'nextpnr-himbaechel';
+                    }
                     return 'nextpnr-gowin';
                 case NextPnREditions.ICE40:
                     return 'nextpnr-ice40';
@@ -27,9 +32,30 @@ function createNextPnRStage(edition: NextPnREditions) {
 
         private getCommand(inputPath: string, outputPath: string): string[] {
             const command = this.getExectuable();
-            const nextPnrPath = path.join(ToolchainStage.ossCadSuiteBinPath, command);
+            const nextPnrPath = ToolchainStage.overrides['nextpnr'] ||
+            path.join(ToolchainStage.ossCadSuiteBinPath, command);
+
             switch (edition) {
                 case NextPnREditions.GOWIN:
+                    const ossRootPath = path.resolve(ToolchainStage.ossCadSuiteBinPath, '..');
+                    const res = spawnSync(
+                        nextPnrPath,
+                        [
+                            '--help'
+                        ],
+                        {
+                        env: {
+                            PATH: [
+                                path.join(ossRootPath, 'bin'),
+                                path.join(ossRootPath, 'lib'),
+                                path.join(ossRootPath, 'py3bin'),
+                                process.env.PATH
+                            ].join(process.platform === 'win32' ? ';' : ':')
+                        },
+                        cwd: this.projectFile.basePath,
+                    });
+
+                    const isHimBaechel = (res.stdout.toString() + res.stderr.toString()).includes('vopt');
                     const {device, family, freq} = gowinDeviceInfo(this.projectFile.board);
                     return [
                         nextPnrPath,
@@ -41,10 +67,14 @@ function createNextPnRStage(edition: NextPnREditions) {
                         freq,
                         '--device',
                         device,
-                        '--family',
-                        family,
-                        '--cst',
-                        this.projectFile.constraintsFile,
+                        ...(isHimBaechel ?
+                            ['--vopt', 'family=' + family] :
+                            ['--family', family]
+                        ),
+                        ...(isHimBaechel ?
+                            ['--vopt', 'cst=' + this.projectFile.constraintsFile] :
+                            ['--cst', this.projectFile.constraintsFile]
+                        ),
                         ...this.projectFile.nextPnrGowinOptions
                     ];
                 case NextPnREditions.ICE40:

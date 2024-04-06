@@ -174,6 +174,9 @@ This extension contributes the following settings:
 * `lushay.OssCadSuite.path`: You need to set this to the path of OSS-CAD-Suite on your computer
 * `lushay.Build.toolchain`: This can be set to 'open-source' or 'cloud' to choose the desired toolchain
 * `"lushay.Build.cloudApiKey`: If cloud is selected this setting must contain a valid API key
+* `"lushay.Build.overrideYosysPath`: If you want to use a custom yosys binary you can set the path here"
+* `"lushay.Build.overrideNextpnrPath`: If you want to use a custom nextpnr binary you can set the path here
+* `"lushay.Build.overrideOpenFpgaLoaderPath`: If you want to use a custom openFPGALoader binary you can set the path here"
 
 ## Release Notes
 
