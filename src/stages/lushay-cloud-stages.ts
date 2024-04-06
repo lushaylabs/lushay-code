@@ -14,7 +14,7 @@ export class YosysGowinPrepareProjectStage extends ToolchainStage {
     public async runProg(): Promise<number | null> {
         const yosysPath = ToolchainStage.overrides['yosys'] || path.join(ToolchainStage.ossCadSuiteBinPath, 'yosys');
         const outPath = path.join(this.projectFile.basePath, `___tempbuild_1${this.projectFile.name}.v`);
-        const gowinXtraCellsPath = path.join(ToolchainStage.ossCadSuiteBinPath, '..', 'share/yosys/gowin/cells_xtra.v');
+        const gowinXtraCellsPath = path.join(ToolchainStage.ossCadSuiteBinPath, '..', 'share', 'yosys', 'gowin', 'cells_xtra.v');
 
         const preparationCommand = [
             yosysPath,

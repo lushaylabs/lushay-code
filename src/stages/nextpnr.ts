@@ -19,7 +19,7 @@ function createNextPnRStage(edition: NextPnREditions) {
             switch (edition) {
                 case NextPnREditions.GOWIN:
                     const himbaechelPath = path.join(ToolchainStage.ossCadSuiteBinPath, 'nextpnr-himbaechel');
-                    if (fs.existsSync(himbaechelPath)) {
+                    if (fs.existsSync(himbaechelPath) || fs.existsSync(himbaechelPath + '.exe')) {
                         return 'nextpnr-himbaechel';
                     }
                     return 'nextpnr-gowin';
@@ -57,6 +57,7 @@ function createNextPnRStage(edition: NextPnREditions) {
 
                     const isHimBaechel = (res.stdout.toString() + res.stderr.toString()).includes('vopt');
                     const {device, family, freq} = gowinDeviceInfo(this.projectFile.board);
+                    const chibDbPath = path.join(ToolchainStage.ossCadSuiteBinPath, '..', 'share', 'nextpnr', 'himbaechel', 'gowin', 'chipdb-' + family + '.bin');
                     return [
                         nextPnrPath,
                         '--json',
@@ -74,6 +75,10 @@ function createNextPnRStage(edition: NextPnREditions) {
                         ...(isHimBaechel ?
                             ['--vopt', 'cst=' + this.projectFile.constraintsFile] :
                             ['--cst', this.projectFile.constraintsFile]
+                        ),
+                        ...(isHimBaechel && !(ToolchainStage.overrides['nextpnr']) ?
+                            ['--chipdb', chibDbPath] :
+                            []
                         ),
                         ...this.projectFile.nextPnrGowinOptions
                     ];
@@ -153,6 +158,8 @@ function createNextPnRStage(edition: NextPnREditions) {
                 if (data.includes('Device utilisation')) {
                     this.utilisationStarted = true;
                 }
+            } else if (line.includes('unrecognised option')) {
+                ToolchainStage.logger.logToSummary('    Error: ' + line);
             }
         }
 

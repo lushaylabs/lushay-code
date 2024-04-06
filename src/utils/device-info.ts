@@ -27,7 +27,7 @@ export const gowinDeviceInfo = (board: string):  {device: string, family: string
     } else if (board === 'tangnano20k') {
         return {
             device: 'GW2AR-LV18QN88C8/I7',
-            family: 'GW2AR-18C',
+            family: 'GW2A-18C',
             freq: '27'
         }
     }
