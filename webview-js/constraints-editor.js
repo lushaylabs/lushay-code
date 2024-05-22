@@ -184,7 +184,7 @@ const TEMPLATES = {
             {name: 'btn2', location: 'V17', standard: 'LVCMOS33'}
         ]
     },
-    'UPduino31': {
+    'UPduino 3.1': {
         // TODO: Finish UPduino stuff
         // 'Clock': [
         //     {name: 'clk', location: '35'}
@@ -593,53 +593,55 @@ const pinLocations = {
         { x: 524, y: 150, pinNumber: 78 },
     ],
     // TODO: Finish UPDuino stuff
-    'UPduino31': [
+    'UPduino 3.1': [
         // TODO: x/y in pix?   then FPGA pin number
         // each seems to be real x,y in pix - 11
-        // Top
-        { x:  40, y: 52, pinNumber: 28 },
-        { x:  80, y: 52, pinNumber: 38 },
-        { x: 120, y: 52, pinNumber: 42 },
-        { x: 160, y: 52, pinNumber: 36 },
-        { x: 200, y: 52, pinNumber: 43 },
-        { x: 240, y: 52, pinNumber: 34 },
-        { x: 280, y: 52, pinNumber: 37 },
-        { x: 320, y: 52, pinNumber: 31 },
-        { x: 360, y: 52, pinNumber: 35 },
-        { x: 400, y: 52, pinNumber: 32 },
-        { x: 440, y: 52, pinNumber: 27 },
-        { x: 480, y: 52, pinNumber: 26 },
-        { x: 520, y: 52, pinNumber: 25 },
-        { x: 560, y: 52, pinNumber: 23 },
+        // Top ; x subtract 27
+        { x:  13, y: 20, pinNumber: 28 },
+        { x:  37, y: 20, pinNumber: 38 },
+        { x:  61, y: 20, pinNumber: 42 },
+        { x:  85, y: 20, pinNumber: 36 },
+        { x: 109, y: 20, pinNumber: 43 },
+        { x: 133, y: 20, pinNumber: 34 },
+        { x: 157, y: 20, pinNumber: 37 },
+        { x: 181, y: 20, pinNumber: 31 },
+        { x: 205, y: 20, pinNumber: 35 },
+        { x: 229, y: 20, pinNumber: 32 },
+        { x: 253, y: 20, pinNumber: 27 },
+        { x: 277, y: 20, pinNumber: 26 },
+        { x: 301, y: 20, pinNumber: 25 },
+        { x: 325, y: 20, pinNumber: 23 },
+        // Gap:  349, 373, 397
         // RGB Pins
-        { x: 720, y: 52, pinNumber: 39 },
-        { x: 760, y: 52, pinNumber: 40 },
-        { x: 800, y: 52, pinNumber: 41 },
+        { x: 424, y: 20, pinNumber: 39 },
+        { x: 449, y: 20, pinNumber: 40 },
+        { x: 472, y: 20, pinNumber: 41 },
+        // 496, 520, 544, 569
         // Bottom
-        { x:  40, y: 333, pinNumber:  2 },
-        { x:  80, y: 333, pinNumber: 46 },
-        { x: 120, y: 333, pinNumber: 47 },
-        { x: 160, y: 333, pinNumber: 45 },
-        { x: 200, y: 333, pinNumber: 48 },
-        { x: 240, y: 333, pinNumber:  3 },
-        { x: 280, y: 333, pinNumber:  4 },
-        { x: 320, y: 333, pinNumber: 44 },
-        { x: 360, y: 333, pinNumber:  6 },
-        { x: 400, y: 333, pinNumber:  9 },
-        { x: 440, y: 333, pinNumber: 11 },
-        { x: 480, y: 333, pinNumber: 18 },
-        { x: 520, y: 333, pinNumber: 19 },
-        { x: 560, y: 333, pinNumber: 13 },
-        { x: 600, y: 333, pinNumber: 21 },
-        { x: 640, y: 333, pinNumber: 12 },
-        // GND and 12Mhz out and 
-        { x: 760, y: 333, pinNumber: 10 },
-        { x: 800, y: 333, pinNumber: 20 },
+        { x:  13, y: 188, pinNumber:  2 },
+        { x:  37, y: 188, pinNumber: 46 },
+        { x:  61, y: 188, pinNumber: 47 },
+        { x:  85, y: 188, pinNumber: 45 },
+        { x: 109, y: 188, pinNumber: 48 },
+        { x: 133, y: 188, pinNumber:  3 },
+        { x: 157, y: 188, pinNumber:  4 },
+        { x: 181, y: 188, pinNumber: 44 },
+        { x: 205, y: 188, pinNumber:  6 },
+        { x: 229, y: 188, pinNumber:  9 },
+        { x: 253, y: 188, pinNumber: 11 },
+        { x: 277, y: 188, pinNumber: 18 },
+        { x: 301, y: 188, pinNumber: 19 },
+        { x: 325, y: 188, pinNumber: 13 },
+        { x: 349, y: 188, pinNumber: 21 },
+        { x: 373, y: 188, pinNumber: 12 },
+        // GND and 12Mhz out : 397, 421
+        { x: 449, y: 188, pinNumber: 10 },
+        { x: 472, y: 188, pinNumber: 20 },
 
-        { x: 840, y: 333, pinNumber: 14 },
-        { x: 880, y: 333, pinNumber: 17 },
-        { x: 920, y: 333, pinNumber: 15 },
-        { x: 960, y: 333, pinNumber: 16 },
+        { x: 496, y: 188, pinNumber: 14 },
+        { x: 520, y: 188, pinNumber: 17 },
+        { x: 544, y: 188, pinNumber: 15 },
+        { x: 568, y: 188, pinNumber: 16 },
 
     ],
 
@@ -665,7 +667,7 @@ const getBoardImages = () => {
         'iCEBreaker': icebreakerBoard,
         'iCEStick': icestickBoard,
         'Orange Crab': orangeCrabBoard,
-        'UPduino31': upduinoBoard31
+        'UPduino 3.1': upduinoBoard31
     }
 }
 
@@ -1347,7 +1349,7 @@ function main() {
             if (['Orange Crab'].includes(board)) {
                 return 'ecp5';
             }
-            if (['iCEBreaker', 'iCEStick', 'UPduino31'].includes(board)) {
+            if (['iCEBreaker', 'iCEStick', 'UPduino 3.1'].includes(board)) {
                 return 'ice';
             }
         }
@@ -1551,7 +1553,7 @@ function main() {
                         'orangeCrab': 'Orange Crab',
                         'icebreaker': 'iCEBreaker',
                         'icestick': 'iCEStick',
-                        'upduino31': 'UPduino31'
+                        'upduino31': 'UPduino 3.1'
                     }
                     const boardName = reverseBoardMap[body.board] || 'Tang Nano 9K';
                     board = boardSelect.value = boardName;
