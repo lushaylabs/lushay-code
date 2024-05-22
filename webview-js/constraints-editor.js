@@ -185,18 +185,20 @@ const TEMPLATES = {
         ]
     },
     'UPduino 3.1': {
-        // TODO: Finish UPduino stuff
-        // 'Clock': [
-        //     {name: 'clk', location: '35'}
-        // ],
-        'UART': [
-            {name: 'uartTx', location: '14'},
-            {name: 'uartRx', location: '15'}
+        // UPduino stuff
+        'Global Pins': [
+            {name: 'G0', location: '34'},
+            {name: 'G1', location: '37'},
+            {name: 'G3', location: '20'},
+            {name: 'G6', location: '44'},
         ],
-        // 'Button': [
-        //     {name: 'btn', location: '10'},
-        // ],
-        'LEDs': [
+        'Flash SPI': [
+            {name: 'MOSI', location: '14'},
+            {name: 'MISO', location: '17'},
+            {name: 'SCK',  location: '15'},
+            {name: 'nCS',  location: '16'},
+        ],
+        'RGB LED': [
             {name: 'ledB', location: '39'},
             {name: 'ledG', location: '40'},
             {name: 'ledR', location: '41'}
@@ -212,6 +214,16 @@ const TEMPLATES = {
         //     {name: 'btn[0]', location: '20'},
         //     {name: 'btn[1]', location: '19'},
         //     {name: 'btn[2]', location: '18'},
+        // ],
+        // 'Button': [
+        //     {name: 'btn', location: '10'},
+        // ],
+        // 'Clock': [
+        //     {name: 'clk', location: '35'}
+        // ],
+        // 'UART': [
+        //     {name: 'uartTx', location: '14'},
+        //     {name: 'uartRx', location: '15'}
         // ]
     },
 
@@ -592,11 +604,10 @@ const pinLocations = {
         { x: 511, y: 150, pinNumber: 87 },
         { x: 524, y: 150, pinNumber: 78 },
     ],
-    // TODO: Finish UPDuino stuff
+    // UPDuino stuff
     'UPduino 3.1': [
-        // TODO: x/y in pix?   then FPGA pin number
-        // each seems to be real x,y in pix - 11
-        // Top ; x subtract 27
+        // x/y in pix, then FPGA pin number
+        // Not clear on the offsets, but this seems ok for current png
         { x:  13, y: 20, pinNumber: 28 },
         { x:  37, y: 20, pinNumber: 38 },
         { x:  61, y: 20, pinNumber: 42 },
