@@ -15,6 +15,7 @@ Currently only the following boards are supported:
 - icebreaker
 - icestick
 - Orange Crab
+- UPduino 3.1
 
 Support for other FPGAs is planned and welcomed.
 
@@ -115,6 +116,7 @@ values for board are:
 - icebreaker
 - icestick
 - orangeCrab
+- upduino31
 
 ### Ubuntu USB Setup
 On Ubuntu by default users don't have the required permissions that openFPGALoader needs in-order to function. To fix this you can open up a terminal and run the following to give your user the required permission.

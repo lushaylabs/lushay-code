@@ -183,7 +183,37 @@ const TEMPLATES = {
             {name: 'btn1', location: 'J17', standard: 'LVCMOS33'},
             {name: 'btn2', location: 'V17', standard: 'LVCMOS33'}
         ]
-    }
+    },
+    'UPduino31': {
+        // TODO: Finish UPduino stuff
+        // 'Clock': [
+        //     {name: 'clk', location: '35'}
+        // ],
+        'UART': [
+            {name: 'uartTx', location: '14'},
+            {name: 'uartRx', location: '15'}
+        ],
+        // 'Button': [
+        //     {name: 'btn', location: '10'},
+        // ],
+        'LEDs': [
+            {name: 'ledB', location: '39'},
+            {name: 'ledG', location: '40'},
+            {name: 'ledR', location: '41'}
+        ],
+        // 'Extension LEDs': [
+        //     {name: 'led[0]', location: '26'},
+        //     {name: 'led[1]', location: '23'},
+        //     {name: 'led[2]', location: '27'},
+        //     {name: 'led[3]', location: '21'},
+        //     {name: 'led[4]', location: '25'},
+        // ],
+        // 'Extension Buttons': [
+        //     {name: 'btn[0]', location: '20'},
+        //     {name: 'btn[1]', location: '19'},
+        //     {name: 'btn[2]', location: '18'},
+        // ]
+    },
 
 }
 
@@ -561,7 +591,58 @@ const pinLocations = {
         { x: 524, y: 138, pinNumber: 79 },
         { x: 511, y: 150, pinNumber: 87 },
         { x: 524, y: 150, pinNumber: 78 },
-    ]
+    ],
+    // TODO: Finish UPDuino stuff
+    'UPduino31': [
+        // TODO: x/y in pix?   then FPGA pin number
+        // each seems to be real x,y in pix - 11
+        // Top
+        { x:  40, y: 52, pinNumber: 28 },
+        { x:  80, y: 52, pinNumber: 38 },
+        { x: 120, y: 52, pinNumber: 42 },
+        { x: 160, y: 52, pinNumber: 36 },
+        { x: 200, y: 52, pinNumber: 43 },
+        { x: 240, y: 52, pinNumber: 34 },
+        { x: 280, y: 52, pinNumber: 37 },
+        { x: 320, y: 52, pinNumber: 31 },
+        { x: 360, y: 52, pinNumber: 35 },
+        { x: 400, y: 52, pinNumber: 32 },
+        { x: 440, y: 52, pinNumber: 27 },
+        { x: 480, y: 52, pinNumber: 26 },
+        { x: 520, y: 52, pinNumber: 25 },
+        { x: 560, y: 52, pinNumber: 23 },
+        // RGB Pins
+        { x: 720, y: 52, pinNumber: 39 },
+        { x: 760, y: 52, pinNumber: 40 },
+        { x: 800, y: 52, pinNumber: 41 },
+        // Bottom
+        { x:  40, y: 333, pinNumber:  2 },
+        { x:  80, y: 333, pinNumber: 46 },
+        { x: 120, y: 333, pinNumber: 47 },
+        { x: 160, y: 333, pinNumber: 45 },
+        { x: 200, y: 333, pinNumber: 48 },
+        { x: 240, y: 333, pinNumber:  3 },
+        { x: 280, y: 333, pinNumber:  4 },
+        { x: 320, y: 333, pinNumber: 44 },
+        { x: 360, y: 333, pinNumber:  6 },
+        { x: 400, y: 333, pinNumber:  9 },
+        { x: 440, y: 333, pinNumber: 11 },
+        { x: 480, y: 333, pinNumber: 18 },
+        { x: 520, y: 333, pinNumber: 19 },
+        { x: 560, y: 333, pinNumber: 13 },
+        { x: 600, y: 333, pinNumber: 21 },
+        { x: 640, y: 333, pinNumber: 12 },
+        // GND and 12Mhz out and 
+        { x: 760, y: 333, pinNumber: 10 },
+        { x: 800, y: 333, pinNumber: 20 },
+
+        { x: 840, y: 333, pinNumber: 14 },
+        { x: 880, y: 333, pinNumber: 17 },
+        { x: 920, y: 333, pinNumber: 15 },
+        { x: 960, y: 333, pinNumber: 16 },
+
+    ],
+
 }
 
 const getBoardImages = () => {
@@ -573,6 +654,7 @@ const getBoardImages = () => {
     const orangeCrabBoard = document.getElementById('orangecrab-board');
     const icebreakerBoard = document.getElementById('icebreaker-board');
     const icestickBoard = document.getElementById('icestick-board');
+    const upduinoBoard31 = document.getElementById('upduino31-board');
 
     return {
         'Tang Nano 20K': tangnano20kBoard,
@@ -583,6 +665,7 @@ const getBoardImages = () => {
         'iCEBreaker': icebreakerBoard,
         'iCEStick': icestickBoard,
         'Orange Crab': orangeCrabBoard,
+        'UPduino31': upduinoBoard31
     }
 }
 
@@ -1264,7 +1347,7 @@ function main() {
             if (['Orange Crab'].includes(board)) {
                 return 'ecp5';
             }
-            if (['iCEBreaker', 'iCEStick'].includes(board)) {
+            if (['iCEBreaker', 'iCEStick', 'UPduino31'].includes(board)) {
                 return 'ice';
             }
         }
@@ -1468,6 +1551,7 @@ function main() {
                         'orangeCrab': 'Orange Crab',
                         'icebreaker': 'iCEBreaker',
                         'icestick': 'iCEStick',
+                        'upduino31': 'UPduino31'
                     }
                     const boardName = reverseBoardMap[body.board] || 'Tang Nano 9K';
                     board = boardSelect.value = boardName;

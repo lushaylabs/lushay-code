@@ -254,7 +254,8 @@
           "tangnano",
           "icebreaker",
           "icestick",
-          "orangeCrab"
+          "orangeCrab",
+          "upduino31"
         ],
         "description": "The FPGA development board",
         "title": "Dev Board"
