@@ -28,6 +28,8 @@ type ModuleDebuggerResult = {
     cases: ModuleDebuggerCase[]
 }>;
 
+const MODULE_DEBUGGER_DEBUG_ATTRIBUTE = "lc_debug";
+
 export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'lushay-code-module-debugger-content';
     private _view?: vscode.WebviewView;
@@ -36,7 +38,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
     public static getOverridePaths?: () => Promise<Record<string, string>>;
     public static currentFile?: vscode.Uri;
     private static _instance?: ModuleDebuggerWebviewContentProvider;
-    private modulesInFile: Array<{ name: string; ports: Array<{ name: string; direction: string; size: number; }>; }>;
+    private modulesInFile: Array<{ name: string; ports: Array<{ name: string; direction: string; size: number; }>; debug: Array<{ name: string; size: number; }>; }>;
 
     constructor(
         private readonly _extensionUri: vscode.Uri
@@ -125,7 +127,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         const overrides = await ModuleDebuggerWebviewContentProvider.getOverridePaths?.() || {};
         const yosysPath = overrides['yosys'] || path.join(ossCadPath, 'yosys');
         const ossRootPath = path.resolve(ossCadPath, '..');
-        const res = spawnSync(yosysPath,  ['-p', `read_verilog "${ModuleDebuggerWebviewContentProvider.currentFile.fsPath}"; portlist *`], {
+        const res = spawnSync(yosysPath,  ['-p', `read_verilog "${ModuleDebuggerWebviewContentProvider.currentFile.fsPath}"; proc; write_json -compat-int ___module_export.json`], {
             env: {
                 PATH: [
                     path.join(ossRootPath, 'bin'),
@@ -146,34 +148,28 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
             })
             return;
         }
-        const resLines = res.stdout.toString().replace(/\r\n/g, '\n').split('\n');
-        const modulesInFile: Array<{
-            name: string,
-            ports: Array<{name: string, direction: string, size: number}>
-        }> = [];
-        let currentModule: {name: string, ports: Array<{name: string, direction: string, size: number}>} | undefined;
-        for (const line of resLines) {
-            if (line.startsWith('module ')) {
-                const moduleName = line.replace('module ', '').replace('(', '').trim();
-                currentModule = {
-                    name: moduleName,
-                    ports: []
-                };
-                modulesInFile.push(currentModule);
-            } else if (line.startsWith('input ') || line.startsWith('output ')) {
-                const direction = line.startsWith('input ') ? 'input' : 'output';
-                const portName = line.replace('input ', '').replace('output ', '').replace(';', '').trim();
-                const [sizeStr, name] = portName.split(' ', 2);
-                const size = parseInt(sizeStr.replace('[', '').replace(']', '').split(':')[0]) + 1;
-                currentModule?.ports.push({
-                    name,
-                    direction,
-                    size
-                });
-            }
-        }
-        this.modulesInFile = modulesInFile;
+
         const pathToFile = ModuleDebuggerWebviewContentProvider.currentFile.fsPath;
+        const yosysExportFile = JSON.parse(fs.readFileSync(path.dirname(pathToFile)+ "/___module_export.json").toString());
+        // TODO: this might require more type annotations
+        const modulesInFile = Object.entries<any>(yosysExportFile.modules).map(([moduleName, {ports, netnames}]) => ({
+            name: moduleName,
+            ports: Object.entries<any>(ports).map(([name, {direction, bits}]) => ({
+                name, 
+                direction: direction as string, 
+                size: bits.length as number
+            })),
+            debug: Object.entries<any>(netnames)
+                // filter all reg/wire that are marked with `(* lc_debug *)`
+                .filter(([_, {attributes}]) => attributes[MODULE_DEBUGGER_DEBUG_ATTRIBUTE] === 1)
+                .map(([name, {bits}]) => ({
+                    name, 
+                    size: bits.length as number
+                }))
+        }));
+        fs.rmSync(path.dirname(pathToFile) + "/___module_export.json");
+
+        this.modulesInFile = modulesInFile;
         const pathWithoutExtension = pathToFile.substring(0, pathToFile.length - 2);
         const dModulePath = pathWithoutExtension + '.dbgmodule';
         let debugFile = {} as ModuleDebuggerResult;
@@ -234,6 +230,9 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
             newFile.push(`    #0`);
             for (const output of outputs) {
                 newFile.push(`    $display("${output.name} = %b", ${output.name});`)
+            }
+            for (const dbg of module.debug) {
+                newFile.push(`    $display("${dbg.name} = %b", ${moduleName}_inst.${dbg.name});`);
             }
             newFile.push(`    $display("");`);
             newFile.push(``);

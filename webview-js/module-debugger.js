@@ -492,7 +492,10 @@ function makeIntoLineCell(newCell, portName, i, parentPortName, isOutput) {
 
 function updateInputArea(inputs) {
     const newInputs = selectedModule.ports.filter(port => port.direction === 'input');
-    const newOutputs = selectedModule.ports.filter(port => port.direction === 'output');
+    const newOutputs = [
+        ...selectedModule.ports.filter(port => port.direction === 'output'),
+        ...selectedModule.debug
+    ];
     const newInputMap = generateNewInputsMap(newInputs, currentInputs);
     const newOutputMap = generateNewInputsMap(newOutputs, currentOutputs);
     
