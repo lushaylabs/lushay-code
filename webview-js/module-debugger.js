@@ -34,7 +34,7 @@ function updateOutputArea(inputs, cases) {
     for (let i = 0; i < cases.length; i++) {
         for (const key in cases[i]) {
             if (currentOutputs[key]) {
-                currentOutputs[key].value[i] = parseInt(cases[i][key], 2);
+                currentOutputs[key].value[i] = cases[i][key].toUpperCase();
                 if (currentOutputs[key].size === 1) {
                     const cell = columns[i+2].querySelector(`.port-output.${key}`);
                     const previousCell = columns[i+1].querySelector(`.port-output.${key}`);
@@ -131,7 +131,7 @@ function generateNewInputsMap(newInputs, currentInputs) {
         newInputMap[port.name] = {
             name: port.name,
             size: port.size,
-            value: currentInputs[port.name] ? currentInputs[port.name].value ?? {} : {}
+            value: currentInputs[port.name]?.value ?? {}
         };
         if (port.size > 1) {
             const subValues = {};
@@ -145,12 +145,11 @@ function generateNewInputsMap(newInputs, currentInputs) {
             }
             for (const k in newInputMap[port.name].value) {
                 const val = newInputMap[port.name].value[k];
-                const bin = val.toString(2).padStart(port.size, '0').split('').reverse().join('');
                 for (let j = 0; j < port.size; j++) {
                     if (!subValues[`${port.name}_${j}`]) {
                         subValues[`${port.name}_${j}`] = {};
                     }
-                    subValues[`${port.name}_${j}`][k] = bin[j] === '0' ? 0 : 1;
+                    subValues[`${port.name}_${j}`][k] = val[port.size - j - 1];
                 }
             }
         }
@@ -165,9 +164,9 @@ function recalculateNonAggPorts(portName) {
     }
     const columns = document.querySelectorAll(`.port-column`);
     for (let i = 0; i <= numCells; i++) {
-        let val = parseInt(port.value[i] ?? '0').toString(2).padStart(port.size, '0').split('').reverse().join('');
+        let val = port.value[i] ?? '0'.repeat(port.size);
         for (let j = 0; j < port.size; j++) {
-            const newVal = val[j] === '0' ? 0 : 1;
+            const newVal = val[port.size - j - 1];
             if (currentInputs[`${portName}_${j}`]?.value[i] !== newVal) {
                 if (!currentInputs[`${portName}_${j}`]) {
                     currentInputs[`${portName}_${j}`] = {
@@ -198,9 +197,9 @@ function recalculateNonAggOutput(portName) {
     }
     const columns = document.querySelectorAll(`.port-column`);
     for (let i = 0; i <= numCells; i++) {
-        let val = parseInt(port.value[i] ?? '0').toString(2).padStart(port.size, '0').split('').reverse().join('');
+        let val = port.value[i] ?? 'X'.repeat(port.size);
         for (let j = 0; j < port.size; j++) {
-            const newVal = val[j] === '0' ? 0 : 1;
+            const newVal = val[port.size - j - 1];
             if (currentOutputs[`${portName}_${j}`]?.value[i] !== newVal) {
                 if (!currentOutputs[`${portName}_${j}`]) {
                     currentOutputs[`${portName}_${j}`] = {
@@ -232,9 +231,9 @@ function recalculateAggInput(portName) {
     for (let i = 0; i <= numCells; i++) {
         let val = [];
         for (let j = 0; j < port.size; j++) {
-            val.push(currentInputs[`${portName}_${j}`].value[i] ? '1' : '0');
+            val.push(currentInputs[`${portName}_${j}`].value[i]);
         }
-        port.value[i] = parseInt(val.reverse().join(''), 2);
+        port.value[i] = val.reverse().join('');
     }
     redrawAggPort(portName);
 }
@@ -253,17 +252,18 @@ function redrawAggPort(portName, isOutput) {
     const aggregatedSignals = [];
     let currentSignal = null;
     for (let i = 0; i <= numCells; i++) {
+        const currentValue = port.value[i] ?? 'X'.repeat(port.size);
         if (currentSignal === null) {
             currentSignal = {
                 start: i,
-                value: port.value[i] ?? 0
+                value: currentValue
             }
-        } else if (currentSignal.value !== port.value[i]) {
+        } else if (currentSignal.value !== currentValue) {
             currentSignal.end = i - 1;
             aggregatedSignals.push(currentSignal);
             currentSignal = {
                 start: i,
-                value: port.value[i] ?? 0
+                value: currentValue
             }
         }
     }
@@ -273,19 +273,24 @@ function redrawAggPort(portName, isOutput) {
     }
     const rootContainer = document.getElementById('inputs');
     for (const signal of aggregatedSignals) {
-        if (signal.value !== 0) {
+        if (Number(signal.value) !== 0) {
             const newAggCell = document.createElement('div');
+            newAggCell.title = signal.value.padStart(port.size, '0');
             newAggCell.classList.add('port-agg-cell');
             newAggCell.style.width = `${((signal.end - signal.start + 1) * 30)-2}px`;
             const signalText = document.createElement('span');
-            signalText.innerHTML = `0x${signal.value.toString(16).padStart(2, '0').toUpperCase()}`;
             signalText.style.paddingTop = '5px';
             signalText.style.paddingBottom = '5px';
             newAggCell.appendChild(signalText);
+            if (signal.value.includes('X') || signal.value.includes('Z')) {
+                newAggCell.classList.add('port-agg-cell-unknown');
+            } else {
+                signalText.innerHTML = `0x${parseInt(signal.value, 2).toString(16).padStart(Math.ceil(port.size / 4), '0').toUpperCase()}`;
+            }
             
             const signalInput = document.createElement('input');
             if (!isOutput) {
-                signalInput.setAttribute('value', signal.value.toString(16));
+                signalInput.value = `0x${parseInt(signal.value, 2).toString(16).padStart(Math.ceil(port.size / 4), '0').toUpperCase()}`;
                 signalInput.style.display = 'none';
                 newAggCell.appendChild(signalInput);
                 
@@ -335,12 +340,15 @@ function redrawAggPort(portName, isOutput) {
             const resetInput = () => {
                 signalText.style.display = 'inline-block';
                 signalInput.style.display = 'none';
-                signalText.innerHTML = `0x${signalInput.value.padStart(2, '0').toUpperCase()}`;
-                signal.value = parseInt(signalInput.value || '0', 16);
+                signalInput.value ||= '0';
+                const newValue = Number(signalInput.value);
+                signalText.innerHTML = `0x${newValue.toString(16).padStart(Math.ceil(port.size / 4), '0').toUpperCase()}`;
+                signal.value = newValue.toString(2).padStart(port.size, '0');
                 for (let i = signal.start; i <= signal.end; i++) {
                     port.value[i] = signal.value;
+                    const signalLength = signal.value.length;
                     for (let j = 0; j < port.size; j++) {
-                        const newVal = signal.value & (1 << j) ? 1 : 0;
+                        const newVal = signal.value[signalLength - j - 1];
                         if (newVal !== currentInputs[`${portName}_${j}`].value[i]) {
                             currentInputs[`${portName}_${j}`].value[i] = newVal;
                             const cell = columns[i+2].querySelector(`.port-input.${portName}_${j}`);
@@ -376,9 +384,10 @@ function redrawAggPort(portName, isOutput) {
 function addSinglePortActions(portName, newCell) {
     const iconButton = createIconButton('watch', newCell);
     iconButton.addEventListener('click', () => {
-        const firstVal = currentInputs[portName].value[0] ? 0 : 1;
+        const val1 = currentInputs[portName].value[0] === '1' ? '0' : '1';
+        const val2 = currentInputs[portName].value[0] === '1' ? '1' : '0';
         for (let i = 0; i <= numCells; i++) {
-            currentInputs[portName].value[i] = i % 2 === 0 ? firstVal : (1-firstVal);
+            currentInputs[portName].value[i] = i % 2 === 0 ? val1 : val2;
         }
         const portCells = document.querySelectorAll(`.port-input.${portName}`);
         portCells.forEach(cell => {
@@ -388,8 +397,9 @@ function addSinglePortActions(portName, newCell) {
     });
     const clearButton = createIconButton('clear-all', newCell);
     clearButton.addEventListener('click', () => {
+        const value = Object.values(currentInputs[portName].value).every(v => v === '0') ? '1' : '0';
         for (let i = 0; i <= numCells; i++) {
-            currentInputs[portName].value[i] = 0;
+            currentInputs[portName].value[i] = value;
         }
         const portCells = document.querySelectorAll(`.port-input.${portName}`);
         portCells.forEach(cell => {
@@ -401,30 +411,46 @@ function addSinglePortActions(portName, newCell) {
 
 function makeIntoLineCell(newCell, portName, i, parentPortName, isOutput) {
     const currentPorts = isOutput ? currentOutputs : currentInputs;
-    const value = currentPorts[portName].value[i] ? 1 : 0;
+    const defaultValue = isOutput ? 'X' : '0';
+    const value = currentPorts[portName].value[i] ?? defaultValue;
     const lineCell = document.createElement('div');
     lineCell.classList.add('port-line');
-    if (value) {
+    if (value === '1') {
         lineCell.classList.add('port-line-active');
-    } else {
+    } else if (value === '0') {
         lineCell.classList.add('port-line-inactive');
+    } else {
+        lineCell.classList.add('port-line-unknown');
+        lineCell.innerText = value;
     }
-    const nextValue = currentPorts[portName].value[i + 1] ? 1 : 0;
+    const nextValue = currentPorts[portName].value[i + 1] ?? defaultValue;
     if (i < numCells && nextValue !== value) {
         lineCell.classList.add('port-line-transition');
     }
     newCell.appendChild(lineCell);
     newCell.index = i;
     newCell.update = (skipParent) => {
-        if (currentPorts[portName].value[newCell.index]) {
+        const currentValue = currentPorts[portName].value[newCell.index] ?? defaultValue;
+        const nextValue = currentPorts[portName].value[newCell.index + 1] ?? defaultValue;
+
+        if (currentValue === '1') {
+            lineCell.classList.remove('port-line-unknown');
             lineCell.classList.remove('port-line-inactive');
             lineCell.classList.add('port-line-active');
-        } else {
+            lineCell.innerText = '';
+        } else if (currentValue === '0') {
+            lineCell.classList.remove('port-line-unknown');
             lineCell.classList.remove('port-line-active');
             lineCell.classList.add('port-line-inactive');
+            lineCell.innerText = '';
+        } else {
+            lineCell.classList.remove('port-line-active');
+            lineCell.classList.remove('port-line-inactive');
+            lineCell.classList.add('port-line-unknown');
+            lineCell.innerText = currentValue;
         }
-        const nextValue = currentPorts[portName].value[newCell.index + 1] ? 1 : 0;
-        if (newCell.index < numCells && nextValue !== (currentPorts[portName].value[newCell.index] ?? 0)) {
+
+        if (newCell.index < numCells && nextValue !== currentValue) {
             lineCell.classList.add('port-line-transition');
         } else {
             lineCell.classList.remove('port-line-transition');
@@ -436,7 +462,7 @@ function makeIntoLineCell(newCell, portName, i, parentPortName, isOutput) {
     if (!isOutput) {
         newCell.addEventListener('mousedown', e => {
             currentMouseDownPort = portName;
-            currentPorts[portName].value[newCell.index] = currentPorts[portName].value[newCell.index] ? 0 : 1;
+            currentPorts[portName].value[newCell.index] = currentPorts[portName].value[newCell.index] === '1' ? '0' : '1';
             currentActionDirection = currentPorts[portName].value[newCell.index];
             currentMouseDownIndex = newCell.index;
             newCell.update();
@@ -448,7 +474,7 @@ function makeIntoLineCell(newCell, portName, i, parentPortName, isOutput) {
             if (e.altKey) {
                 const matchesSpacing = currentMouseDownIndex % 2 === newCell.index % 2;
                 if (!matchesSpacing) {
-                    valueToMatch = currentActionDirection ? 0 : 1;
+                    valueToMatch = currentActionDirection === '1' ? '0' : '1';
                 }
             }
             if (currentMouseDownPort && currentMouseDownPort === portName && valueToMatch !== currentPorts[portName].value[newCell.index]) {
@@ -570,8 +596,8 @@ function updateInputArea(inputs) {
                     currentActionSignal.start = index;
                 } else if (index > currentActionSignal.start) {
                     for (let j = currentActionSignal.start; j < index; j++) {
-                        if (currentInputs[currentMouseDownPort].value[j] !== 0) {
-                            currentInputs[currentMouseDownPort].value[j] = 0;
+                        if (Number(currentInputs[currentMouseDownPort].value[j]) !== 0) {
+                            currentInputs[currentMouseDownPort].value[j] = '0'.repeat(currentInputs[currentMouseDownPort].size);
                             changedSomething = true;
                         }  
                     }
@@ -590,8 +616,8 @@ function updateInputArea(inputs) {
                     currentActionSignal.end = index;
                 } else if (index < currentActionSignal.end) {
                     for (let j = index + 1; j <= currentActionSignal.end; j++) {
-                        if (currentInputs[currentMouseDownPort].value[j] !== 0) {
-                            currentInputs[currentMouseDownPort].value[j] = 0;
+                        if (Number(currentInputs[currentMouseDownPort].value[j]) !== 0) {
+                            currentInputs[currentMouseDownPort].value[j] = '0'.repeat(currentInputs[currentMouseDownPort].size);
                             changedSomething = true;
                         }  
                     }
@@ -618,8 +644,8 @@ function updateInputArea(inputs) {
                 const newCell = createCell(['port-input', port.name, 'port-summary'], row);
                 newCell.index = i;
                 newCell.addEventListener('dblclick', e => {
-                    if (!currentInputs[port.name].value[newCell.index]) {
-                        currentInputs[port.name].value[newCell.index] = 1;
+                    if (Number(currentInputs[port.name].value[newCell.index]) === 0) {
+                        currentInputs[port.name].value[newCell.index] = '1'.padStart(port.size, '0');
                         recalculateNonAggPorts(port.name);
                         redrawAggPort(port.name);
                         debouncedUpdateOutput();
@@ -710,7 +736,10 @@ function main() {
 
     clearBtn.addEventListener('click', e => {
         for (const port in currentInputs) {
-            currentInputs[port].value = new Array(currentInputs[port].size).fill(0);
+            const resetValue = '0'.repeat(currentInputs[port].size);
+            for (let i = 0; i <= numCells; i++) {
+                currentInputs[port].value[i] = resetValue;
+            }
             debouncedUpdateOutput();
             updateInputArea(document.getElementById('inputs'));
         }

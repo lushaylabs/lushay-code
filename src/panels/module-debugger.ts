@@ -6,6 +6,28 @@ import { Uri } from 'vscode';
 import * as fs from 'fs';
 import * as os from 'os';
 
+type ModuleDebuggerInput = {
+    name: string;
+    size: number;
+    value: Record<string, string>;
+    isSubValue?: boolean | undefined;
+};
+
+type ModuleDebuggerCase = {
+    [key: string]: string;
+};
+
+const MODULE_DEBUGGER_RESULT_VERSION = 1;
+type ModuleDebuggerResult = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    __meta__: {
+        version: typeof MODULE_DEBUGGER_RESULT_VERSION
+    }
+} & Record<string, {
+    inputs: Record<string, ModuleDebuggerInput>
+    cases: ModuleDebuggerCase[]
+}>;
+
 export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'lushay-code-module-debugger-content';
     private _view?: vscode.WebviewView;
@@ -27,6 +49,39 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         if (this._instance) {
             this._instance.updateCurrentFile(fileChanged);
         }
+    }
+
+    private upgradeResultFile(file: ModuleDebuggerResult) {
+        if (file.__meta__?.version === MODULE_DEBUGGER_RESULT_VERSION) {
+            return false;
+        }
+
+        for (const key in file) {
+            if (key === '__meta__') {
+                continue;
+            }
+            const module = file[key];
+            for (const inputName in module.inputs) {
+                const input = module.inputs[inputName];
+                for (let i = 0; i <= 100; i++) {
+                    let value: string | number | undefined = input.value[i] as any;
+                    if (value === undefined) {
+                        continue;
+                    }
+                    if (typeof value === 'number') {
+                        value = value.toString(2).padStart(input.size, '0');
+                    }
+                    else if (typeof value !== 'string') {
+                        value = '0'.repeat(input.size);
+                    }
+                    input.value[i] = value.padStart(input.size, '0').substring(0, input.size);
+                }
+            }
+        }
+
+        file.__meta__ = { version: MODULE_DEBUGGER_RESULT_VERSION };
+
+        return true;
     }
 
     public async updateCurrentFile(changedFile: boolean) {
@@ -93,7 +148,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         }
         const resLines = res.stdout.toString().replace(/\r\n/g, '\n').split('\n');
         const modulesInFile: Array<{
-            name: string, 
+            name: string,
             ports: Array<{name: string, direction: string, size: number}>
         }> = [];
         let currentModule: {name: string, ports: Array<{name: string, direction: string, size: number}>} | undefined;
@@ -121,9 +176,12 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         const pathToFile = ModuleDebuggerWebviewContentProvider.currentFile.fsPath;
         const pathWithoutExtension = pathToFile.substring(0, pathToFile.length - 2);
         const dModulePath = pathWithoutExtension + '.dbgmodule';
-        let debugFile = {};
+        let debugFile = {} as ModuleDebuggerResult;
         if (fs.existsSync(dModulePath)) {
-            debugFile = JSON.parse(fs.readFileSync(dModulePath).toString())
+            debugFile = JSON.parse(fs.readFileSync(dModulePath).toString());
+            if (this.upgradeResultFile(debugFile)) {
+                fs.writeFileSync(dModulePath, JSON.stringify(debugFile, null, 4));
+            }
         }
 
         this._view?.webview.postMessage({
@@ -134,7 +192,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
     }
 
 
-    private async createAndRunTestForModule(inputs: Record<string, {name: string, size: number, value: Record<string, number>, isSubValue?: boolean}>, moduleName: string) {
+    private async createAndRunTestForModule(inputs: Record<string, ModuleDebuggerInput>, moduleName: string) {
         const module = this.modulesInFile.find(m => m.name === moduleName);
         if (!module) {
             return;
@@ -254,18 +312,18 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         return cases;
     }
 
-    async saveResults(inputs: Record<string, { name: string; size: number; value: Record<string, number>; isSubValue?: boolean | undefined; }>, cases: { [key: string]: string; }[], moduleName: string) {
+    async saveResults(inputs: Record<string, ModuleDebuggerInput>, cases: ModuleDebuggerCase[], moduleName: string) {
         const currentFile = ModuleDebuggerWebviewContentProvider.currentFile;
         if (!currentFile) {
             return;
         }
         const pathWithoutExtension = currentFile.fsPath.split('.').slice(0, -1).join('.');
         const dModulePath = `${pathWithoutExtension}.dbgmodule`;
-        let fileContent: Record<string, {inputs: typeof inputs, cases: typeof cases}> = {};
+        let fileContent = {} as ModuleDebuggerResult;
         if (fs.existsSync(dModulePath)) {
             fileContent = JSON.parse(fs.readFileSync(dModulePath).toString());
         }
-
+        this.upgradeResultFile(fileContent);
         fileContent[moduleName] = {
             inputs,
             cases
@@ -302,7 +360,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         this._view.show?.(true);
         this.updateCurrentFile(true);
     }
-    
+
     private async onMessage(message: any) {
         const { command, data } = message;
         switch (command) {
@@ -325,7 +383,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         const toolkitUri = webview.asWebviewUri(Uri.joinPath(this._extensionUri, 'node_modules', '@vscode', 'webview-ui-toolkit', 'dist', 'toolkit.js'));
         const mainUri = webview.asWebviewUri(Uri.joinPath(this._extensionUri, 'webview-js', 'module-debugger.js'));
         const codiconsUri = webview.asWebviewUri(Uri.joinPath(this._extensionUri, 'node_modules', '@vscode', 'codicons', 'dist', 'codicon.css'));
-    
+
         return `<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -372,6 +430,13 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 .port-line-inactive {
                     border-bottom: 1px solid #0291ff;
                 }
+                .port-line-unknown {
+                    color: #ff0000;
+                    text-align: center;
+                    background: #ff000040;
+                    border-bottom: 1px solid #ff0000;
+                    border-top: 1px solid #ff0000;
+                }
                 .port-agg-handle {
                     position: absolute;
                     top: 0px;
@@ -403,6 +468,12 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 }
                 .port-agg-cell:hover {
                     background: #48b0ff;
+                }
+                .port-agg-cell-unknown {
+                    background: #aa0000;
+                }
+                .port-agg-cell-unknown:hover {
+                    background: #ff3333;
                 }
                 .port-input-container {
                     display: flex;
@@ -482,7 +553,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                     border-top: 1px solid rgba(255, 255, 255, 0.1);
                     font-size: 11px;
                     height: 30px;
-                    
+
                 }
                 .port-cell.port-index {
                     height: 30px;
@@ -548,7 +619,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         <body>
             <div id="container">
                 <h3>
-                Module Debugger 
+                Module Debugger
                 <vscode-dropdown id="module-select" position="below"></vscode-dropdown>
                 <vscode-button id="clear-button" title="Clear" icon="clear-all">Clear All</vscode-button>
                 </h3>
