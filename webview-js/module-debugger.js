@@ -555,7 +555,7 @@ function updateInputArea(inputs) {
     outerElement.appendChild(inputColumnContainer);
     inputColumnContainer.addEventListener('mousemove', e => {
         if (currentDragMode !== 'agg-left' && currentDragMode !== 'agg-right') { return; }
-        const mousePositionOffset = e.clientX - inputColumnContainer.getBoundingClientRect().left;
+        const mousePositionOffset = e.clientX - inputColumnContainer.getBoundingClientRect().left + inputColumnContainer.scrollLeft;
         const index = Math.floor(mousePositionOffset / 30);
         let changedSomething = false;
         if (currentDragMode === 'agg-left') {
