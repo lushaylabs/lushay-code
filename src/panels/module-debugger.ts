@@ -260,9 +260,8 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         const iverilogPath = path.join(ossCadPath, 'iverilog');
         const ossRootPath = path.resolve(ossCadPath, '..');
         const gowinCellsPath = path.join(ossRootPath, 'share/yosys/gowin/cells_sim.v');
-        const gowinXtraCellsPath = path.join(ossRootPath, 'share/yosys/gowin/cells_xtra.v');
 
-        const res = spawnSync(iverilogPath,  ['-o', `${moduleName}_test.vvp`, '-s', `${moduleName}_test`, `${moduleName}_test.v`, ...(projectFile.includedFilePaths), gowinCellsPath, ...(fs.existsSync(gowinXtraCellsPath) ? [gowinXtraCellsPath] : [])], {
+        const res = spawnSync(iverilogPath,  ['-o', `${moduleName}_test.vvp`, '-s', `${moduleName}_test`, `${moduleName}_test.v`, ...(projectFile.includedFilePaths), gowinCellsPath], {
             cwd: testFile,
             env: {
                 // eslint-disable-next-line @typescript-eslint/naming-convention

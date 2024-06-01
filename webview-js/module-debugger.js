@@ -696,7 +696,16 @@ function selectBoxUpdated(moduleSelect, inputs, outputs) {
             }
             return port.direction === newPort.direction && port.size === newPort.size;
         }) && newSelectedModule.ports.length === selectedModule?.ports?.length;
-        if (selectedModule && allPortsMatch && selectedModule.name === newSelectedModule.name) {
+        const currentFields = [
+            ...(Object.keys(currentInputs).filter(key => !currentInputs[key].isSubValue)),
+            ...(Object.keys(currentOutputs).filter(key => !currentOutputs[key].isSubValue))
+        ];
+        const fieldsFromModule = [
+            ...newSelectedModule.ports.map(port => port.name),
+            ...newSelectedModule.debug.map(port => port.name)
+        ];
+        const fieldsChanged = fieldsFromModule.some(field => !currentFields.includes(field)) || currentFields.some(field => !fieldsFromModule.includes(field));
+        if (selectedModule && allPortsMatch && selectedModule.name === newSelectedModule.name && !fieldsChanged) {
             return;
         }
         selectedModule = newSelectedModule;
