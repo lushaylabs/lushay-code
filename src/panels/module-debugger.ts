@@ -6,6 +6,30 @@ import { Uri } from 'vscode';
 import * as fs from 'fs';
 import * as os from 'os';
 
+type ModuleDebuggerInput = {
+    name: string;
+    size: number;
+    value: Record<string, string>;
+    isSubValue?: boolean | undefined;
+};
+
+type ModuleDebuggerCase = {
+    [key: string]: string;
+};
+
+const MODULE_DEBUGGER_RESULT_VERSION = 1;
+type ModuleDebuggerResult = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    __meta__: {
+        version: typeof MODULE_DEBUGGER_RESULT_VERSION
+    }
+} & Record<string, {
+    inputs: Record<string, ModuleDebuggerInput>
+    cases: ModuleDebuggerCase[]
+}>;
+
+const MODULE_DEBUGGER_DEBUG_ATTRIBUTE = "lc_debug";
+
 export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'lushay-code-module-debugger-content';
     private _view?: vscode.WebviewView;
@@ -14,7 +38,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
     public static getOverridePaths?: () => Promise<Record<string, string>>;
     public static currentFile?: vscode.Uri;
     private static _instance?: ModuleDebuggerWebviewContentProvider;
-    private modulesInFile: Array<{ name: string; ports: Array<{ name: string; direction: string; size: number; }>; }>;
+    private modulesInFile: Array<{ name: string; ports: Array<{ name: string; direction: string; size: number; }>; debug: Array<{ name: string; size: number; }>; }>;
 
     constructor(
         private readonly _extensionUri: vscode.Uri
@@ -29,12 +53,45 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         }
     }
 
+    private upgradeResultFile(file: ModuleDebuggerResult) {
+        if (file.__meta__?.version === MODULE_DEBUGGER_RESULT_VERSION) {
+            return false;
+        }
+
+        for (const key in file) {
+            if (key === '__meta__') {
+                continue;
+            }
+            const module = file[key];
+            for (const inputName in module.inputs) {
+                const input = module.inputs[inputName];
+                for (let i = 0; i <= 100; i++) {
+                    let value: string | number | undefined = input.value[i] as any;
+                    if (value === undefined) {
+                        continue;
+                    }
+                    if (typeof value === 'number') {
+                        value = value.toString(2).padStart(input.size, '0');
+                    }
+                    else if (typeof value !== 'string') {
+                        value = '0'.repeat(input.size);
+                    }
+                    input.value[i] = value.padStart(input.size, '0').substring(0, input.size);
+                }
+            }
+        }
+
+        file.__meta__ = { version: MODULE_DEBUGGER_RESULT_VERSION };
+
+        return true;
+    }
+
     public async updateCurrentFile(changedFile: boolean) {
         if (!ModuleDebuggerWebviewContentProvider.currentFile || !ModuleDebuggerWebviewContentProvider.currentFile.fsPath.endsWith('.v')) {
             this._view?.webview.postMessage({
                 command: 'updatedCurrentModules',
                 data: []
-            })
+            });
             return;
         }
         const ossCadPath = await ModuleDebuggerWebviewContentProvider.ossCadSuitePath?.();
@@ -42,7 +99,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
             this._view?.webview.postMessage({
                 command: 'updatedCurrentModules',
                 data: []
-            })
+            });
             return;
         }
         const selectedProject = ModuleDebuggerWebviewContentProvider.selectedProject?.();
@@ -53,7 +110,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 data: [],
                 error: 'Please Select a Project',
                 extra: 'This can be done by clicking the button in the bottom toolbar labeled "<Auto-Detect Project>"'
-            })
+            });
             return;
         }
         const projectToUse = selectedProject || {name: 'default', path: numLushayFiles[0].fsPath};
@@ -64,14 +121,15 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 data: [],
                 error: numLushayFiles.length > 1 ? 'Please Select a Project' : 'No Project Found',
                 extra: numLushayFiles.length > 1 ? 'This can be done by clicking the button in the bottom toolbar labeled "<Auto-Detect Project>"' : undefined
-            })
+            });
             return;
         }
         const overrides = await ModuleDebuggerWebviewContentProvider.getOverridePaths?.() || {};
         const yosysPath = overrides['yosys'] || path.join(ossCadPath, 'yosys');
         const ossRootPath = path.resolve(ossCadPath, '..');
-        const res = spawnSync(yosysPath,  ['-p', `read_verilog "${ModuleDebuggerWebviewContentProvider.currentFile.fsPath}"; portlist *`], {
+        const res = spawnSync(yosysPath,  ['-p', `read_verilog "${ModuleDebuggerWebviewContentProvider.currentFile.fsPath}"; proc; write_json -compat-int ___module_export.json`], {
             env: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 PATH: [
                     path.join(ossRootPath, 'bin'),
                     path.join(ossRootPath, 'lib'),
@@ -88,53 +146,50 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 data: [],
                 error: 'Error compiling module',
                 extra: res.stderr.toString()
-            })
+            });
             return;
         }
-        const resLines = res.stdout.toString().replace(/\r\n/g, '\n').split('\n');
-        const modulesInFile: Array<{
-            name: string, 
-            ports: Array<{name: string, direction: string, size: number}>
-        }> = [];
-        let currentModule: {name: string, ports: Array<{name: string, direction: string, size: number}>} | undefined;
-        for (const line of resLines) {
-            if (line.startsWith('module ')) {
-                const moduleName = line.replace('module ', '').replace('(', '').trim();
-                currentModule = {
-                    name: moduleName,
-                    ports: []
-                };
-                modulesInFile.push(currentModule);
-            } else if (line.startsWith('input ') || line.startsWith('output ')) {
-                const direction = line.startsWith('input ') ? 'input' : 'output';
-                const portName = line.replace('input ', '').replace('output ', '').replace(';', '').trim();
-                const [sizeStr, name] = portName.split(' ', 2);
-                const size = parseInt(sizeStr.replace('[', '').replace(']', '').split(':')[0]) + 1;
-                currentModule?.ports.push({
-                    name,
-                    direction,
-                    size
-                });
-            }
-        }
-        this.modulesInFile = modulesInFile;
+
         const pathToFile = ModuleDebuggerWebviewContentProvider.currentFile.fsPath;
+        const yosysExportFile = JSON.parse(fs.readFileSync(path.dirname(pathToFile)+ "/___module_export.json").toString());
+        // TODO: this might require more type annotations
+        const modulesInFile = Object.entries<any>(yosysExportFile.modules).map(([moduleName, {ports, netnames}]) => ({
+            name: moduleName,
+            ports: Object.entries<any>(ports).map(([name, {direction, bits}]) => ({
+                name, 
+                direction: direction as string, 
+                size: bits.length as number
+            })),
+            debug: Object.entries<any>(netnames)
+                // filter all reg/wire that are marked with `(* lc_debug *)`
+                .filter(([_, {attributes}]) => attributes[MODULE_DEBUGGER_DEBUG_ATTRIBUTE] === 1)
+                .map(([name, {bits}]) => ({
+                    name, 
+                    size: bits.length as number
+                }))
+        }));
+        fs.rmSync(path.dirname(pathToFile) + "/___module_export.json");
+
+        this.modulesInFile = modulesInFile;
         const pathWithoutExtension = pathToFile.substring(0, pathToFile.length - 2);
         const dModulePath = pathWithoutExtension + '.dbgmodule';
-        let debugFile = {};
+        let debugFile = {} as ModuleDebuggerResult;
         if (fs.existsSync(dModulePath)) {
-            debugFile = JSON.parse(fs.readFileSync(dModulePath).toString())
+            debugFile = JSON.parse(fs.readFileSync(dModulePath).toString());
+            if (this.upgradeResultFile(debugFile)) {
+                fs.writeFileSync(dModulePath, JSON.stringify(debugFile, null, 4));
+            }
         }
 
         this._view?.webview.postMessage({
             command: 'updatedCurrentModules',
             data: modulesInFile,
             debugFile: debugFile
-        })
+        });
     }
 
 
-    private async createAndRunTestForModule(inputs: Record<string, {name: string, size: number, value: Record<string, number>, isSubValue?: boolean}>, moduleName: string) {
+    private async createAndRunTestForModule(inputs: Record<string, ModuleDebuggerInput>, moduleName: string) {
         const module = this.modulesInFile.find(m => m.name === moduleName);
         if (!module) {
             return;
@@ -157,7 +212,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
             }
         });
 
-        const outputs = module.ports.filter(p => p.direction === 'output')
+        const outputs = module.ports.filter(p => p.direction === 'output');
 
         newFile.push(`${moduleName} ${moduleName}_inst(`);
         newFile.push(...(module.ports.map(port => `    .${port.name}(${port.name})`).join(',\n').split('\n')));
@@ -171,11 +226,14 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                     continue;
                 }
                 newFile.push(`    ${key} = ${value.value[i] ?? 0};`);
-                newFile.push(`    $display("${key} = %b", ${key});`)
+                newFile.push(`    $display("${key} = %b", ${key});`);
             }
             newFile.push(`    #0`);
             for (const output of outputs) {
-                newFile.push(`    $display("${output.name} = %b", ${output.name});`)
+                newFile.push(`    $display("${output.name} = %b", ${output.name});`);
+            }
+            for (const dbg of module.debug) {
+                newFile.push(`    $display("${dbg.name} = %b", ${moduleName}_inst.${dbg.name});`);
             }
             newFile.push(`    $display("");`);
             newFile.push(``);
@@ -207,6 +265,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         const res = spawnSync(iverilogPath,  ['-o', `${moduleName}_test.vvp`, '-s', `${moduleName}_test`, `${moduleName}_test.v`, ...(projectFile.includedFilePaths), gowinCellsPath, ...(fs.existsSync(gowinXtraCellsPath) ? [gowinXtraCellsPath] : [])], {
             cwd: testFile,
             env: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 PATH: [
                     path.join(ossRootPath, 'bin'),
                     path.join(ossRootPath, 'lib'),
@@ -229,6 +288,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         const vvp = spawnSync(vvpPath, [`${moduleName}_test.vvp`], {
             cwd: testFile,
             env: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 PATH: [
                     path.join(ossRootPath, 'bin'),
                     path.join(ossRootPath, 'lib'),
@@ -254,18 +314,18 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         return cases;
     }
 
-    async saveResults(inputs: Record<string, { name: string; size: number; value: Record<string, number>; isSubValue?: boolean | undefined; }>, cases: { [key: string]: string; }[], moduleName: string) {
+    async saveResults(inputs: Record<string, ModuleDebuggerInput>, cases: ModuleDebuggerCase[], moduleName: string) {
         const currentFile = ModuleDebuggerWebviewContentProvider.currentFile;
         if (!currentFile) {
             return;
         }
         const pathWithoutExtension = currentFile.fsPath.split('.').slice(0, -1).join('.');
         const dModulePath = `${pathWithoutExtension}.dbgmodule`;
-        let fileContent: Record<string, {inputs: typeof inputs, cases: typeof cases}> = {};
+        let fileContent = {} as ModuleDebuggerResult;
         if (fs.existsSync(dModulePath)) {
             fileContent = JSON.parse(fs.readFileSync(dModulePath).toString());
         }
-
+        this.upgradeResultFile(fileContent);
         fileContent[moduleName] = {
             inputs,
             cases
@@ -281,7 +341,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         return vscode.window.registerWebviewViewProvider(
             ModuleDebuggerWebviewContentProvider.viewType,
             this._instance
-        )
+        );
     }
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -302,7 +362,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         this._view.show?.(true);
         this.updateCurrentFile(true);
     }
-    
+
     private async onMessage(message: any) {
         const { command, data } = message;
         switch (command) {
@@ -325,7 +385,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         const toolkitUri = webview.asWebviewUri(Uri.joinPath(this._extensionUri, 'node_modules', '@vscode', 'webview-ui-toolkit', 'dist', 'toolkit.js'));
         const mainUri = webview.asWebviewUri(Uri.joinPath(this._extensionUri, 'webview-js', 'module-debugger.js'));
         const codiconsUri = webview.asWebviewUri(Uri.joinPath(this._extensionUri, 'node_modules', '@vscode', 'codicons', 'dist', 'codicon.css'));
-    
+
         return `<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -372,6 +432,13 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 .port-line-inactive {
                     border-bottom: 1px solid #0291ff;
                 }
+                .port-line-unknown {
+                    color: #ff0000;
+                    text-align: center;
+                    background: #ff000040;
+                    border-bottom: 1px solid #ff0000;
+                    border-top: 1px solid #ff0000;
+                }
                 .port-agg-handle {
                     position: absolute;
                     top: 0px;
@@ -403,6 +470,12 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 }
                 .port-agg-cell:hover {
                     background: #48b0ff;
+                }
+                .port-agg-cell-unknown {
+                    background: #aa0000;
+                }
+                .port-agg-cell-unknown:hover {
+                    background: #ff3333;
                 }
                 .port-input-container {
                     display: flex;
@@ -482,7 +555,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                     border-top: 1px solid rgba(255, 255, 255, 0.1);
                     font-size: 11px;
                     height: 30px;
-                    
+
                 }
                 .port-cell.port-index {
                     height: 30px;
@@ -548,7 +621,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         <body>
             <div id="container">
                 <h3>
-                Module Debugger 
+                Module Debugger
                 <vscode-dropdown id="module-select" position="below"></vscode-dropdown>
                 <vscode-button id="clear-button" title="Clear" icon="clear-all">Clear All</vscode-button>
                 </h3>
