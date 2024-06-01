@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.0.20]
+
+### Added
+- Added support to debug registers and wires in the module debugger ([PR #8](https://github.com/lushaylabs/lushay-code/pull/8))
+- Added support for `x` and `z` values in the module debugger ([PR #8](https://github.com/lushaylabs/lushay-code/pull/8))
+
+### Changed
+- Fixes to dragging in module debugger when window is scrolled ([PR #8](https://github.com/lushaylabs/lushay-code/pull/8))
+- Fix to module debugger for himbaechel version
+
 ## [0.0.19]
 
 ### Added
