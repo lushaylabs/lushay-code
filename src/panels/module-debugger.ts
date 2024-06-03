@@ -196,14 +196,17 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         }
         const newFile = [];
         newFile.push(`module ${moduleName}_test;`);
+
+        const numBitsForAllInputs = module.ports.reduce((acc, port) => {
+            if (port.direction === 'output') {
+                return acc;
+            }
+            return acc + port.size;
+        }, 0);
+        newFile.push(`    reg [${numBitsForAllInputs - 1}:0] inputs;`);
+
         module.ports.forEach(port => {
-            if (port.direction === 'input') {
-                if (port.size === 1) {
-                    newFile.push(`reg ${port.name};`);
-                } else {
-                    newFile.push(`reg [${port.size - 1}:0] ${port.name};`);
-                }
-            } else {
+            if (port.direction === 'output') {
                 if (port.size === 1) {
                     newFile.push(`wire ${port.name};`);
                 } else {
@@ -214,19 +217,45 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
 
         const outputs = module.ports.filter(p => p.direction === 'output');
 
+        let currentBit = 0;
+        const startBitPerInput: Record<string, number> = {};
         newFile.push(`${moduleName} ${moduleName}_inst(`);
-        newFile.push(...(module.ports.map(port => `    .${port.name}(${port.name})`).join(',\n').split('\n')));
+
+        newFile.push(...(module.ports.map(port => {
+            if (port.direction === 'output') {
+                return `    .${port.name}(${port.name})`
+            } else {
+                const input = inputs[port.name];
+                const startBit = startBitPerInput[port.name] = currentBit;
+                currentBit += input.size;
+                const endBit = currentBit - 1;
+                return `    .${port.name}(inputs[${endBit}:${startBit}])`
+            }
+        }).join(',\n').split('\n')));
+
         newFile.push(`);`);
 
         newFile.push(`initial begin`);
+        const inputEntries = Object.entries(inputs);
         for (let i = 0; i <= 100; i+=1) {
             newFile.push(`    #1`);
-            for (const [key, value] of Object.entries(inputs)) {
+            const newBits = new Array(numBitsForAllInputs);
+            for (const [key, value] of inputEntries) {
                 if (value.isSubValue) {
                     continue;
                 }
-                newFile.push(`    ${key} = 'b${value.value[i] ?? "0".repeat(value.size)};`);
-                newFile.push(`    $display("${key} = %b", ${key});`);
+                const startBit = startBitPerInput[key];
+                const endBit = startBit + value.size - 1;
+                const bitVal = `${value.value[i] ?? "0".repeat(value.size)}`
+                newBits.splice(startBit, value.size, ...bitVal.split(''));
+            }
+            const reversedBits = newBits.reverse().join('');
+            newFile.push(`    inputs = ${numBitsForAllInputs}'b${reversedBits};`);
+            for (const [key, value] of inputEntries) {
+                if (value.isSubValue) {
+                    continue;
+                }
+                newFile.push(`    $display("${key} = %b", inputs[${startBitPerInput[key] + value.size - 1}:${startBitPerInput[key]}]);`);
             }
             newFile.push(`    #0`);
             for (const output of outputs) {
