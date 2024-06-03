@@ -54,10 +54,12 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
     }
 
     private resultNeedsUpgrade(file: ModuleDebuggerResult) {
-        return file.__meta__?.version === MODULE_DEBUGGER_RESULT_VERSION;
+        return file.__meta__?.version !== MODULE_DEBUGGER_RESULT_VERSION;
     }
 
     private upgradeResult(file: ModuleDebuggerResult) {
+        file.__meta__ = { version: MODULE_DEBUGGER_RESULT_VERSION };
+
         for (const key in file) {
             if (key === '__meta__') {
                 continue;
@@ -80,8 +82,6 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 }
             }
         }
-
-        file.__meta__ = { version: MODULE_DEBUGGER_RESULT_VERSION };
     }
 
     public async updateCurrentFile(changedFile: boolean) {
