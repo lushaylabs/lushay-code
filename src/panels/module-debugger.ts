@@ -274,11 +274,15 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
             }
         });
         if (res.status !== 0) {
-            console.log('Iverilog failed', res.stderr.toString());
+            const errResponse = res.stderr.toString();
+            console.log('Iverilog failed', errResponse);
+            const responseWithoutTimingWarnings = errResponse.split('\n').filter((line) => {
+                return !(line.includes('share/yosys/gowin') && line.includes('warning: Timing checks are not supported'));
+            }).join('\n');
             this._view?.webview.postMessage({
                 command: 'updatedCurrentModules',
                 error: 'Simulation failed',
-                extra: res.stderr.toString()
+                extra: responseWithoutTimingWarnings
             });
             return;
         }

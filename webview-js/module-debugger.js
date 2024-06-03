@@ -252,7 +252,8 @@ function redrawAggPort(portName, isOutput) {
     const aggregatedSignals = [];
     let currentSignal = null;
     for (let i = 0; i <= numCells; i++) {
-        const currentValue = port.value[i] ?? 'X'.repeat(port.size);
+        const defaultValue = isOutput ? 'X' : '0';
+        const currentValue = port.value[i] ?? defaultValue.repeat(port.size);
         if (currentSignal === null) {
             currentSignal = {
                 start: i,
