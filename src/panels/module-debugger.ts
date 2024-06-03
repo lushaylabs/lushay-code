@@ -53,10 +53,12 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         }
     }
 
-    private upgradeResultFile(file: ModuleDebuggerResult) {
-        if (file.__meta__?.version === MODULE_DEBUGGER_RESULT_VERSION) {
-            return false;
-        }
+    private resultNeedsUpgrade(file: ModuleDebuggerResult) {
+        return file.__meta__?.version !== MODULE_DEBUGGER_RESULT_VERSION;
+    }
+
+    private upgradeResult(file: ModuleDebuggerResult) {
+        file.__meta__ = { version: MODULE_DEBUGGER_RESULT_VERSION };
 
         for (const key in file) {
             if (key === '__meta__') {
@@ -80,10 +82,6 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 }
             }
         }
-
-        file.__meta__ = { version: MODULE_DEBUGGER_RESULT_VERSION };
-
-        return true;
     }
 
     public async updateCurrentFile(changedFile: boolean) {
@@ -176,7 +174,9 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         let debugFile = {} as ModuleDebuggerResult;
         if (fs.existsSync(dModulePath)) {
             debugFile = JSON.parse(fs.readFileSync(dModulePath).toString());
-            if (this.upgradeResultFile(debugFile)) {
+            if (this.resultNeedsUpgrade(debugFile)) {
+                fs.writeFileSync(dModulePath + '_old_' + Date.now(), JSON.stringify(debugFile, null, 4));
+                this.upgradeResult(debugFile);
                 fs.writeFileSync(dModulePath, JSON.stringify(debugFile, null, 4));
             }
         }
@@ -225,7 +225,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 if (value.isSubValue) {
                     continue;
                 }
-                newFile.push(`    ${key} = ${value.value[i] ?? 0};`);
+                newFile.push(`    ${key} = 'b${value.value[i] ?? "0".repeat(value.size)};`);
                 newFile.push(`    $display("${key} = %b", ${key});`);
             }
             newFile.push(`    #0`);
@@ -324,7 +324,10 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
         if (fs.existsSync(dModulePath)) {
             fileContent = JSON.parse(fs.readFileSync(dModulePath).toString());
         }
-        this.upgradeResultFile(fileContent);
+        if (this.resultNeedsUpgrade(fileContent)) {
+            fs.writeFileSync(dModulePath + '_old_' + Date.now(), JSON.stringify(fileContent, null, 4));
+            this.upgradeResult(fileContent);
+        }
         fileContent[moduleName] = {
             inputs,
             cases
