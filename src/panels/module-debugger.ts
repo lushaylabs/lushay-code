@@ -225,7 +225,7 @@ export class ModuleDebuggerWebviewContentProvider implements vscode.WebviewViewP
                 if (value.isSubValue) {
                     continue;
                 }
-                newFile.push(`    ${key} = ${value.value[i] ?? 0};`);
+                newFile.push(`    ${key} = 'b${value.value[i] ?? "0".repeat(value.size)};`);
                 newFile.push(`    $display("${key} = %b", ${key});`);
             }
             newFile.push(`    #0`);
