@@ -10,7 +10,6 @@
 - Fixes to dragging in module debugger when window is scrolled ([PR #8](https://github.com/lushaylabs/lushay-code/pull/8))
 - Fix to module debugger for himbaechel version
 
-
 ## [0.0.19]
 
 ### Added

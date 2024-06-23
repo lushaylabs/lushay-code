@@ -185,7 +185,6 @@ const TEMPLATES = {
         ]
     },
     'UPduino 3.1': {
-        // UPduino stuff
         'Global Pins': [
             {name: 'G0', location: '34'},
             {name: 'G1', location: '37'},
@@ -202,29 +201,7 @@ const TEMPLATES = {
             {name: 'ledB', location: '39'},
             {name: 'ledG', location: '40'},
             {name: 'ledR', location: '41'}
-        ],
-        // 'Extension LEDs': [
-        //     {name: 'led[0]', location: '26'},
-        //     {name: 'led[1]', location: '23'},
-        //     {name: 'led[2]', location: '27'},
-        //     {name: 'led[3]', location: '21'},
-        //     {name: 'led[4]', location: '25'},
-        // ],
-        // 'Extension Buttons': [
-        //     {name: 'btn[0]', location: '20'},
-        //     {name: 'btn[1]', location: '19'},
-        //     {name: 'btn[2]', location: '18'},
-        // ],
-        // 'Button': [
-        //     {name: 'btn', location: '10'},
-        // ],
-        // 'Clock': [
-        //     {name: 'clk', location: '35'}
-        // ],
-        // 'UART': [
-        //     {name: 'uartTx', location: '14'},
-        //     {name: 'uartRx', location: '15'}
-        // ]
+        ]
     },
 
 }
