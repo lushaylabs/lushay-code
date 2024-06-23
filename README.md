@@ -144,9 +144,29 @@ If you ever want to uninstall this driver and go back to the default driver (for
 
 ## Visual Module Debugger
 
-By opening any verilog file you should see a new panel next to the toolchain output panel called Module Debugger. Once open the you should see a dropdown box where you can select which module from the currently open file you would like to debug (relevant for files with more then 1 module inside). Once you have your module selected the panel will show you a table with all input and output ports. The input ports can be modified visually by clicking and dragging on single bit rows, or by double clicking on multi-bit rows, whenever an input is changed / the verilog code updated the simulation will be run updating the outputs.
+By opening any verilog file you should see a new panel next to the toolchain output panel called Module Debugger. Once open the you should see a dropdown box where you can select which module from the currently open file you would like to debug (relevant for files with more then 1 module inside). Once you have your module selected the panel will show you by default a table with all input and output ports. The input ports can be modified visually by clicking and dragging on single bit rows, or by double clicking on multi-bit rows, whenever an input is changed / the verilog code updated, the simulation will be run updating the outputs.
 
 ![Module Debugger](./docs/module-debugger-view.jpg)
+
+Registers and wires from the module being debugged can also be viewed by adding an attribute above them `(* lc_debug *)` this will add them to the table as an output. For example:
+
+```verilog
+
+module abc(
+    input wire clk,
+    output wire [7:0] data_out
+);
+    
+    (* lc_debug *)
+    reg [7:0] internalCounter;
+
+    
+    (* lc_debug *)
+    wire internalSignal;
+
+    // rest of module ...
+endmodule
+```
 
 There is a button on each single bit line with a watch icon, this can be used to pulse the signal of that input on and off, useful for clock signals, it can be clicked multiple times to shift the phase of the signal by 1 time frame. You can also use the `alt` key while dragging to alternate between high and low on a line to create a specific area with a clock signal.
 
