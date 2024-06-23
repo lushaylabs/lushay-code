@@ -489,6 +489,7 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
         const boardImageIceBreaker = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-icebreaker.png'));
         const boardImageIcestick = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-icestick.png'));
         const boardImageOrangeCrab = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-orangecrab.png'));
+        const boardImageUPduino31 = webview.asWebviewUri(Uri.joinPath(this._context.extensionUri, 'webview-js', 'board-layout-upduino31.png'));
 
         return `
             <!DOCTYPE html>
@@ -690,6 +691,7 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                             <vscode-option>iCEBreaker</vscode-option>
                             <vscode-option>iCEStick</vscode-option>
                             <vscode-option>Orange Crab</vscode-option>
+                            <vscode-option>UPduino 3.1</vscode-option>
                         </vscode-dropdown>
                         </h1>
                         <div id="table-split">
@@ -866,6 +868,7 @@ export class ConstraintsEditor implements CustomEditorProvider<ConstraintsFileDo
                                 <img class="board-pic hide" id="icebreaker-board" src="${boardImageIceBreaker}" />
                                 <img class="board-pic hide" id="icestick-board" src="${boardImageIcestick}" />
                                 <img class="board-pic hide" id="orangecrab-board" src="${boardImageOrangeCrab}" />
+                                <img class="board-pic hide" id="upduino31-board" src="${boardImageUPduino31}" />
                                 <div id="pin-container"></div>
                             </div>
                             <vscode-button appearance="secondary" id="cancel-board">Cancel</vscode-button>

@@ -183,7 +183,26 @@ const TEMPLATES = {
             {name: 'btn1', location: 'J17', standard: 'LVCMOS33'},
             {name: 'btn2', location: 'V17', standard: 'LVCMOS33'}
         ]
-    }
+    },
+    'UPduino 3.1': {
+        'Global Pins': [
+            {name: 'G0', location: '34'},
+            {name: 'G1', location: '37'},
+            {name: 'G3', location: '20'},
+            {name: 'G6', location: '44'},
+        ],
+        'Flash SPI': [
+            {name: 'MOSI', location: '14'},
+            {name: 'MISO', location: '17'},
+            {name: 'SCK',  location: '15'},
+            {name: 'nCS',  location: '16'},
+        ],
+        'RGB LED': [
+            {name: 'ledB', location: '39'},
+            {name: 'ledG', location: '40'},
+            {name: 'ledR', location: '41'}
+        ]
+    },
 
 }
 
@@ -561,7 +580,59 @@ const pinLocations = {
         { x: 524, y: 138, pinNumber: 79 },
         { x: 511, y: 150, pinNumber: 87 },
         { x: 524, y: 150, pinNumber: 78 },
-    ]
+    ],
+    // UPDuino stuff
+    'UPduino 3.1': [
+        // x/y in pix, then FPGA pin number
+        // Not clear on the offsets, but this seems ok for current png
+        { x:  13, y: 20, pinNumber: 28 },
+        { x:  37, y: 20, pinNumber: 38 },
+        { x:  61, y: 20, pinNumber: 42 },
+        { x:  85, y: 20, pinNumber: 36 },
+        { x: 109, y: 20, pinNumber: 43 },
+        { x: 133, y: 20, pinNumber: 34 },
+        { x: 157, y: 20, pinNumber: 37 },
+        { x: 181, y: 20, pinNumber: 31 },
+        { x: 205, y: 20, pinNumber: 35 },
+        { x: 229, y: 20, pinNumber: 32 },
+        { x: 253, y: 20, pinNumber: 27 },
+        { x: 277, y: 20, pinNumber: 26 },
+        { x: 301, y: 20, pinNumber: 25 },
+        { x: 325, y: 20, pinNumber: 23 },
+        // Gap:  349, 373, 397
+        // RGB Pins
+        { x: 424, y: 20, pinNumber: 39 },
+        { x: 449, y: 20, pinNumber: 40 },
+        { x: 472, y: 20, pinNumber: 41 },
+        // 496, 520, 544, 569
+        // Bottom
+        { x:  13, y: 188, pinNumber:  2 },
+        { x:  37, y: 188, pinNumber: 46 },
+        { x:  61, y: 188, pinNumber: 47 },
+        { x:  85, y: 188, pinNumber: 45 },
+        { x: 109, y: 188, pinNumber: 48 },
+        { x: 133, y: 188, pinNumber:  3 },
+        { x: 157, y: 188, pinNumber:  4 },
+        { x: 181, y: 188, pinNumber: 44 },
+        { x: 205, y: 188, pinNumber:  6 },
+        { x: 229, y: 188, pinNumber:  9 },
+        { x: 253, y: 188, pinNumber: 11 },
+        { x: 277, y: 188, pinNumber: 18 },
+        { x: 301, y: 188, pinNumber: 19 },
+        { x: 325, y: 188, pinNumber: 13 },
+        { x: 349, y: 188, pinNumber: 21 },
+        { x: 373, y: 188, pinNumber: 12 },
+        // GND and 12Mhz out : 397, 421
+        { x: 449, y: 188, pinNumber: 10 },
+        { x: 472, y: 188, pinNumber: 20 },
+
+        { x: 496, y: 188, pinNumber: 14 },
+        { x: 520, y: 188, pinNumber: 17 },
+        { x: 544, y: 188, pinNumber: 15 },
+        { x: 568, y: 188, pinNumber: 16 },
+
+    ],
+
 }
 
 const getBoardImages = () => {
@@ -573,6 +644,7 @@ const getBoardImages = () => {
     const orangeCrabBoard = document.getElementById('orangecrab-board');
     const icebreakerBoard = document.getElementById('icebreaker-board');
     const icestickBoard = document.getElementById('icestick-board');
+    const upduinoBoard31 = document.getElementById('upduino31-board');
 
     return {
         'Tang Nano 20K': tangnano20kBoard,
@@ -583,6 +655,7 @@ const getBoardImages = () => {
         'iCEBreaker': icebreakerBoard,
         'iCEStick': icestickBoard,
         'Orange Crab': orangeCrabBoard,
+        'UPduino 3.1': upduinoBoard31
     }
 }
 
@@ -1264,7 +1337,7 @@ function main() {
             if (['Orange Crab'].includes(board)) {
                 return 'ecp5';
             }
-            if (['iCEBreaker', 'iCEStick'].includes(board)) {
+            if (['iCEBreaker', 'iCEStick', 'UPduino 3.1'].includes(board)) {
                 return 'ice';
             }
         }
@@ -1468,6 +1541,7 @@ function main() {
                         'orangeCrab': 'Orange Crab',
                         'icebreaker': 'iCEBreaker',
                         'icestick': 'iCEStick',
+                        'upduino31': 'UPduino 3.1'
                     }
                     const boardName = reverseBoardMap[body.board] || 'Tang Nano 9K';
                     board = boardSelect.value = boardName;

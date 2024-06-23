@@ -47,7 +47,7 @@ export const ecp5DeviceInfo = (board: string):  {device: string, deviceFlag: str
 }
 
 export const ice40DeviceInfo = (board: string):  {device: string, deviceFlag: string, package: string, freq: string} => {
-    if (board === 'icebreaker') {
+    if (board === 'icebreaker' || board === 'upduino31') {
         return {
             device: 'iCE40UP5K',
             package: 'sg48',
@@ -84,7 +84,8 @@ export function boardToToolchain(board: string): ToolchainProject {
     }
     if ([
         'icebreaker',
-        'icestick'
+        'icestick',
+        'upduino31'
     ].includes(board)) {
         return ToolchainProject.ICESTORM;
     }
