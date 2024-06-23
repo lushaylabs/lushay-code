@@ -1,11 +1,15 @@
 # Change Log
 
-### Added
+## [0.0.20]
 
-- Support for UPduino 3.1
-  - Image based on UPduino assembly (https://github.com/tinyvision-ai-inc/UPduino-v3.0/blob/master/Board/v3.0/UPduino_v3.0Assembly.html ; Open locally to render)
-    - Selected FPGA, export Front with default (1000x1000); Use gimp to crop to png
-    - Save to src/webview-js/board-layout-upduino31.png
+### Added
+- Added support to debug registers and wires in the module debugger ([PR #8](https://github.com/lushaylabs/lushay-code/pull/8))
+- Added support for `x` and `z` values in the module debugger ([PR #8](https://github.com/lushaylabs/lushay-code/pull/8))
+
+### Changed
+- Fixes to dragging in module debugger when window is scrolled ([PR #8](https://github.com/lushaylabs/lushay-code/pull/8))
+- Fix to module debugger for himbaechel version
+
 
 ## [0.0.19]
 
