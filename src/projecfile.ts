@@ -51,7 +51,6 @@ export async function parseProjectFile(logger?: Logger, selectedProject?: string
         let defaultBoard = 'tangnano9k';
         let constraintsFiles = await vscode.workspace.findFiles(path.join('**','*.cst'));
         if (constraintsFiles.length === 0) {
-            // TODO: Review for upduino31 default?
             defaultBoard = 'icebreaker';
             constraintsFiles = await vscode.workspace.findFiles(path.join('**','*.pcf'));
             if (constraintsFiles.length === 0) {
@@ -217,7 +216,6 @@ async function expandProjectFile(projectFile: ProjectFile): Promise<ProjectFile>
             if (projectFile.constraintsFile.endsWith('.cst')) {
                 projectFile.board = 'tangnano9k';
             } else if (projectFile.constraintsFile.endsWith('.pcf')) {
-                // TODO: Review for upduino31 default?
                 projectFile.board = 'icebreaker';
             } else if (projectFile.constraintsFile.endsWith('.lpf')) {
                 projectFile.board = 'orangeCrab';
