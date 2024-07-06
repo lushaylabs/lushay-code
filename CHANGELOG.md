@@ -1,5 +1,14 @@
 # Change Log
 
+## [0.0.21]
+
+### Added
+- Added support for the UPduino 3.1 FPGA board ([PR #12](https://github.com/lushaylabs/lushay-code/pull/12))
+
+### Changed
+- Changed debug module migration behavior to backup the old debug module ([PR #9](https://github.com/lushaylabs/lushay-code/pull/9/files))
+- Fix to debug module input conversion type ([PR #9](https://github.com/lushaylabs/lushay-code/pull/9/files))
+
 ## [0.0.20]
 
 ### Added
