@@ -1,0 +1,34 @@
+{
+    "scopeName": "source.fpga-toolchain-output",
+    "patterns": [
+        { "include": "#top-level" },
+        { "include": "#comment" },
+        { "include": "#paren-expression" },
+        { "include": "#error-expression" },
+        { "include": "#error-line" }
+    ],
+    "repository": {
+      "top-level": {
+        "match": "^[A-Z].*$",
+        "name": "variable.parameter"
+      },
+      "comment": {
+        "match": "^[ ]+[|/\\\\].*$",
+        "name": "keyword.letter"
+      },
+      "paren-expression": {
+        "begin": "(Device Utilisation|Summary)",
+        "end": "^(?=[^ ])",
+        "name": "constant.numeric"
+      },
+      "error-expression": {
+        "begin": "There was an error",
+        "end": "^(?=[^ ])",
+        "name": "invalid.illegal"
+      },
+      "error-line": {
+        "match": "^[ ]+Error:.*$",
+        "name": "invalid.illegal"
+      }
+    }
+  }

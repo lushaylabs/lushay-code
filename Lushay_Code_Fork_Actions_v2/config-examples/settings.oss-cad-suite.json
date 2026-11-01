@@ -1,0 +1,5 @@
+{
+  "lushay.Toolchain.binPath": "",
+  "lushay.OssCadSuite.path": "/opt/oss-cad-suite",
+  "lushay.Build.toolchain": "open-source"
+}

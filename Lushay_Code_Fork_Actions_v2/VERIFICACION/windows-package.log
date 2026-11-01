@@ -1,0 +1,38 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> lushay-code-vhdl@0.1.0 package:vsix
+> vsce package --target win32-x64 --out /workspace/scratch/f21994bc2ad2/lushay-code-vhdl-win32-x64-test.vsix
+
+Executing prepublish script 'npm run vscode:prepublish'...
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> lushay-code-vhdl@0.1.0 vscode:prepublish
+> npm run compile
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> lushay-code-vhdl@0.1.0 compile
+> tsc -p ./
+
+ WARNING  This extension consists of 1067 files, out of which 409 are JavaScript files. For performance reasons, you should bundle your extension: https://aka.ms/vscode-bundle-extension. You should also exclude unnecessary files by adding them to your .vscodeignore: https://aka.ms/vscode-vscodeignore.
+
+ INFO  Files included in the VSIX:
+lushay-code-vhdl-win32-x64-test.vsix
+├─ [Content_Types].xml 
+├─ extension.vsixmanifest 
+└─ extension/
+   ├─ LICENSE.txt [1.04 KB]
+   ├─ changelog.md 
+   ├─ lushay-icon.png [6.46 KB]
+   ├─ lushay.schema.json [7.87 KB]
+   ├─ package.json [5.29 KB]
+   ├─ readme.md 
+   ├─ docs/ (3 files) [1.6 MB]
+   ├─ node_modules/ (1024 files) [9.63 MB]
+   ├─ out/ (20 files) [161.05 KB]
+   ├─ syntaxes/ (1 file) [0.86 KB]
+   └─ webview-js/ (11 files) [338.5 KB]
+
+=> Run vsce ls --tree to see all included files.
+
+ DONE  Packaged: /workspace/scratch/f21994bc2ad2/lushay-code-vhdl-win32-x64-test.vsix (1067 files, 3.82 MB)

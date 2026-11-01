@@ -1,0 +1,27 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> lushay-code-vhdl@0.1.0 test:ci
+> npm run compile && node --test tests/vhdl.test.cjs tests/toolchain.test.cjs
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> lushay-code-vhdl@0.1.0 compile
+> tsc -p ./
+
+✔ external binary directory takes priority and legacy suite roots remain usable (1.142808ms)
+✔ Windows child processes preserve native environment and use one PATH key (0.680509ms)
+✔ POSIX child processes keep the host PATH and GHDL library settings (0.214925ms)
+✔ VHDL discovery includes both suffixes and excludes testbenches (1.884139ms)
+✔ pin parsing preserves non-zero and ascending indices (0.380646ms)
+✔ unsupported VHDL operations stop before cloud, simulation or mixed-language builds (0.928754ms)
+✔ built-in and external plugin configurations are supported (1.442441ms)
+✔ project parser discovers VHDL and preserves an explicit dependency order (2.249361ms)
+﹣ real GHDL/Yosys integration and Gowin bitstreams (0.093781ms) # SKIP
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 107.375972

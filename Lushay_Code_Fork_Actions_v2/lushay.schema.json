@@ -1,0 +1,283 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Project Name",
+        "description": "Used as name for output files"
+      },
+      "includedFiles": {
+        "oneOf": [
+          {
+            "enum": [ "all" ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {
+                "type": "string"
+              }
+            ]
+          }
+        ],
+        "title": "List of files to synthesize",
+        "description": "Files to synthesize in analysis order. With all, discover .v, .vhd and .vhdl files except _tb files. Use an explicit ordered list for VHDL package dependencies."
+      },
+      "ghdlOptions": {
+        "type": "array",
+        "items": { "type": "string" },
+        "default": ["--std=08"],
+        "title": "GHDL frontend options",
+        "description": "Arguments passed before VHDL sources to the GHDL Yosys frontend. Defaults to VHDL-2008."
+      },
+      "ghdlPlugin": {
+        "type": "string",
+        "default": "ghdl",
+        "title": "GHDL Yosys plugin",
+        "description": "Yosys plugin name or path, relative to the project file if applicable. Set to an empty string when GHDL is built into Yosys."
+      },
+      "externalFlashFiles": {
+        "type": "array",
+        "items": [
+          {
+            "type": "string"
+          }
+        ],
+        "title": "List of files that can be flashed to external memory",
+        "description": "List of files that can be flashed to external memory"
+      },
+      "top": {
+        "type": "string",
+        "description": "The name of the top module",
+        "title": "Top Module's Name"
+      },
+      "constraintsFile": {
+        "type": "string",
+        "description": "The constraints file to use for pnr",
+        "title": "Constraints File Path"
+      },
+      "testBenches": {
+        "oneOf": [
+          {
+            "enum": [ "all" ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {
+                "type": "string"
+              }
+            ]
+          }
+        ],
+        "title": "A list if testbench files",
+        "description": "A list if testbench files Defaults to all _tb.v files"
+      },
+      "programMode": {
+        "enum": [
+          "ram",
+          "flash"
+        ],
+        "description": "Whether programming should be to flash or ram",
+        "title": "Programming Mode"
+      },
+      "baudRate": {
+        "type": "number",
+        "title": "Serial Baud Rate",
+        "description": "The baud rate to use in the serial terminal"
+      },
+      "nextPnrGowinOptions": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "-v",
+                "--verbose",
+                "-q",
+                "--quiet",
+                "--log",
+                "-l",
+                "--debug",
+                "--debug-placer",
+                "--debug-router",
+                "--threads",
+                "--force",
+                "-f",
+                "--pre-pack",
+                "--pre-place",
+                "--pre-route",
+                "--post-route",
+                "--on-failure",
+                "--seed",
+                "--randomize-seed",
+                "-r",
+                "--placer",
+                "--router",
+                "--slack_redist_iter",
+                "--cstrweight",
+                "--starttemp",
+                "--placer-budgets",
+                "--ignore-loops",
+                "--test",
+                "--timing-allow-fail",
+                "--no-tmdriv",
+                "--sdf",
+                "--sdf-cvc",
+                "--no-print-critical-path-source",
+                "--placer-heap-alpha",
+                "--placer-heap-beta",
+                "--placer-heap-critexp",
+                "--placer-heap-timingweight",
+                "--parallel-refine",
+                "--router2-heatmap",
+                "--tmg-ripup",
+                "--router2-tmg-ripup",
+                "--report",
+                "--detailed-timing-report",
+                "--placed-svg",
+                "--routed-svg",
+                "--enable-globals",
+                "--enable-auto-longwires"
+              ]
+            }, 
+            {
+                "type": "string"
+            }
+          ]
+        },
+        "title": "Additional nextpnr-gowin flags",
+        "description": "Extra flags which will be passed to nextpnr-gowin"
+      },
+      "nextPnrEcp5Options": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "title": "Additional nextpnr-ecp5 flags",
+        "description": "Extra flags which will be passed to nextpnr-ecp5"
+      },
+      "nextPnrIce40Options": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "title": "Additional nextpnr-ice40 flags",
+        "description": "Extra flags which will be passed to nextpnr-ice40"
+      },
+      "synthGowinOptions": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "enum": [
+            "-nodffe",
+            "-nobram",
+            "-nolutram",
+            "-noflatten",
+            "-retime",
+            "-nowidelut",
+            "-noiopads",
+            "-noalu",
+            "-abc9",
+            "-no-rw-check"
+          ]
+        },
+        "title": "Additional synth_gowin flags",
+        "description": "Extra flags which will be passed to synth_gowin as part of yosys"
+      },
+      "synthEcp5Options": {
+        "type": "array",
+        "items": {
+        "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "-blif",
+                "-edif",
+                "-run",
+                "-noflatten",
+                "-dff",
+                "-retime",
+                "-noccu2",
+                "-nodffe",
+                "-nobram",
+                "-nolutram",
+                "-nowidelut",
+                "-asyncprld",
+                "-abc2",
+                "-abc9",
+                "-vpr",
+                "-nodsp",
+                "-no-rw-check"
+              ]
+            }, 
+            {
+                "type": "string"
+            }
+          ]
+        },
+        "title": "Additional synth_ecp5 flags",
+        "description": "Extra flags which will be passed to synth_ecp5 as part of yosys"
+      },
+      "synthIce40Options": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "-device",
+                "-blif",
+                "-edif",
+                "-run",
+                "-noflatten",
+                "-dff",
+                "-retime",
+                "-nocarry",
+                "-nodffe",
+                "-dffe_min_ce_use",
+                "-nobram",
+                "-spram",
+                "-dsp",
+                "-noabc",
+                "-abc2",
+                "-abc9",
+                "-vpr",
+                "-flowmap",
+                "-no-rw-check"
+              ]
+            }, 
+            {
+                "type": "string"
+            }
+          ]
+        },
+        "title": "Additional synth_ice40 flags",
+        "description": "Extra flags which will be passed to synth_ice40 as part of yosys"
+      },
+      "board": {
+        "enum": [
+          "tangnano20k",
+          "tangnano9k",
+          "tangnano4k",
+          "tangnano1k",
+          "tangnano",
+          "icebreaker",
+          "icestick",
+          "orangeCrab",
+          "upduino31"
+        ],
+        "description": "The FPGA development board",
+        "title": "Dev Board"
+      },
+      "skipCstChecking": {
+        "type": "boolean",
+        "title": "Skip CST Checking",
+        "description": "Skip the prestage of making sure all ports are defined in CST"
+      }
+    },
+    "title": "Lushay Project File"
+  }

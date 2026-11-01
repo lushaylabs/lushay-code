@@ -1,0 +1,135 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> lushay-code-vhdl@0.1.0 lint
+> eslint src --ext ts
+
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/extension.ts
+  113:5   warning  Enum Member name `WARNING` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  114:5   warning  Enum Member name `ERROR` must match one of the following formats: camelCase    @typescript-eslint/naming-convention
+  153:6   warning  Missing semicolon                                                              @typescript-eslint/semi
+  221:6   warning  Missing semicolon                                                              @typescript-eslint/semi
+  272:15  warning  Missing semicolon                                                              @typescript-eslint/semi
+  382:6   warning  Missing semicolon                                                              @typescript-eslint/semi
+  391:6   warning  Missing semicolon                                                              @typescript-eslint/semi
+  435:15  warning  Missing semicolon                                                              @typescript-eslint/semi
+  463:59  warning  Missing semicolon                                                              @typescript-eslint/semi
+  570:64  warning  Missing semicolon                                                              @typescript-eslint/semi
+  582:44  warning  Missing semicolon                                                              @typescript-eslint/semi
+  616:61  warning  Missing semicolon                                                              @typescript-eslint/semi
+  623:18  warning  Missing semicolon                                                              @typescript-eslint/semi
+  632:15  warning  Missing semicolon                                                              @typescript-eslint/semi
+  633:10  warning  Missing semicolon                                                              @typescript-eslint/semi
+  652:75  warning  Missing semicolon                                                              @typescript-eslint/semi
+  669:11  warning  Missing semicolon                                                              @typescript-eslint/semi
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/panels/constraints-editor.ts
+  451:11  warning  Missing semicolon  @typescript-eslint/semi
+  452:59  warning  Missing semicolon  @typescript-eslint/semi
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/projecfile.ts
+   88:11  warning  Missing semicolon  @typescript-eslint/semi
+  203:45  warning  Missing semicolon  @typescript-eslint/semi
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/stages.ts
+  61:19  warning  Expected '===' and instead saw '=='  eqeqeq
+  67:14  warning  Missing semicolon                    @typescript-eslint/semi
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/stages/lushay-cloud-stages.ts
+    8:56   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+   28:177  warning  Missing semicolon                                                                                   @typescript-eslint/semi
+   48:22   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+   54:22   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+   77:41   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+   79:131  warning  Missing semicolon                                                                                   @typescript-eslint/semi
+   95:193  warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  102:233  warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  118:17   warning  Object Literal Property name `x-goog-resumable` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  130:15   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  131:11   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  146:17   warning  Object Literal Property name `x-goog-resumable` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  147:17   warning  Object Literal Property name `Content-Type` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+  148:17   warning  Object Literal Property name `Content-Length` must match one of the following formats: camelCase    @typescript-eslint/naming-convention
+  155:15   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  160:29   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  162:15   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  163:11   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  193:39   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  203:15   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  204:11   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  233:10   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  244:6    warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  268:10   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  300:14   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+  308:53   warning  Missing semicolon                                                                                   @typescript-eslint/semi
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/stages/nextpnr.ts
+    9:5   warning  Enum Member name `GOWIN` must match one of the following formats: camelCase                       @typescript-eslint/naming-convention
+   10:5   warning  Enum Member name `ICE40` must match one of the following formats: camelCase                       @typescript-eslint/naming-convention
+   11:5   warning  Enum Member name `ECP5` must match one of the following formats: camelCase                        @typescript-eslint/naming-convention
+  171:22  warning  Missing semicolon                                                                                 @typescript-eslint/semi
+  182:14  warning  Variable name `NextPnrGowinStage` must match one of the following formats: camelCase, UPPER_CASE  @typescript-eslint/naming-convention
+  183:14  warning  Variable name `NextPnrIce40Stage` must match one of the following formats: camelCase, UPPER_CASE  @typescript-eslint/naming-convention
+  184:14  warning  Variable name `NextPnrEcp5Stage` must match one of the following formats: camelCase, UPPER_CASE   @typescript-eslint/naming-convention
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/stages/openfpgaloader-external-flash.ts
+  47:95  warning  Missing semicolon  @typescript-eslint/semi
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/stages/openfpgaloader-program.ts
+  51:95  warning  Missing semicolon  @typescript-eslint/semi
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/stages/stage.ts
+  49:34  warning  Missing semicolon  @typescript-eslint/semi
+  65:15  warning  Missing semicolon  @typescript-eslint/semi
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/stages/yosys-cst-check.ts
+   11:63   warning  Missing semicolon  @typescript-eslint/semi
+   30:63   warning  Missing semicolon  @typescript-eslint/semi
+   43:63   warning  Missing semicolon  @typescript-eslint/semi
+  101:178  warning  Missing semicolon  @typescript-eslint/semi
+  136:193  warning  Missing semicolon  @typescript-eslint/semi
+  143:233  warning  Missing semicolon  @typescript-eslint/semi
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/stages/yosys-synth.ts
+    6:5    warning  Enum Member name `GOWIN` must match one of the following formats: camelCase                     @typescript-eslint/naming-convention
+    7:5    warning  Enum Member name `ICE40` must match one of the following formats: camelCase                     @typescript-eslint/naming-convention
+    8:5    warning  Enum Member name `ECP5` must match one of the following formats: camelCase                      @typescript-eslint/naming-convention
+   71:26   warning  Missing semicolon                                                                               @typescript-eslint/semi
+   77:26   warning  Missing semicolon                                                                               @typescript-eslint/semi
+  100:45   warning  Missing semicolon                                                                               @typescript-eslint/semi
+  102:135  warning  Missing semicolon                                                                               @typescript-eslint/semi
+  118:197  warning  Missing semicolon                                                                               @typescript-eslint/semi
+  125:237  warning  Missing semicolon                                                                               @typescript-eslint/semi
+  133:14   warning  Variable name `YosysGowinStage` must match one of the following formats: camelCase, UPPER_CASE  @typescript-eslint/naming-convention
+  134:14   warning  Variable name `YosysECP5Stage` must match one of the following formats: camelCase, UPPER_CASE   @typescript-eslint/naming-convention
+  135:14   warning  Variable name `YosysICE40Stage` must match one of the following formats: camelCase, UPPER_CASE  @typescript-eslint/naming-convention
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/utils/command-options.ts
+  2:5  warning  Enum Member name `BUILD_AND_PROGRAM` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  3:5  warning  Enum Member name `BUILD_ONLY` must match one of the following formats: camelCase         @typescript-eslint/naming-convention
+  4:5  warning  Enum Member name `PROGRAM_ONLY` must match one of the following formats: camelCase       @typescript-eslint/naming-convention
+  5:5  warning  Enum Member name `EXTERNAL_FLASH` must match one of the following formats: camelCase     @typescript-eslint/naming-convention
+  6:5  warning  Enum Member name `RUN_TESTBENCH` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+  7:5  warning  Enum Member name `OPEN_TERMINAL` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+  8:5  warning  Enum Member name `SERIAL_CONSOLE` must match one of the following formats: camelCase     @typescript-eslint/naming-convention
+  9:5  warning  Enum Member name `CANCEL` must match one of the following formats: camelCase             @typescript-eslint/naming-convention
+
+/workspace/scratch/f21994bc2ad2/Lushay_Code_Fork_Actions_v2/src/utils/device-info.ts
+   8:10  warning  Missing semicolon                                                               @typescript-eslint/semi
+  14:10  warning  Missing semicolon                                                               @typescript-eslint/semi
+  20:10  warning  Missing semicolon                                                               @typescript-eslint/semi
+  26:10  warning  Missing semicolon                                                               @typescript-eslint/semi
+  32:10  warning  Missing semicolon                                                               @typescript-eslint/semi
+  35:2   warning  Missing semicolon                                                               @typescript-eslint/semi
+  44:10  warning  Missing semicolon                                                               @typescript-eslint/semi
+  47:2   warning  Missing semicolon                                                               @typescript-eslint/semi
+  56:10  warning  Missing semicolon                                                               @typescript-eslint/semi
+  63:10  warning  Missing semicolon                                                               @typescript-eslint/semi
+  66:2   warning  Missing semicolon                                                               @typescript-eslint/semi
+  70:5   warning  Enum Member name `APICULA` must match one of the following formats: camelCase   @typescript-eslint/naming-convention
+  71:5   warning  Enum Member name `ICESTORM` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  72:5   warning  Enum Member name `TRELIS` must match one of the following formats: camelCase    @typescript-eslint/naming-convention
+
+✖ 100 problems (0 errors, 100 warnings)
+  0 errors and 70 warnings potentially fixable with the `--fix` option.
+

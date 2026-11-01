@@ -1,0 +1,15 @@
+{
+  "name": "vhdl-plugin",
+  "board": "tangnano9k",
+  "top": "Blink_Top",
+  "includedFiles": [
+    "../examples/vhdl-blinky/counter_pkg.vhd",
+    "../examples/vhdl-blinky/blink.vhdl"
+  ],
+  "constraintsFile": "../examples/vhdl-blinky/tangnano9k.cst",
+  "programMode": "ram",
+  "ghdlOptions": [
+    "--std=08"
+  ],
+  "ghdlPlugin": "ghdl"
+}

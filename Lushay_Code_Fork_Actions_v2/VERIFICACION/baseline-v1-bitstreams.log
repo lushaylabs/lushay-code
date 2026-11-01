@@ -1,0 +1,32 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> lushay-code@0.0.21 test:vhdl
+> npm run compile && node --test tests/vhdl.test.cjs
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> lushay-code@0.0.21 compile
+> tsc -p ./
+
+✔ VHDL discovery includes both suffixes and excludes testbenches (1.803178ms)
+✔ pin parsing preserves non-zero and ascending indices (0.40287ms)
+✔ unsupported VHDL operations stop before cloud, simulation or mixed-language builds (0.978878ms)
+✔ built-in and external plugin configurations are supported (1.55158ms)
+✔ project parser discovers VHDL and preserves an explicit dependency order (2.914417ms)
+▶ real GHDL/Yosys integration and Gowin bitstreams
+  ✔ VHDL package and entity in paths with spaces produce a Gowin .fs (6517.576362ms)
+  ✔ missing VHDL port constraint fails before synthesis (123.451808ms)
+  ✔ invalid VHDL fails with a frontend error (24.909359ms)
+  ✔ missing plugin produces a failed build (17.72662ms)
+  ✔ a project can select VHDL-93 explicitly (88.486871ms)
+  ✔ filenames with Tcl characters are passed literally and scripts are cleaned up (93.255806ms)
+  ✔ Verilog synthesis and bitstream generation still work (10328.259751ms)
+✔ real GHDL/Yosys integration and Gowin bitstreams (17199.355221ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17357.67711

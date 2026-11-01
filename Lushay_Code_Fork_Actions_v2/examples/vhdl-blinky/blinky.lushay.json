@@ -1,0 +1,9 @@
+{
+    "name": "vhdl-blinky",
+    "board": "tangnano9k",
+    "top": "Blink_Top",
+    "includedFiles": ["counter_pkg.vhd", "blink.vhdl"],
+    "constraintsFile": "tangnano9k.cst",
+    "programMode": "ram",
+    "ghdlOptions": ["--std=08"]
+}

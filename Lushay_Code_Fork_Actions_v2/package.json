@@ -1,0 +1,192 @@
+{
+  "name": "lushay-code-vhdl",
+  "displayName": "Lushay Code VHDL (Fork)",
+  "description": "Open FPGA toolchain with VHDL/GHDL support, based on Lushay Code",
+  "version": "0.1.0",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.72.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "fpga",
+    "verilog",
+    "oss-cad-suite",
+    "yosys",
+    "nextpnr",
+    "apicula",
+    "vhdl"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lushaylabs/lushay-code.git"
+  },
+  "icon": "lushay-icon.png",
+  "activationEvents": [
+    "onStartupFinished",
+    "workspaceContains:**/*.v",
+    "workspaceContains:**/*.vhd",
+    "workspaceContains:**/*.vhdl",
+    "workspaceContains:**/*.cst",
+    "onCommand:lushay-code.runFPGAToolchain",
+    "onCommand:lushay-code.selectProject",
+    "onLanguage:verilog",
+    "onLanguage:vhdl"
+  ],
+  "publisher": "fpga-custom",
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "lushay-code-module-debugger",
+          "title": "Module Debugger",
+          "icon": "$(clear-all)"
+        }
+      ]
+    },
+    "views": {
+      "lushay-code-module-debugger": [
+        {
+          "type": "webview",
+          "id": "lushay-code-module-debugger-content",
+          "name": "Module Debugger",
+          "canToggleVisibility": true,
+          "order": 10,
+          "when": "resourceExtname == .v"
+        }
+      ]
+    },
+    "customEditors": [
+      {
+        "viewType": "lushay-code.constraintsEditor",
+        "displayName": "Constraints Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.cst"
+          },
+          {
+            "filenamePattern": "*.pcf"
+          },
+          {
+            "filenamePattern": "*.lpf"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "lushay-code.runFPGAToolchain",
+        "title": "Run FPGA Toolchain"
+      },
+      {
+        "command": "lushay-code.selectProject",
+        "title": "Select FPGA Project"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "Lushay Code",
+        "properties": {
+          "lushay.OssCadSuite.path": {
+            "type": "string",
+            "default": "",
+            "description": "The path to OSS Cad Suite"
+          },
+          "lushay.Build.toolchain": {
+            "type": "string",
+            "enum": [
+              "open-source",
+              "cloud"
+            ],
+            "description": "The toolchain to use for building",
+            "default": "open-source"
+          },
+          "lushay.Build.cloudApiKey": {
+            "type": "string",
+            "description": "API Key for cloud build",
+            "default": ""
+          },
+          "lushay.Build.overrideNextpnrPath": {
+            "type": "string",
+            "description": "Override the path to nextpnr",
+            "default": ""
+          },
+          "lushay.Build.overrideYosysPath": {
+            "type": "string",
+            "description": "Override the path to yosys",
+            "default": ""
+          },
+          "lushay.Build.overrideOpenFpgaLoaderPath": {
+            "type": "string",
+            "description": "Override the path to openFPGALoader",
+            "default": ""
+          },
+          "lushay.Toolchain.binPath": {
+            "type": "string",
+            "default": "",
+            "description": "Explicit FPGA tool binary directory, for example C:/msys64/ucrt64/bin. Takes priority over OssCadSuite.path."
+          },
+          "lushay.Build.overrideGowinPackPath": {
+            "type": "string",
+            "default": "",
+            "description": "Override the Apicula gowin_pack executable path."
+          }
+        }
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": "*.lushay.json",
+        "url": "./lushay.schema.json"
+      }
+    ],
+    "languages": [
+      {
+        "id": "fpga-toolchain-output"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "fpga-toolchain-output",
+        "scopeName": "source.fpga-toolchain-output",
+        "path": "./syntaxes/fpga-toolchain-output.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "test:vhdl": "npm run compile && node --test tests/vhdl.test.cjs",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "bundle": "vsce package",
+    "test:ci": "npm run compile && node --test tests/vhdl.test.cjs tests/toolchain.test.cjs",
+    "package:vsix": "vsce package"
+  },
+  "devDependencies": {
+    "@types/cli-spinner": "^0.2.1",
+    "@types/glob": "^8.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.72.0",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "@vscode/test-electron": "^2.1.5",
+    "@vscode/vsce": "4.1.0",
+    "eslint": "^8.24.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.0.0",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.32",
+    "@vscode/webview-ui-toolkit": "^1.2.0",
+    "serialport": "^10.5.0"
+  }
+}
