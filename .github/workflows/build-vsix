@@ -1,0 +1,96 @@
+name: Build VSIX
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vsix-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Package ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: linux-x64
+          - os: windows-2022
+            target: win32-x64
+    defaults:
+      run:
+        shell: bash
+    env:
+      BUILD_TARGET: ${{ matrix.target }}
+      VSCE_STORE: file
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Lint
+        run: npm run lint
+      - name: Compile and run unit tests
+        run: npm run test:ci
+      - name: Check native serial dependency
+        run: node -e "require('serialport'); console.log('SerialPort native module loaded on', process.platform, process.arch)"
+      - name: Set fork identity and check release version
+        run: node scripts/prepare-fork.cjs
+      - name: Package extension with runtime dependencies
+        run: |
+          mkdir -p dist
+          npm run package:vsix -- --target "$BUILD_TARGET" --out "dist/lushay-code-vhdl-$BUILD_TARGET.vsix"
+      - name: Inspect VSIX and generate checksum
+        run: python scripts/verify-vsix.py "dist/lushay-code-vhdl-$BUILD_TARGET.vsix" "$BUILD_TARGET"
+      - name: Upload installable extension
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: vsix-${{ matrix.target }}
+          path: |
+            dist/*.vsix
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: Attach installers to a tagged release
+    if: (github.event_name == 'push' || github.event_name == 'release') && startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ github.ref_name }}
+      RUN_ID: ${{ github.run_id }}
+    steps:
+      - name: Download installers from this run
+        run: gh run download "$RUN_ID" --repo "$GH_REPO" --pattern 'vsix-*' --dir release-assets
+      - name: Create release and attach installers
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$GH_REPO" > /dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" release-assets/*/*.vsix release-assets/*/*.sha256 --repo "$GH_REPO"
+          else
+            gh release create "$RELEASE_TAG" release-assets/*/*.vsix release-assets/*/*.sha256 \
+              --repo "$GH_REPO" --verify-tag --title "$RELEASE_TAG" --generate-notes
+          fi
