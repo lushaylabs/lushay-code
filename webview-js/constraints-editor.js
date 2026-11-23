@@ -47,12 +47,12 @@ const TEMPLATES = {
             {name: 'clk', location: '4', pullMode: 'Pull Up', standard: 'LVCMOS33'}
         ],
         'LEDs': [
-            {name: 'led[0]', location: '20', standard: 'LVCMOS18', drive: '8ma'},
-            {name: 'led[1]', location: '19', standard: 'LVCMOS18', drive: '8ma'},
-            {name: 'led[2]', location: '18', standard: 'LVCMOS18', drive: '8ma'},
-            {name: 'led[3]', location: '17', standard: 'LVCMOS18', drive: '8ma'},
-            {name: 'led[4]', location: '16', standard: 'LVCMOS18', drive: '8ma'},
-            {name: 'led[5]', location: '15', standard: 'LVCMOS18', drive: '8ma'}
+            {name: 'led[0]', location: '20', standard: 'LVCMOS33', drive: '8ma'},
+            {name: 'led[1]', location: '19', standard: 'LVCMOS33', drive: '8ma'},
+            {name: 'led[2]', location: '18', standard: 'LVCMOS33', drive: '8ma'},
+            {name: 'led[3]', location: '17', standard: 'LVCMOS33', drive: '8ma'},
+            {name: 'led[4]', location: '16', standard: 'LVCMOS33', drive: '8ma'},
+            {name: 'led[5]', location: '15', standard: 'LVCMOS33', drive: '8ma'}
         ],
         'Buttons': [
             {name: 'btn1', location: '88', standard: 'LVCMOS33'},
